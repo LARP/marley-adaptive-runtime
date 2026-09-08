@@ -114,7 +114,7 @@ This file is the **index** of all test reports in `results/`. Each row below lis
 
 ## 7. Strategic Governance & Technical Directives
 
-- **[Directiva Técnica de Experto Externo (SD & ComfyUI)](../docs/EXPERT_RECOMMENDATIONS_ADOPTION.md):** Documento vinculante aprobado por supervisión humana el 2026-09-08. Establece la congelación de optimizaciones antes de F3, la ratificación de descarte de F2, el confinamiento de NF4 como modo extremo, y las 7 métricas cuantitativas obligatorias para la validación de F3.
+- **[External Technical Directive (SD & ComfyUI Expert Advisory)](../docs/EXPERT_RECOMMENDATIONS_ADOPTION.md):** Binding directive approved by human supervision on 2026-09-08. Establishes the freezing of prior optimization stack before Phase F3, reaffirms Phase F2 bypass, restricts NF4 to extreme low-memory mode, and defines the mandatory 7-metric scorecard for Phase F3 evaluation.
 
 ---
 
