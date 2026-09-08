@@ -35,8 +35,11 @@
 > D remained on INT8 because no switch was demanded) — a *valid* negative, not a refutation.
 > Key finding: **Async FP16 beats Async INT8 by ~3.5% at this length** (dequant on critical path),
 > reinforcing F4's purpose (pick FP16 under no pressure). Verdict: **CORE SYSTEM VALIDATED —
-> PERFORMANCE CERTIFICATION PENDING**. Decision on engine retention vs fixed policy (Async INT8 /
-> Performance) reserved to the Director per Consejero §7 scenarios. Report:
+> PERFORMANCE CERTIFICATION PENDING**. Decision on engine retention vs fixed policy reserved to the
+> Director per Consejero §7/§11 scenarios (A: retain on proven benefit; B: retain on robustness;
+> C: fixed static — candidate **Async FP16 or Async INT8**). **Next experiment (no architectural
+> change first): real controlled VRAM pressure** to drive free VRAM below `SAFE_MIN_FREE_MB =
+> 1,500 MB` and exercise the `INT8 / off / evict` branch. Report:
 > [`results/TEST_F4_adaptive_benchmark.md`](results/TEST_F4_adaptive_benchmark.md) · Telemetry:
 > [`logs/f4_adaptive_benchmark.json`](logs/f4_adaptive_benchmark.json) · Change analysis:
 > [`docs/F4_IMPLEMENTATION_CHANGES_01.md`](docs/F4_IMPLEMENTATION_CHANGES_01.md).
@@ -337,7 +340,9 @@ projections vs FP16) on the frozen F3 async scheduler with FP16 compute. NF4/F4 
 - **Key finding:** **Async FP16 ≈3.5% faster than Async INT8** here (dequant on critical path) →
   reinforces the adaptive rationale (choose FP16 when no pressure).
 - **Status:** **CORE SYSTEM VALIDATED — PERFORMANCE CERTIFICATION PENDING.** Retention decision
-  (F4 vs fixed Async-INT8/Performance policy) reserved to the Director per Consejero §7.
+  (F4 vs fixed policy — candidates **Async FP16 or Async INT8**) reserved to the Director per
+  Consejero §7/§11 scenarios. **Next: real controlled pressure test** to reach free VRAM
+  < `SAFE_MIN_FREE_MB` (1,500 MB) and exercise the `INT8 / off / evict` branch before deciding.
 
 
 ---
@@ -378,7 +383,7 @@ projections vs FP16) on the frozen F3 async scheduler with FP16 compute. NF4/F4 
 | **F2** | Slab Allocator | Allocator fragmentation $> 15\%$ | No measurable peak physical VRAM drop | Retain standard PyTorch caching allocator | ❌ **BYPASSED / DISCARDED**<br>(Frag = 44.9 MB < 1.0%) |
 | **F3** | Async Scheduler | F0.6 overlap $\ge 10\%$ & prefetch safe | Overlap (real) $< 5\%$, speedup $< 0\%$, or OOM under load | Synchronous layer transfer | 🟢 **CERTIFIED PASS**<br>mean **+7.2%** external wall-clock (5 A/B reps) · overlap 100% measured · 2,584 MB · [`Verification`](results/TEST_F3_verification.md) |
 | **F3+INT8** | Transfer-Volume Isolation | F3 certified PASS | Same gates as F3; fidelity cos $< 0.99$ | Retain FP16 baseline | 🟢 **PASS**<br>Async-vs-Sync **+13.2%** · overlap 98.1% · **2,076 MB** (−508) · payload −49.9% · [`Report`](results/TEST_F3_INT8_benchmark.md) |
-| **F4** | Adaptive Decision Engine | Unconditional (Core) | Does not meet ≥5% Optimization Target over best same-session static (validated vs Safety/Adaptive Gates per v3) | Deterministic static block policy (Async INT8 / Performance) | 🟡 **CORE VALIDATED**<br>[`TEST_F4_adaptive_benchmark.md`](results/TEST_F4_adaptive_benchmark.md) (Safety 2,882 MB/0 NaN · Adaptive PASS · D vs best B −3.40% no-pressure · overhead 0.16 ms) |
+| **F4** | Adaptive Decision Engine | Unconditional (Core) | ≥5% Optimization Target is a *target*, not a validity gate (validated vs Safety/Adaptive Gates per v3) | Deterministic static policy (Async FP16 or Async INT8 / Performance) | 🟢 **CORE VALIDATED**<br>[`TEST_F4_adaptive_benchmark.md`](results/TEST_F4_adaptive_benchmark.md) (Safety 2,882 MB/0 NaN · Adaptive PASS · D vs best B −3.40% no-pressure · overhead 0.16 ms) |
 | **F5** | Temporal VAE Stitcher | VAE is confirmed bottleneck | Saves $< 20\%$ VRAM or introduces seam artifacts | Tiled spatial decoding fallback | ⚪ **Addressed in F0.5 Test J**<br>(Micro-tiling resolved VAE spike) |
 | **F6** | Verification Benchmarks | Completion of prior phases | Wall-clock time $> 30\text{ min}$ without explanation | Document operational boundaries | ⚪ **Final Validation Stage** |
 

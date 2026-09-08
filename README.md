@@ -16,6 +16,9 @@
 [![Phase F0.6: PASS](https://img.shields.io/badge/Phase%20F0.6-PASS%20(WDDM%20overlap)-22c55e.svg)](results/TEST_F0.6_wddm_overlap.md)
 [![Phase F1: PASS](https://img.shields.io/badge/Phase%20F1-PASS%20(3.2GB)-22c55e.svg)](results/TEST_F1_lifetime_profiler.md)
 [![Phase F1.7: PASS](https://img.shields.io/badge/Phase%20F1.7-PASS%20(-50%25%20T5)-22c55e.svg)](results/TEST_F1.7_selective_quantization.md)
+[![Phase F3: CERTIFIED](https://img.shields.io/badge/Phase%20F3-CERTIFIED%20(+7.2%25)-22c55e.svg)](results/TEST_F3_verification.md)
+[![Phase F3+INT8: PASS](https://img.shields.io/badge/Phase%20F3%2BINT8-PASS%20(+13.2%25)-22c55e.svg)](results/TEST_F3_INT8_benchmark.md)
+[![Phase F4: CORE VALIDATED](https://img.shields.io/badge/Phase%20F4-CORE%20VALIDATED-8b5cf6.svg)](results/TEST_F4_adaptive_benchmark.md)
 
 *In loving memory of Marley 🐾*
 
@@ -68,7 +71,8 @@ Memory is tracked across **three distinct layers** to prevent WDDM virtualizatio
 | **F1.7** | Selective Quantization | 🟢 **PASS** | **T5 -50.0% (7.38 GB RAM saved)** · DiT Proj -48.2% (-76.9 GB PCIe payload) · Cosine 0.9996 · [`TEST_F1.7_selective_quantization.md`](results/TEST_F1.7_selective_quantization.md) |
 | **F2** | Static Slab Allocator | ❌ **BYPASSED** | Allocator fragmentation is < 1.0% (44.9 MB vs 720 MB threshold); custom allocator discarded |
 | **F3** | Async Stream Scheduler | 🟢 **PASS** | Real Wan2.1 DiT, measurement-corrected: **mean +7.2% wall-clock** (stable 6.0–8.4% over 5 A/B reps), overlap 100% measured, 2,584 MB VRAM. Certified → F3+INT8. · [`Verification`](results/TEST_F3_verification.md) · [`TEST_F3`](results/TEST_F3_async_scheduler.md) · [`Methodology`](docs/F3_MEASUREMENT_VERIFICATION_03.md) |
-| **F4** | Adaptive Decision Engine | ⚪ CORE | Dynamic AOT decision engine utilizing F1 telemetry & F3 async streaming |
+| **F3+INT8** | Transfer-Volume Isolation | 🟢 **PASS** | INT8 linear proj + FP16 compute, scheduler frozen: Async-vs-Sync **+13.2%**, payload −49.9%, overlap 98.1%, peak **2,076 MB**, cos ≥ 0.9999 · [`Report`](results/TEST_F3_INT8_benchmark.md) · F3 FP16 baseline frozen |
+| **F4** | Adaptive Decision Engine | 🟢 **CORE VALIDATED** | Same-session A/B/C/D (30×3): Safety PASS (2,882 MB, 0 NaN), Adaptive Gate PASS (no oscillation), overhead 0.16 ms. D vs best static B **−3.40%** (no-pressure, perf cert pending) · [`Report`](results/TEST_F4_adaptive_benchmark.md) · [`Contract`](docs/F4_TEST_SPEC_01.md) |
 | **F5** | Temporal VAE Stitcher | ⚪ STANDBY | VAE memory spike already resolved in Phase F0.5 Test J (micro-tiling) |
 | **F6** | Validation Benchmarks | ⚪ Final | Multi-dimensional benchmarks at 480p/33f and 720p stretch |
 
@@ -226,6 +230,68 @@ Following a post-certification audit, the overlap/stall instrumentation and benc
 - **Verdict:** 🟢 **F3 PASS — Certified. Advance to F3 + INT8.**
 
 First-run (preliminary) reference: [`results/TEST_F3_async_scheduler.md`](results/TEST_F3_async_scheduler.md).
+
+---
+
+## 🧠 Phase F3 + INT8 — Transfer-Volume Isolation (🟢 PASS, baseline frozen)
+
+F3+INT8 isolated a single variable — the per-block H2D byte volume — by quantizing DiT linear
+projections to INT8 (FP16 compute, on-device dequant) on the **unchanged** F3 async scheduler.
+
+| Metric | Value |
+| :--- | :---: |
+| H2D payload / block | 46.5 MB (**−49.9%** vs 92.9 MB FP16) |
+| Async-vs-Sync wall-clock | **+13.2%** (min +10.4 / max +15.4, σ ±2.5) |
+| Effective overlap | 98.1% |
+| Peak VRAM (NVML) | **2,076 MB** (−508 vs FP16) |
+| Dequant fidelity (float64) | cos mean 0.999959 / min 0.999935 · 0 NaN/Inf |
+
+Residual ~324 ms dequant stall on the critical path became the **F4 decision signal**.
+Report: [`results/TEST_F3_INT8_benchmark.md`](results/TEST_F3_INT8_benchmark.md) · Closure:
+[`docs/F3_INT8_CLOSURE_01.md`](docs/F3_INT8_CLOSURE_01.md) · F3 FP16 baseline remains frozen.
+
+---
+
+## ⚙️ Phase F4 — Adaptive Memory Decision Engine (🟢 CORE SYSTEM VALIDATED)
+
+F4 adds a **decision layer** over the frozen F3/F3+INT8 primitives (no scheduler/dequant changes —
+causal attribution preserved). It observes memory/transfer state and selects, per decision window,
+`precision × prefetch × residency`, delegating execution to `BudgetedAsyncStreamer` (FP16) or
+`INT8BudgetedStreamer` (INT8). Code: [`marley/core/policies.py`](marley/core/policies.py) +
+[`marley/core/adaptive.py`](marley/core/adaptive.py) · Runner: [`f4_adaptive_benchmark.py`](f4_adaptive_benchmark.py)
+· Authorized contract: [`docs/F4_TEST_SPEC_01.md`](docs/F4_TEST_SPEC_01.md).
+
+### Same-session A/B/C/D — 30 steps × 3 reps (external wall-clock)
+
+| Condition | Strategy | Mean (ms) | Overlap | NaN/Inf |
+| :--- | :--- | :---: | :---: | :---: |
+| **A** | Sync FP16 | 113,538.7 | 0.0% | 0/0 |
+| **B** | Async FP16 | **105,441.5** | 100.0% | 0/0 |
+| **C** | Async INT8 | 109,157.9 | 98.1% | 0/0 |
+| **D** | Adaptive | 109,022.8 | ~88.4% | 0/0 |
+
+- **Best static = B (Async FP16).** **D vs best = −3.40%** (no-pressure regime: D correctly stayed
+  on its `performance` INT8 policy because no switch was demanded → D ≈ C). **Not a refutation of
+  F4** — D was never asked to adapt.
+- **Decision overhead:** 0.16 ms total · switch 0 · replan 0 · **Peak VRAM 2,882 MB**
+  (Hard Gate ≤ 4,800 PASS · Engineering Target ≤ 4,000 MET).
+- **Key experimental finding:** **Async FP16 ≈3.5% faster than Async INT8** at this length (dequant
+  on the critical path) — INT8 is **not universally superior**; its value depends on memory state,
+  which is precisely the adaptive rationale.
+
+### Adaptive Gate — `--pressure-test` (deterministic injected pressure)
+
+`performance → memory_safe → performance` cycle reproduced with **replan 2 · switch 2 ·
+overhead 0.07 ms · oscillation False → 🟢 PASS** (hysteresis + minimum-dwell validated).
+
+> **Honest caveats (kept per Consejero §5):** not yet demonstrated = D faster than the best static
+> policy; consistent ≥5% advantage; benefit under **real** (vs injected) memory pressure; and the
+> `INT8-tighten` branch below `SAFE_MIN_FREE_MB` (the simulated +600 MB spike kept free VRAM
+> > 1,500 MB). Verdict: **CORE SYSTEM VALIDATED — PERFORMANCE CERTIFICATION PENDING.**
+
+Full report: [`results/TEST_F4_adaptive_benchmark.md`](results/TEST_F4_adaptive_benchmark.md) ·
+Telemetry: [`logs/f4_adaptive_benchmark.json`](logs/f4_adaptive_benchmark.json) · Change analysis:
+[`docs/F4_IMPLEMENTATION_CHANGES_01.md`](docs/F4_IMPLEMENTATION_CHANGES_01.md).
 
 ---
 
