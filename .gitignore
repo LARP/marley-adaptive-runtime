@@ -223,3 +223,10 @@ __marimo__/
 .gemini/
 GEMINI.md
 AGENTS.md
+
+# Marley Runtime — Generated outputs (heavy binaries, not versioned)
+logs/*.mp4
+logs/*.json
+logs/*.log
+benchmarks/*.mp4
+benchmarks/*.json
