@@ -24,7 +24,7 @@
 Rather than relying purely on blunt sequential CPU offloading, `marley-runtime` investigates and measures **adaptive, block-level memory management policies** that dynamically balance PCIe transfer latency, activation recomputation, tensor lifetime management, and selective quantization.
 
 > [!NOTE]
-> The current architectural design and phased milestone strategy is governed by **[Roadmap v5](ROADMAP.md)**, formulated through a multi-agent review consensus (ChatGPT, DeepSeek Pro, and Gemini Pro).
+> The current architectural design and phased milestone strategy is governed by **[Roadmap v5](ROADMAP.md)**, reviewed and approved through a multi-agent consensus using **free-tier models** (ChatGPT, DeepSeek Pro, and Gemini Pro). Active execution is performed by **Antigravity Pro** (Gemini 2.5 Flash and Claude Sonnet 4.6).
 
 ---
 
