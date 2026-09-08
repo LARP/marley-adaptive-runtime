@@ -11,7 +11,7 @@
 [![Roadmap: v5 Approved](https://img.shields.io/badge/Roadmap-v5%20Approved-8b5cf6.svg)](ROADMAP.md)
 [![Phase F0: PASS](https://img.shields.io/badge/Phase%20F0-PASS-22c55e.svg)](ROADMAP.md)
 [![Phase F0.5: PASS](https://img.shields.io/badge/Phase%20F0.5-PASS%20(2.9GB)-22c55e.svg)](results/TEST_J_vae_tiling_bf16.md)
-[![Phase F0.6: NEXT](https://img.shields.io/badge/Phase%20F0.6-NEXT%20(WDDM)-3b82f6.svg)](ROADMAP.md)
+[![Phase F0.6: PASS](https://img.shields.io/badge/Phase%20F0.6-PASS%20(WDDM%20overlap)-22c55e.svg)](results/TEST_F0.6_wddm_overlap.md)
 
 *In loving memory of Marley 🐾*
 
@@ -58,7 +58,7 @@ Memory is tracked across **three distinct layers** to prevent WDDM virtualizatio
 | **F0.1** | Hardware Verification | 🟢 **PASS** | Driver 581.86 · CUDA 13.0 · RTX 3050 6GB confirmed |
 | **F0** | Reproducible Baseline | 🟢 **PASS** | Wan2.1-T2V-1.3B run at 480p/16f/FP16 — video generated |
 | **F0.5** | Progressive Exploration | 🟢 **PASS** | **Peak NVML 2,902 MB (+1,898 MB headroom)** · VAE BF16 + Tiling |
-| **F0.6** | WDDM Concurrency | 🔵 **NEXT** | PCIe async transfer vs. Tensor Core matmul overlap |
+| **F0.6** | WDDM Concurrency | 🟢 **PASS** | **Overlap 79.9–96.3%** · PCIe async copy hides compute → F3 ACTIVE |
 | **F1** | Lifetime Profiler | ⚪ Scheduled | — |
 | **F1.5** | Bottleneck Analysis | ⚪ Scheduled | — |
 | **F1.7** | Selective Quantization | ⚪ Conditional | — |
@@ -125,6 +125,20 @@ Following Phase F0, an experimental ladder of low-cost isolation tests was execu
 4. **Zero Visual Artifacts:** Native spatial tiling (256×256 px) with causal temporal caching preserved video smoothness and quality with zero NaNs.
 
 All test reports and raw telemetry are centralized in the [`results/`](results/) directory.
+
+---
+
+## 🔀 Phase F0.6 — WDDM Concurrency Benchmark Results (2026-09-08)
+
+Phase F0.6 measured whether the Windows WDDM driver scheduler permits genuine overlap of PCIe `cudaMemcpyAsync` (host→device) transfers with Tensor-Core `matmul` kernels on separate non-default CUDA streams.
+
+| H2D Transfer | Copy Alone | Matmul Alone | Concurrent | **Overlap** | Gate (≥10%) |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| 512 MB | 43.7 ms | 38.7 ms | 43.4 ms | **89.3%** | 🟢 **PASS** |
+| 1024 MB | 87.2 ms | 69.2 ms | 86.8 ms | **79.9%** | 🟢 **PASS** |
+| 2048 MB | 174.4 ms | 172.0 ms | 178.4 ms | **96.3%** | 🟢 **PASS** |
+
+> **Key finding:** Concurrent makespan tracked the *copy-alone* time (not the serial sum), proving the WDDM copy engine runs **in parallel** with SM compute. With overlap of **79.9–96.3%** — an order of magnitude above the 10% gate — **Phase F3 (async prefetch scheduler) is justified and stays active**. Report: [`results/TEST_F0.6_wddm_overlap.md`](results/TEST_F0.6_wddm_overlap.md).
 
 ---
 

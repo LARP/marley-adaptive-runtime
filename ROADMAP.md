@@ -107,9 +107,11 @@ flowchart TD
 ---
 
 
-### Phase F0.6 — Windows WDDM Concurrency Evaluation
+### Phase F0.6 — Windows WDDM Concurrency Evaluation · 🟢 PASS
 - **Benchmark:** Measure effective hardware overlap of `cudaMemcpyAsync` host-to-device transfers alongside dense matrix multiplication kernels (`matmul`) operating on separate non-default CUDA streams.
 - **Kill Gate:** If measured transfer/compute overlap under WDDM is **< 10%**, permanently cancel Phase F3 (asynchronous prefetch scheduler) in favor of deterministic synchronous staging.
+- **Gate Result:** **PASS** — Measured overlap of **79.9–96.3%** across 512/1024/2048 MB H2D transfers (script: [`f0_6_wddm_overlap.py`](f0_6_wddm_overlap.py) · report: [`results/TEST_F0.6_wddm_overlap.md`](results/TEST_F0.6_wddm_overlap.md)).
+- **Concurrent makespan tracked the copy-alone time (not the serial sum)**, confirming the WDDM copy engine genuinely overlaps with Tensor-Core `matmul` on separate streams. **Phase F3 is NOT cancelled** — it remains active.
 
 ---
 

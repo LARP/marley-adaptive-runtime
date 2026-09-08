@@ -21,6 +21,19 @@ Dedicated directory for test documentation, telemetry capture, and performance a
 
 ---
 
+## Phase F0.6 — Windows WDDM Concurrency Evaluation 🟢 PASS
+
+**Gate Target:** Measured `cudaMemcpyAsync` (H2D) / `matmul` overlap under WDDM ≥ **10%** to keep Phase F3 active.  
+**Result:** Overlap of **79.9–96.3%** (512 / 1024 / 2048 MB) → **Phase F3 stays active**.
+
+| Workload (H2D copy) | Copy Alone | Matmul Alone | Serial Sum | Concurrent | Overlap | Gate F0.6 | Report |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| 512 MB (32 × 16 MB) | 43.7 ms | 38.7 ms | 82.4 ms | 43.4 ms | **89.3%** | 🟢 PASS | [TEST_F0.6_wddm_overlap.md](./TEST_F0.6_wddm_overlap.md) |
+| 1024 MB (128 × 8 MB) | 87.2 ms | 69.2 ms | 156.4 ms | 86.8 ms | **79.9%** | 🟢 PASS | [TEST_F0.6_wddm_overlap.md](./TEST_F0.6_wddm_overlap.md) |
+| 2048 MB (128 × 16 MB) | 174.4 ms | 172.0 ms | 346.4 ms | 178.4 ms | **96.3%** | 🟢 PASS | [TEST_F0.6_wddm_overlap.md](./TEST_F0.6_wddm_overlap.md) |
+
+---
+
 ## 2. Test Documentation Architecture
 
 Each test run contains an individual technical report in this directory:
