@@ -23,8 +23,8 @@ This file is the **index** of all test reports in `results/`. Each row below lis
 | 9 | [`TEST_F3_verification.md`](./TEST_F3_verification.md) | F3 | Final Measurement Verification (Enmiendas 1–3) | External wall-clock speedup mean **+7.2%** (stable over 5 A/B reps); stall 0 ms; peak 2,584 MB | 🟢 **CERTIFIED PASS** → F3+INT8 |
 | 10 | [`TEST_F3_INT8_benchmark.md`](./TEST_F3_INT8_benchmark.md) | F3+INT8 | Isolation: transfer-volume reduction (INT8 linear proj, FP16 compute, scheduler frozen) | Async-vs-Sync **+13.2%**; payload −49.9%; overlap 98.1%; peak **2,076 MB** (−508 vs FP16); cos ≥ 0.9999; 0 NaNs | 🟢 **PASS** |
 | — | [`F3_INT8_CLOSURE_01.md`](../docs/F3_INT8_CLOSURE_01.md) | F3+INT8 | Formal closure acta (freeze as F4 baseline) | +13.2% Async-vs-Sync; 46.5 MB/block; 2,076 MB; cos ≥ 0.9999; precise intra-session interpretation | 🟢 **CLOSED / FROZEN** |
-| — | [`F4_ADAPTIVE_ENGINE_PLAN_01.md`](../docs/F4_ADAPTIVE_ENGINE_PLAN_01.md) | F4 | Design plan (CORE) | Dynamic FP16/INT8 + prefetch + residency; same-session A/B/C; kill gate vs best static ≥ 5% | 🟡 **PLANNED** |
 | 11 | [`TEST_F4_adaptive_benchmark.md`](./TEST_F4_adaptive_benchmark.md) | F4 | Adaptive Memory Decision Engine (decision loop, A/B/C/D same-session + pressure test) | CORE VALIDATED: Safety 2,882 MB/0 NaN; Adaptive Gate PASS (pressure→Memory Safe→recovery, no oscillation); overhead 0.1 ms; D vs best static B = −3.40% (no-pressure, D stayed INT8) | 🟢 **CORE VALIDATED / PERF. PENDING** |
+| 12 | [`TEST_F5_vae_probe_33f.md`](./TEST_F5_vae_probe_33f.md) | F5 | Canonical 33-frame VAE Decode Probe (Decision-First Protocol) | Peak NVML **2,109 MB** (Gate ≤ 4,800); Decode **26.99 s** (Target ≤ 150 s); 0 NaNs; 1,402 MB RAM; No temporal stitcher needed | 🟢 **RETIRE F5 (Resolved by Tiling)** |
 
 > **Notes:**
 > - **F0 (Ref)** is documented in [`TEST_F0_baseline_ref.md`](./TEST_F0_baseline_ref.md) with ground-truth telemetry from [`logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json`](../logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json).
@@ -187,7 +187,31 @@ Frozen F3/F3+INT8 primitives (`marley/ops/async_stream*.py`) **unchanged** (diff
 
 ---
 
-## 10. Test Documentation Architecture
+## 10. Phase F5 — Temporal VAE Stitcher (Probe F5-A) 🟢 RETIRED (Resolved by Tiling)
+
+**Canonical F5 Workload & Decision Protocol ([`docs/F5_ROADMAP_PLAN_01.md`](../docs/F5_ROADMAP_PLAN_01.md)):**
+- Workload: 832×480 @ **33 frames exact** · Latent `(1, 16, 9, 60, 104)` · BF16 · Spatial tiling 256×256 + causal caching.
+- Decision rule: If Peak VRAM ≤ 4,800 MB & Decode ≤ 150 s $\rightarrow$ **RETIRE F5-C** (resolved by existing tiled VAE) $\rightarrow$ Advance to F6.
+
+**Status:** 🟢 **CERTIFIED PASS — RETIRE F5-C**.
+Report: [`TEST_F5_vae_probe_33f.md`](./TEST_F5_vae_probe_33f.md) · Telemetry: [`logs/f5_vae_probe_33f.json`](../logs/f5_vae_probe_33f.json) · Script: [`f5_vae_probe_33f.py`](../f5_vae_probe_33f.py).
+
+| Metric | Target / Gate | Measured (F5-A) | Verdict |
+| :--- | :---: | :---: | :---: |
+| **Peak VRAM (NVML 50ms)** | ≤ 4,800 MB (Hard Gate) | **2,109.0 MB** | 🟢 **PASS (+2,691 MB margin)** |
+| **Engineering Target VRAM** | ≤ 4,000 MB | **2,109.0 MB** | 🟢 **MET** |
+| **VAE Decode Duration** | ≤ 150.0 s | **26.99 s** | 🟢 **MET (5.5× faster than budget)** |
+| **PyTorch Allocated Peak** | — | **1,056.9 MB** | 🟢 Stable |
+| **Host Process RAM (RSS)** | Audited | **1,402.6 MB** | 🟢 Negligible system footprint |
+| **Integrity (NaNs / Infs)** | 0 / 0 | **0 / 0** | 🟢 **PASS** |
+| **Output Shape** | `[1, 3, 33, 480, 832]` | `[1, 3, 33, 480, 832]` | 🟢 **MATCH** |
+
+**Conclusion & Action:**
+Because the existing tiled VAE path (`torch.bfloat16` + `enable_tiling()` 256×256) decodes 33 frames effortlessly within ~2.1 GB of VRAM in under 27 seconds, writing a temporal chunker (`marley/ops/vae_stitch.py`) is **unnecessary**. F5-C is **CANCELLED / RETIRED** as resolved by existing tiling. Phase F5 is formally closed; project advances directly to **Phase F6 (480p / 33f End-to-End Pipeline)**.
+
+---
+
+## 11. Test Documentation Architecture
 
 Each test run contains an individual technical report in this directory:
 - `TEST_<ID>_<strategy>.md`: Document covering the technical hypothesis, reproducible command line, multi-layer memory telemetry, bottleneck analysis, and gate verdict.

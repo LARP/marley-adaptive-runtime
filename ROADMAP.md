@@ -1,7 +1,7 @@
 # Marley Runtime (`marley-runtime`) — Roadmap v5
 
 **Release Date:** 2026-09-08  
-**Status:** Active — F1.5, F1.7, **F3 (CERTIFIED PASS)**, **F3+INT8 (PASS)** & **F4 (CORE SYSTEM VALIDATED)** · Phase F4 performance-certification pending · F6 NEXT  
+**Status:** Active — F1.5, F1.7, **F3 (CERTIFIED PASS)**, **F3+INT8 (PASS)**, **F4 (CORE VALIDATED)** & **F5 (RETIRED — Resolved by Tiling at 33f)** · Phase F6 (480p/33f End-to-End) NEXT  
 **Target Repository:** [`LARP/marley-runtime`](https://github.com/LARP/marley-runtime)  
 **Primary Objective:** Investigate and deploy adaptive memory management policies for Wan2.1-T2V-1.3B constrained to ~4.8 GB effective physical VRAM (NVIDIA GeForce RTX 3050 6GB Laptop, Windows WDDM), prioritizing 480p resolution (with 720p as secondary/stretch milestone).
 
@@ -44,6 +44,19 @@
 > [`logs/f4_adaptive_benchmark.json`](logs/f4_adaptive_benchmark.json) · Change analysis:
 > [`docs/F4_IMPLEMENTATION_CHANGES_01.md`](docs/F4_IMPLEMENTATION_CHANGES_01.md).
 
+> **Phase F5 RETIRED / CLOSED 2026-09-08 (Decision-First Protocol).** Executed canonical 33-frame
+> probe ([`f5_vae_probe_33f.py`](f5_vae_probe_33f.py)) on $832 \times 480$, 33 frames exact, latent
+> `(1, 16, 9, 60, 104)` with native tiling $256 \times 256$ (BF16, causal temporal caching).
+> Measured: **Peak NVML 2,109.0 MB** (Hard Gate $\le 4,800\text{ MB}$ PASS, Target $\le 4,000\text{ MB}$ MET
+> with **+2,691 MB free headroom**), **VAE decode 26.99 s** (Target $\le 150\text{ s}$ MET with 82% margin),
+> 0 NaNs/Infs, and 1,402 MB process RAM RSS. Because the existing tiled VAE decodes 33 frames with negligible
+> footprint and under 27 s, custom temporal stitcher build (`marley/ops/vae_stitch.py`) is **unnecessary**.
+> Phase F5 is formally closed as **`🟢 RETIRED (Resolved by Tiling)`**. Advance directly to Phase F6.
+> Report: [`results/TEST_F5_vae_probe_33f.md`](results/TEST_F5_vae_probe_33f.md) · Telemetry:
+> [`logs/f5_vae_probe_33f.json`](logs/f5_vae_probe_33f.json) · Directives:
+> [`docs/F5_DIRECTOR_RESOLUTION_01.md`](docs/F5_DIRECTOR_RESOLUTION_01.md) /
+> [`docs/F5_CONSULTANT_RATIFICATION_01.md`](docs/F5_CONSULTANT_RATIFICATION_01.md).
+
 > **Provenance Note:** This roadmap represents the unified **v5 architectural consensus**, synthesized and hardened via a multi-agent review ensemble (ChatGPT, DeepSeek Pro, and Gemini Pro) and calibrated with external generative runtime advisory.
 
 ---
@@ -84,17 +97,17 @@ flowchart TD
     F15 --> F17["F1.7: Selective Quantization 🟢"]
     F15 -.->|"Frag < 1% (Bypassed)"| F2["F2: Static Slab Allocator ❌"]
     F06 -.->|"Overlap 80-96% + Prefetch Safe"| F3["F3: Budgeted Async Scheduler 🟢"]
-    F17 --> F4["F4: Adaptive Memory Decision Engine (CORE) 🟡"]
+    F17 --> F4["F4: Adaptive Memory Decision Engine (CORE) 🟢"]
     F3 --> F3I8["F3+INT8: Transfer-Volume Isolation 🟢"] --> F4
-    F4 -.->|"Resolved in F0.5"| F5["F5: Temporal VAE Stitcher ⚪"]
-    F4 --> F6["F6: Multidimensional Benchmarks"]
+    F4 -.->|"Resolved in F0.5/F5-A"| F5["F5: Temporal VAE Stitcher (RETIRED) 🟢"]
+    F4 --> F6["F6: Multidimensional Benchmarks ⚪"]
     F5 --> F6
 
     classDef pass fill:#1b4332,stroke:#40916c,stroke-width:2px,color:#d8f3dc;
     classDef inprog fill:#5c4d00,stroke:#d4af37,stroke-width:2px,color:#fff3b0;
     classDef bypass fill:#4a1525,stroke:#9b2226,stroke-width:1px,color:#f8d7da;
     class F0,F05,F06,F1,F15,F17,F3 pass;
-    class F3I8 pass;
+    class F3I8,F4,F5 pass;
     class F2 bypass;
 ```
 
@@ -347,10 +360,15 @@ projections vs FP16) on the frozen F3 async scheduler with FP16 compute. NF4/F4 
 
 ---
 
-### Phase F5 — Temporal VAE Stitcher *(Conditional, Low Priority)*
-- **Trigger:** Activated only if the VAE decoding pass is identified in Phase F1.5 as the primary OOM bottleneck and layer offloading fails to contain it.
-- **Goal:** Chunked temporal latent decoding with overlapping frame blending to decode long sequences within memory limits.
-- **Kill Gate:** If the stitcher does not save **≥ 20% VRAM** during decoding or creates noticeable boundary seam artifacts, cancel implementation.
+### Phase F5 — Temporal VAE Stitcher · 🟢 RETIRED (Resolved by Tiling)
+- **Protocol:** Decision-First Protocol ([`docs/F5_DIRECTOR_RESOLUTION_01.md`](docs/F5_DIRECTOR_RESOLUTION_01.md) / [`docs/F5_CONSULTANT_RATIFICATION_01.md`](docs/F5_CONSULTANT_RATIFICATION_01.md)).
+- **Canonical 33f Workload:** $832 \times 480$, 33 frames exact, latent `(1, 16, 9, 60, 104)`, `bfloat16`, spatial tiling $256 \times 256$ with causal caching.
+- **Measured Result (F5-A Probe):**
+  - Peak Physical VRAM (NVML): **2,109.0 MB** (Hard Gate $\le 4,800\text{ MB}$ PASS, Target $\le 4,000\text{ MB}$ MET with **+2,691 MB headroom**).
+  - VAE Decode Duration: **26.99 s** (Target $\le 150\text{ s}$ MET with 82% margin).
+  - PyTorch Allocated Peak: **1,056.9 MB** · Process RAM RSS: **1,402.6 MB**.
+  - Output Integrity: exact match `[1, 3, 33, 480, 832]`, 0 NaNs / 0 Infs.
+- **Verdict & Action:** Scaling the temporal axis to 33 frames produces no memory cliff or latency stall under native tiling ($~2.1\text{ GB}$ VRAM, $27\text{ s}$). Writing a custom temporal chunker (`marley/ops/vae_stitch.py`) is **unnecessary**. F5-C is **CANCELLED / RETIRED**. Phase F5 is formally closed; project advances directly to **Phase F6**. Report: [`results/TEST_F5_vae_probe_33f.md`](results/TEST_F5_vae_probe_33f.md).
 
 ---
 
@@ -384,7 +402,7 @@ projections vs FP16) on the frozen F3 async scheduler with FP16 compute. NF4/F4 
 | **F3** | Async Scheduler | F0.6 overlap $\ge 10\%$ & prefetch safe | Overlap (real) $< 5\%$, speedup $< 0\%$, or OOM under load | Synchronous layer transfer | 🟢 **CERTIFIED PASS**<br>mean **+7.2%** external wall-clock (5 A/B reps) · overlap 100% measured · 2,584 MB · [`Verification`](results/TEST_F3_verification.md) |
 | **F3+INT8** | Transfer-Volume Isolation | F3 certified PASS | Same gates as F3; fidelity cos $< 0.99$ | Retain FP16 baseline | 🟢 **PASS**<br>Async-vs-Sync **+13.2%** · overlap 98.1% · **2,076 MB** (−508) · payload −49.9% · [`Report`](results/TEST_F3_INT8_benchmark.md) |
 | **F4** | Adaptive Decision Engine | Unconditional (Core) | ≥5% Optimization Target is a *target*, not a validity gate (validated vs Safety/Adaptive Gates per v3) | Deterministic static policy (Async FP16 or Async INT8 / Performance) | 🟢 **CORE VALIDATED**<br>[`TEST_F4_adaptive_benchmark.md`](results/TEST_F4_adaptive_benchmark.md) (Safety 2,882 MB/0 NaN · Adaptive PASS · D vs best B −3.40% no-pressure · overhead 0.16 ms) |
-| **F5** | Temporal VAE Stitcher | VAE is confirmed bottleneck | Saves $< 20\%$ VRAM or introduces seam artifacts | Tiled spatial decoding fallback | ⚪ **Addressed in F0.5 Test J**<br>(Micro-tiling resolved VAE spike) |
+| **F5** | Temporal VAE Stitcher | VAE is confirmed bottleneck at 33f | Saves $< 20\%$ VRAM or introduces seam artifacts | Tiled spatial-temporal decoding (Test J) | 🟢 **RETIRED (Resolved by Tiling)**<br>Probe F5-A certified: **2,109 MB peak NVML** (Gate ≤ 4,800), **26.99 s decode** (Target ≤ 150 s), 0 NaNs at 33f. Stitcher unnecessary. [`TEST_F5`](results/TEST_F5_vae_probe_33f.md) |
 | **F6** | Verification Benchmarks | Completion of prior phases | Wall-clock time $> 30\text{ min}$ without explanation | Document operational boundaries | ⚪ **Final Validation Stage** |
 
 ---

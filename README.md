@@ -19,6 +19,7 @@
 [![Phase F3: CERTIFIED](https://img.shields.io/badge/Phase%20F3-CERTIFIED%20(+7.2%25)-22c55e.svg)](results/TEST_F3_verification.md)
 [![Phase F3+INT8: PASS](https://img.shields.io/badge/Phase%20F3%2BINT8-PASS%20(+13.2%25)-22c55e.svg)](results/TEST_F3_INT8_benchmark.md)
 [![Phase F4: CORE VALIDATED](https://img.shields.io/badge/Phase%20F4-CORE%20VALIDATED-8b5cf6.svg)](results/TEST_F4_adaptive_benchmark.md)
+[![Phase F5: RETIRED](https://img.shields.io/badge/Phase%20F5-RETIRED%20(2.1GB%20%40%2033f)-22c55e.svg)](results/TEST_F5_vae_probe_33f.md)
 
 *In loving memory of Marley 🐾*
 
@@ -73,7 +74,7 @@ Memory is tracked across **three distinct layers** to prevent WDDM virtualizatio
 | **F3** | Async Stream Scheduler | 🟢 **PASS** | Real Wan2.1 DiT, measurement-corrected: **mean +7.2% wall-clock** (stable 6.0–8.4% over 5 A/B reps), overlap 100% measured, 2,584 MB VRAM. Certified → F3+INT8. · [`Verification`](results/TEST_F3_verification.md) · [`TEST_F3`](results/TEST_F3_async_scheduler.md) · [`Methodology`](docs/F3_MEASUREMENT_VERIFICATION_03.md) |
 | **F3+INT8** | Transfer-Volume Isolation | 🟢 **PASS** | INT8 linear proj + FP16 compute, scheduler frozen: Async-vs-Sync **+13.2%**, payload −49.9%, overlap 98.1%, peak **2,076 MB**, cos ≥ 0.9999 · [`Report`](results/TEST_F3_INT8_benchmark.md) · F3 FP16 baseline frozen |
 | **F4** | Adaptive Decision Engine | 🟢 **CORE VALIDATED** | Same-session A/B/C/D (30×3): Safety PASS (2,882 MB, 0 NaN), Adaptive Gate PASS (no oscillation), overhead 0.16 ms. D vs best static B **−3.40%** (no-pressure, perf cert pending) · [`Report`](results/TEST_F4_adaptive_benchmark.md) · [`Contract`](docs/F4_TEST_SPEC_01.md) |
-| **F5** | Temporal VAE Stitcher | ⚪ STANDBY | VAE memory spike already resolved in Phase F0.5 Test J (micro-tiling) |
+| **F5** | Temporal VAE Stitcher | 🟢 **RETIRED** | Probe F5-A certified: 33f VAE decodes in **26.99s @ 2,109 MB** (Hard Gate ≤ 4,800 PASS); stitcher unnecessary, resolved by native tiling · [`TEST_F5`](results/TEST_F5_vae_probe_33f.md) |
 | **F6** | Validation Benchmarks | ⚪ Final | Multi-dimensional benchmarks at 480p/33f and 720p stretch |
 
 ---
@@ -292,6 +293,31 @@ overhead 0.07 ms · oscillation False → 🟢 PASS** (hysteresis + minimum-dwel
 Full report: [`results/TEST_F4_adaptive_benchmark.md`](results/TEST_F4_adaptive_benchmark.md) ·
 Telemetry: [`logs/f4_adaptive_benchmark.json`](logs/f4_adaptive_benchmark.json) · Change analysis:
 [`docs/F4_IMPLEMENTATION_CHANGES_01.md`](docs/F4_IMPLEMENTATION_CHANGES_01.md).
+
+---
+
+## 🎞️ Phase F5 — Temporal VAE Stitcher (🟢 RETIRED · Probe F5-A PASS)
+
+Per the **Decision-First** protocol agreed with the Director and External Consultant ([`docs/F5_DIRECTOR_RESOLUTION_01.md`](docs/F5_DIRECTOR_RESOLUTION_01.md) and [`docs/F5_CONSULTANT_RATIFICATION_01.md`](docs/F5_CONSULTANT_RATIFICATION_01.md)), Phase F5 executed the canonical 33-frame probe before building any temporal chunker.
+
+### Canonical 33-Frame VAE Decode (F5-A)
+
+- **Workload:** $832 \times 480$ (480p) · **33 frames exact** · Latent `(1, 16, 9, 60, 104)` · `torch.bfloat16`.
+- **Configuration:** Native `enable_tiling()` with $256 \times 256$ spatial tiles and causal temporal caching.
+
+| Metric | Target / Gate | Measured (F5-A) | Verdict |
+| :--- | :---: | :---: | :---: |
+| **Peak VRAM (NVML 50ms)** | $\le 4,800\text{ MB}$ (Hard Gate) | **2,109.0 MB** | 🟢 **PASS (+2,691 MB headroom)** |
+| **Engineering Target VRAM** | $\le 4,000\text{ MB}$ | **2,109.0 MB** | 🟢 **MET** |
+| **VAE Decode Duration** | $\le 150.0\text{ s}$ | **26.99 s** | 🟢 **MET (5.5× faster than budget)** |
+| **Integrity (NaNs / Infs)** | $0 / 0$ | **0 / 0** | 🟢 **PASS** |
+| **Output Shape** | `[1, 3, 33, 480, 832]` | `[1, 3, 33, 480, 832]` | 🟢 **MATCH** |
+| **Host Process RAM (RSS)** | Audited | **1,402.6 MB** | 🟢 Clean (no thrashing) |
+
+**Conclusion & Action:**  
+Because the existing tiled VAE path (`bfloat16` + $256 \times 256$ spatial tiling) decodes 33 frames in **26.99 seconds** using only **2,109 MB** of VRAM, building a custom temporal stitcher (`marley/ops/vae_stitch.py`) is completely unnecessary. F5-C is **CANCELLED / RETIRED** as resolved by existing tiling. Phase F5 is formally closed; project advances directly to **Phase F6 (480p / 33f End-to-End Pipeline)**.
+
+Full report: [`results/TEST_F5_vae_probe_33f.md`](results/TEST_F5_vae_probe_33f.md) · Telemetry: [`logs/f5_vae_probe_33f.json`](logs/f5_vae_probe_33f.json) · Probe: [`f5_vae_probe_33f.py`](f5_vae_probe_33f.py).
 
 ---
 
