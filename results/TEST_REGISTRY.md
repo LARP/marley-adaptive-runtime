@@ -1,10 +1,30 @@
-# Marley Runtime — Central Benchmark & Test Registry
+# Marley Runtime — Central Test Registry
 
 Dedicated directory for test documentation, telemetry capture, and performance analysis across runtime phases (Phase F0.5 onward).
 
+This file is the **index** of all test reports in `results/`. Each row below lists a report file in
+**chronological order**, with a one-line summary of what it covers and its gate status.
+
 ---
 
-## 1. Master Experiment Matrix (Phase F0.5 — VAE & Offload Optimization)
+## 1. Test Reports (in order)
+
+| # | Report file | Phase | Subject | Key result | Status |
+| :---: | :--- | :---: | :--- | :--- | :---: |
+| 1 | [`TEST_G_model_cpu_offload.md`](./TEST_G_model_cpu_offload.md) | F0.5 | Model-level CPU offload (`--offload model_cpu`) | Peak NVML 5,861 MB; VAE paging 13 GB virtual | ❌ Gate +1,061 MB |
+| 2 | [`TEST_H_bfloat16_vae.md`](./TEST_H_bfloat16_vae.md) | F0.5 | Sequential offload + `bfloat16` VAE | VAE decode 322s → 65s | ⚠️ Alloc 4,366 MB |
+| 3 | [`TEST_J_vae_tiling_bf16.md`](./TEST_J_vae_tiling_bf16.md) | F0.5 | Sequential offload + BF16 VAE + spatial-temporal tiling | Peak NVML 2,902 MB; VAE decode 58s | 🟢 **PASS** (−1,898 MB) |
+| 4 | [`TEST_F0.6_wddm_overlap.md`](./TEST_F0.6_wddm_overlap.md) | F0.6 | WDDM `cudaMemcpyAsync` H2D vs. Tensor-Core `matmul` overlap | Overlap 79.9–96.3% | 🟢 **PASS** (F3 active) |
+| 5 | [`TEST_F1_lifetime_profiler.md`](./TEST_F1_lifetime_profiler.md) | F1 | Tensor Lifetime Profiler (per-DiT-block residency, real model) | Peak NVML 3,223.7 MB; 32 components traced | 🟢 **PASS** (−1,576 MB) |
+
+> **Notes:**
+> - `Test I` and `Test K` produced **no report file** (skipped / not required) — see §2 matrix.
+> - The order above is chronological by test **date**, which is the project's natural reading order
+>   (`F0.5 → F0.6 → F1`). Detailed scorecards for each phase follow in §2.
+
+---
+
+## 2. Master Experiment Matrix (Phase F0.5 — VAE & Offload Optimization)
 
 **Phase F0.5 Gate Target:** Reduce physical peak VRAM (NVML) to **≤ 4,800 MB** on RTX 3050 6GB Laptop GPU.  
 **Baseline F0 Reference:** Peak NVML = **5,451 MB** (+651 MB violation) · VAE Decode = **322s** (Sequential Offload, FP32 VAE).
@@ -12,29 +32,29 @@ Dedicated directory for test documentation, telemetry capture, and performance a
 | Test ID | Description / Strategy | Configuration | Peak NVML (50ms) | Denoise Time | VAE Decode | Total Wall-Clock | Gate F0.5 | Report |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
 | **F0 (Ref)** | Sequential CPU Offload + FP32 VAE | `res=480p, 16f, DiT=fp16, VAE=fp32, offload=cpu` | 5,451 MB | 297s | 322s | 619.8s (10.3m) | ❌ +651 MB | [F0 Baseline](../logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json) |
-| **Test G** | Model CPU Offload (submodel level) | `res=480p, 17f, DiT=fp16, VAE=fp32, offload=model_cpu` | **5,861 MB** (live peak) | **212s** (6.3s/it) | **484s** | **696.3s (11.6m)** | ❌ +1,061 MB (WDDM 13GB paging) | [TEST_G_model_cpu_offload.md](./TEST_G_model_cpu_offload.md) |
-| **Test H** | Sequential Offload + bfloat16 VAE | `res=480p, 17f, DiT=fp16, VAE=bf16, offload=cpu` | **6,028 MB** (peak) / 4,839 post | **274s** (9.1s/it) | **65s** 🟢 | **339.0s (5.65m)** 🟢 | ⚠️ Alloc 4,366 MB (VAE -80% time) | [TEST_H_bfloat16_vae.md](./TEST_H_bfloat16_vae.md) |
+| **Test G** | Model CPU Offload (submodel level) | `res=480p, 17f, DiT=fp16, VAE=fp32, offload=model_cpu` | **5,861 MB** (live peak) | **212s** (6.3s/it) | **484s** | **696.3s (11.6m)** | ❌ +1,061 MB (WDDM 13GB paging) | [TEST_G](./TEST_G_model_cpu_offload.md) |
+| **Test H** | Sequential Offload + bfloat16 VAE | `res=480p, 17f, DiT=fp16, VAE=bf16, offload=cpu` | **6,028 MB** (peak) / 4,839 post | **274s** (9.1s/it) | **65s** 🟢 | **339.0s (5.65m)** 🟢 | ⚠️ Alloc 4,366 MB (VAE -80% time) | [TEST_H](./TEST_H_bfloat16_vae.md) |
 | **Test I** | Sequential Offload + float16 VAE | `res=480p, 17f, DiT=fp16, VAE=fp16, offload=cpu` | *Skipped* (same memory footprint as BF16) | — | — | — | *Superseded by Test J* | Skipped |
-| **Test J** | **Sequential Offload + BF16 + VAE Tiling** | `res=480p, 17f, DiT=fp16, VAE=bf16, vae_tiling=True` | **2,902.0 MB** 🟢 | **270s** (9.0s/it) | **58s** 🟢 | **328.2s (5.47m)** 🟢 | 🟢 **PASS (-1,898 MB headroom)** | [TEST_J_vae_tiling_bf16.md](./TEST_J_vae_tiling_bf16.md) |
+| **Test J** | **Sequential Offload + BF16 + VAE Tiling** | `res=480p, 17f, DiT=fp16, VAE=bf16, vae_tiling=True` | **2,902.0 MB** 🟢 | **270s** (9.0s/it) | **58s** 🟢 | **328.2s (5.47m)** 🟢 | 🟢 **PASS (-1,898 MB headroom)** | [TEST_J](./TEST_J_vae_tiling_bf16.md) |
 | **Test K** | Custom Chunked VAE | *Not required* | — | — | — | — | *Gate F0.5 passed by Test J* | Standby |
 | **Test L** | Chunked VAE + GPU Residency | *Future exploration* | — | — | — | — | *Deferred to Phase F4* | Standby |
 
 ---
 
-## Phase F0.6 — Windows WDDM Concurrency Evaluation 🟢 PASS
+## 3. Phase F0.6 — Windows WDDM Concurrency Evaluation 🟢 PASS
 
 **Gate Target:** Measured `cudaMemcpyAsync` (H2D) / `matmul` overlap under WDDM ≥ **10%** to keep Phase F3 active.  
 **Result:** Overlap of **79.9–96.3%** (512 / 1024 / 2048 MB) → **Phase F3 stays active**.
 
 | Workload (H2D copy) | Copy Alone | Matmul Alone | Serial Sum | Concurrent | Overlap | Gate F0.6 | Report |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| 512 MB (32 × 16 MB) | 43.7 ms | 38.7 ms | 82.4 ms | 43.4 ms | **89.3%** | 🟢 PASS | [TEST_F0.6_wddm_overlap.md](./TEST_F0.6_wddm_overlap.md) |
-| 1024 MB (128 × 8 MB) | 87.2 ms | 69.2 ms | 156.4 ms | 86.8 ms | **79.9%** | 🟢 PASS | [TEST_F0.6_wddm_overlap.md](./TEST_F0.6_wddm_overlap.md) |
-| 2048 MB (128 × 16 MB) | 174.4 ms | 172.0 ms | 346.4 ms | 178.4 ms | **96.3%** | 🟢 PASS | [TEST_F0.6_wddm_overlap.md](./TEST_F0.6_wddm_overlap.md) |
+| 512 MB (32 × 16 MB) | 43.7 ms | 38.7 ms | 82.4 ms | 43.4 ms | **89.3%** | 🟢 PASS | [TEST_F0.6](./TEST_F0.6_wddm_overlap.md) |
+| 1024 MB (128 × 8 MB) | 87.2 ms | 69.2 ms | 156.4 ms | 86.8 ms | **79.9%** | 🟢 PASS | [TEST_F0.6](./TEST_F0.6_wddm_overlap.md) |
+| 2048 MB (128 × 16 MB) | 174.4 ms | 172.0 ms | 346.4 ms | 178.4 ms | **96.3%** | 🟢 PASS | [TEST_F0.6](./TEST_F0.6_wddm_overlap.md) |
 
 ---
 
-## Phase F1 — Tensor Lifetime Profiler 🟢 COMPLETE
+## 4. Phase F1 — Tensor Lifetime Profiler 🟢 COMPLETE
 
 **Gate Target:** Verify per-component & per-DiT-block lifecycle/residency profiling is feasible on the real model (with pure static analytical fallback preserved), and confirm physical residency stays ≤ 4,800 MB.
 
@@ -50,8 +70,9 @@ Dedicated directory for test documentation, telemetry capture, and performance a
 
 ---
 
-## 2. Test Documentation Architecture
+## 5. Test Documentation Architecture
 
 Each test run contains an individual technical report in this directory:
 - `TEST_<ID>_<strategy>.md`: Document covering the technical hypothesis, reproducible command line, multi-layer memory telemetry, bottleneck analysis, and gate verdict.
 - Generated `.mp4` video outputs are stored locally in `logs/` and excluded from the Git repository due to binary size constraints.
+- This file (`TEST_REGISTRY.md`) is the central index/scorecard and is the entry point to all reports.
