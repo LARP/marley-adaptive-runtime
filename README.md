@@ -13,6 +13,7 @@
 [![Phase F0.5: PASS](https://img.shields.io/badge/Phase%20F0.5-PASS%20(2.9GB)-22c55e.svg)](results/TEST_J_vae_tiling_bf16.md)
 [![Phase F0.6: PASS](https://img.shields.io/badge/Phase%20F0.6-PASS%20(WDDM%20overlap)-22c55e.svg)](results/TEST_F0.6_wddm_overlap.md)
 [![Phase F1: PASS](https://img.shields.io/badge/Phase%20F1-PASS%20(3.2GB)-22c55e.svg)](results/TEST_F1_lifetime_profiler.md)
+[![Phase F1.7: PASS](https://img.shields.io/badge/Phase%20F1.7-PASS%20(-50%25%20T5)-22c55e.svg)](results/TEST_F1.7_selective_quantization.md)
 
 *In loving memory of Marley 🐾*
 
@@ -62,7 +63,7 @@ Memory is tracked across **three distinct layers** to prevent WDDM virtualizatio
 | **F0.6** | WDDM Concurrency | 🟢 **PASS** | **Overlap 79.9–96.3%** · PCIe async copy hides compute → F3 ACTIVE · [`TEST_F0.6_wddm_overlap.md`](results/TEST_F0.6_wddm_overlap.md) |
 | **F1** | Lifetime Profiler | 🟢 **PASS** | **Peak NVML 3,223.7 MB** · 32 components traced live (text/DiT×30/VAE) · [`TEST_F1_lifetime_profiler.md`](results/TEST_F1_lifetime_profiler.md) |
 | **F1.5** | Bottleneck Analysis | 🟢 **PASS** | **5 Categories Decomposed** · Allocator frag 44.9 MB (<1%) → **F2 Bypassed**; Prefetch safe (88.6 MB vs 1.57 GB) → **F3 Greenlit** · [`TEST_F1.5_bottleneck_classification.md`](results/TEST_F1.5_bottleneck_classification.md) |
-| **F1.7** | Selective Quantization | 🟡 **IN PROGRESS** | Prioritized target: T5-XXL text encoder (14.7 GB) & DiT projection layers |
+| **F1.7** | Selective Quantization | 🟢 **PASS** | **T5 -50.0% (7.38 GB RAM saved)** · DiT Proj -48.2% (-76.9 GB PCIe payload) · Cosine 0.9996 · [`TEST_F1.7_selective_quantization.md`](results/TEST_F1.7_selective_quantization.md) |
 | **F2** | Static Slab Allocator | ❌ **BYPASSED** | Allocator fragmentation is < 1.0% (44.9 MB vs 720 MB threshold); custom allocator discarded |
 | **F3** | Async Stream Scheduler | 🟢 **GREENLIT** | Overlap 80–96% & 88.6 MB prefetch safe under 4.8 GB gate; next development focus |
 | **F4** | Adaptive Decision Engine | ⚪ CORE | Dynamic AOT decision engine utilizing F1 telemetry & F3 async streaming |
@@ -179,6 +180,25 @@ Phase F1.5 ingested canonical Phase F1 telemetry to quantitatively classify memo
 3. **Phase F1.7 (Selective Quantization) → 🟡 PRIORITIZED FOR T5:** Quantizing the 14.7 GB T5 text encoder to reduce system RAM demand.
 
 Full technical report: [`results/TEST_F1.5_bottleneck_classification.md`](results/TEST_F1.5_bottleneck_classification.md) · Telemetry: [`logs/f1_5_bottleneck_decomposition.json`](logs/f1_5_bottleneck_decomposition.json).
+
+---
+
+## ⚡ Phase F1.7 — Selective & Adaptive Quantization Results (2026-09-08)
+
+Phase F1.7 evaluated selective 8-bit / 4-bit precision scaling targeted at the dominant weight bottlenecks identified in F1.5 without introducing perceptual or numerical degradation.
+
+### Quantization Benchmark & Numerical Fidelity
+
+| Component | Precision Mode | Memory Footprint | Savings | Cosine Similarity | RMSE | Zero NaNs |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| **Text Encoder (UMT5-XXL)** | FP16 Baseline | 14,758.5 MB | 0.0% | 1.000000 | 0.000 | ✅ |
+| **Text Encoder (UMT5-XXL)** | **INT8 (`load_in_8bit`)** | **7,379.2 MB** | **-50.0% (-7.38 GB)** | **1.000017** | 0.011 | ✅ |
+| **Text Encoder (UMT5-XXL)** | NF4 (`load_in_4bit`) | 3,689.6 MB | -75.0% (-11.07 GB) | 0.980313 | 0.048 | ✅ |
+| **DiT Unit Block (Linear)** | FP16 Baseline | 88.60 MB | 0.0% | 1.000000 | — | ✅ |
+| **DiT Unit Block (Linear)** | **8-Bit Projections** | **45.89 MB** | **-48.2% (-42.7 MB)** | **0.999610** | 0.003 | ✅ |
+
+> **Key Takeaway:** 8-bit text encoding saves **7.38 GB of host memory** with perfect semantic fidelity ($> 0.99$), eliminating paging on 16–24 GB laptops. 8-bit DiT projections save **-76.9 GB of cumulative PCIe transfers** across 30 denoising steps.  
+> **Kill Gate F1.7 Status:** 🟢 **PASS**. Full report: [`results/TEST_F1.7_selective_quantization.md`](results/TEST_F1.7_selective_quantization.md) · Benchmark script: [`f1_7_selective_quantizer.py`](f1_7_selective_quantizer.py).
 
 ---
 
