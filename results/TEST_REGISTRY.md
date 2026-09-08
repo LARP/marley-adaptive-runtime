@@ -19,6 +19,8 @@ This file is the **index** of all test reports in `results/`. Each row below lis
 | 5 | [`TEST_F1_lifetime_profiler.md`](./TEST_F1_lifetime_profiler.md) | F1 | Tensor Lifetime Profiler (per-DiT-block residency, real model) | Peak NVML 3,223.7 MB; 32 components traced | 🟢 **PASS** (−1,576 MB) |
 | 6 | [`TEST_F1.5_bottleneck_classification.md`](./TEST_F1.5_bottleneck_classification.md) | F1.5 | Real Bottleneck Identification & Roadmap Dispatch | Allocator frag 44.9 MB (<1%); Prefetch safe (88.6 MB vs 1.57 GB); F3 Greenlit, F2 Bypassed | 🟢 **COMPLETE** |
 | 7 | [`TEST_F1.7_selective_quantization.md`](./TEST_F1.7_selective_quantization.md) | F1.7 | Selective & Adaptive Quantization | T5 8-bit (-50% / -7.38 GB); DiT 8-bit (-48.2%); Cosine Sim 0.9996; Gate $\ge 20\%$ PASS | 🟢 **PASS** |
+| 8 | [`TEST_F3_async_scheduler.md`](./TEST_F3_async_scheduler.md) | F3 | Budgeted Asynchronous Scheduler (Double-buffer) | First run: +10.4% (optimistic sample). **Certified by [`TEST_F3_verification.md`](./TEST_F3_verification.md): mean +7.2%** (6.0–8.4%); overlap 100% measured; VRAM 2,584 MB; 0 NaNs | 🟢 **PASS** (§7) |
+| 9 | [`TEST_F3_verification.md`](./TEST_F3_verification.md) | F3 | Final Measurement Verification (Enmiendas 1–3) | External wall-clock speedup mean **+7.2%** (stable over 5 A/B reps); stall 0 ms; peak 2,584 MB | 🟢 **CERTIFIED PASS** → F3+INT8 |
 
 > **Notes:**
 > - **F0 (Ref)** is documented in [`TEST_F0_baseline_ref.md`](./TEST_F0_baseline_ref.md) with ground-truth telemetry from [`logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json`](../logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json).
@@ -110,15 +112,33 @@ This file is the **index** of all test reports in `results/`. Each row below lis
 
 ---
 
+## 7. Phase F3 — Budgeted Asynchronous Scheduler 🟢 CERTIFIED PASS
+
+**Gate Target:** Wall-clock speedup $> 0.0\%$, Effective Overlap $\ge 5.0\%$, Peak NVML $\le 4,800\text{ MB}$, and Zero NaNs/Infs on Wan2.1 DiT blocks.
+
+**Certified result (measurement-corrected, [`TEST_F3_verification.md`](./TEST_F3_verification.md)):** repeated A/B (5 reps, order alternated, warmup discarded) with external wall-clock and real overlap/stall instrumentation confirms a **stable speedup of mean +7.2%** (range +6.0% to +8.4%, σ ±1.1%), **overlap 100% measured** (0.00 ms stall, backed by per-block timelines), **2,584 MB peak VRAM** and **0 NaNs/Infs**. All gates PASS → **F3 CERTIFIED, advance to F3 + INT8**.
+
+> **Supersedes the first-run report** [`TEST_F3_async_scheduler.md`](./TEST_F3_async_scheduler.md) whose +10.4% was an optimistic single sample and whose "100% overlap" was an instrumentation artifact (now corrected; the 100% is re-confirmed empirically).
+
+- Report: [`TEST_F3_async_scheduler.md`](./TEST_F3_async_scheduler.md) (first run) · Certified: [`TEST_F3_verification.md`](./TEST_F3_verification.md) · Telemetry: [`logs/f3_verification_benchmark.json`](../logs/f3_verification_benchmark.json) · Methodology: [`docs/F3_MEASUREMENT_VERIFICATION_03.md`](../docs/F3_MEASUREMENT_VERIFICATION_03.md)
+
+| Metric | Condition A (Marley Sync) | Condition B (Marley Async) | Gate Target | Status |
+| :--- | :---: | :---: | :---: | :---: |
+| **Wall-Clock Denoise (5 steps)** | 18,127.4 ms | **16,824.1 ms (+7.2%)** | $> 0.0\%$ speedup | 🟢 **PASS** |
+| **Effective Overlap** | 0.0% | **100.0%** (measured, 0 ms stall) | $\ge 5.0\%$ | 🟢 **PASS** |
+| **Peak VRAM (NVML)** | — | **2,584 MB** | $\le 4,800\text{ MB}$ | 🟢 **PASS** |
+| **Numerical Fidelity** | Clean | **0 NaNs / 0 Infs** | Zero corruption | 🟢 **PASS** |
+| **Consistency / Reproducibility** | σ ±245.9 ms | σ ±290.6 ms · speedup σ ±1.1 pp | Stable reps | 🟢 **PASS** |
+
 ---
 
-## 7. Strategic Governance & Technical Directives
+## 8. Strategic Governance & Technical Directives
 
-- **[External Technical Directive (SD & ComfyUI Expert Advisory)](../docs/EXPERT_RECOMMENDATIONS_ADOPTION.md):** Binding directive approved by human supervision on 2026-09-08. Establishes the freezing of prior optimization stack before Phase F3, reaffirms Phase F2 bypass, restricts NF4 to extreme low-memory mode, and defines the mandatory 7-metric scorecard for Phase F3 evaluation.
+- **[External Technical Directive (SD & ComfyUI Expert Advisory)](../docs/F3_F4_TECHNICAL_OPINION_01.md):** Binding directive approved by human supervision on 2026-09-08. Establishes the freezing of prior optimization stack before Phase F3, reaffirms Phase F2 bypass, restricts NF4 to extreme low-memory mode, and defines the mandatory 7-metric scorecard for Phase F3 evaluation.
 
 ---
 
-## 8. Test Documentation Architecture
+## 9. Test Documentation Architecture
 
 Each test run contains an individual technical report in this directory:
 - `TEST_<ID>_<strategy>.md`: Document covering the technical hypothesis, reproducible command line, multi-layer memory telemetry, bottleneck analysis, and gate verdict.

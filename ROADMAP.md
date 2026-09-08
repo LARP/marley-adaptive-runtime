@@ -1,7 +1,7 @@
 # Marley Runtime (`marley-runtime`) — Roadmap v5
 
 **Release Date:** 2026-09-08  
-**Status:** Active — Phases F1.5 & F1.7 COMPLETE · Phase F3 NEXT  
+**Status:** Active — Phases F1.5, F1.7 & **F3 COMPLETE (CERTIFIED PASS)** · Phase F3+INT8 NEXT  
 **Target Repository:** [`LARP/marley-runtime`](https://github.com/LARP/marley-runtime)  
 **Primary Objective:** Investigate and deploy adaptive memory management policies for Wan2.1-T2V-1.3B constrained to ~4.8 GB effective physical VRAM (NVIDIA GeForce RTX 3050 6GB Laptop, Windows WDDM), prioritizing 480p resolution (with 720p as secondary/stretch milestone).
 
@@ -17,7 +17,9 @@
 
 > **Phase F1.7 completed 2026-09-08.** Selective quantization of T5-XXL text encoder achieved **-50.0% (-7,379.2 MB)** weight reduction with **0.999607** cosine similarity (zero NaNs). DiT linear projection quantization reduces per-block PCIe streaming payload from 88.6 MB to 45.9 MB (-48.2%). Gate PASS (>> 20% target). Report: [`results/TEST_F1.7_selective_quantization.md`](results/TEST_F1.7_selective_quantization.md).
 
-> **Expert Technical Directive (2026-09-08):** Following F1.5 and F1.7, technical guidance from an external IA Generative / SD / ComfyUI runtime expert was formally adopted. Key directives: (1) Freeze prior optimizations to preserve causal attribution; (2) Reject adding new memory tricks before F3; (3) Mandate 7 quantitative metrics for F3 benchmark; (4) Retain INT8 as production baseline while restricting NF4 to extreme low-memory mode; (5) Architect F4 around *Performance* vs *Memory Safe* operational profiles; (6) Retain 480p/33f as primary scalability milestone. Full directive: [`docs/EXPERT_RECOMMENDATIONS_ADOPTION.md`](docs/EXPERT_RECOMMENDATIONS_ADOPTION.md).
+> **Phase F3 CERTIFIED PASS 2026-09-08 (measurement-corrected).** After a post-certification audit corrected the overlap/stall instrumentation (Enmiendas 1–3), a repeated A/B verification battery (5 reps, order alternated, warmup discarded) on real Wan2.1 DiT blocks confirmed a **stable external wall-clock speedup of mean +7.2%** (range +6.0% to +8.4%, σ ±1.1%), **overlap 100% measured** (0.00 ms stall, per-block timelines), **2,584 MB peak NVML** and **0 NaNs/Infs**. All F3-B gates PASS → **advance to F3 + INT8**. Certified report: [`results/TEST_F3_verification.md`](results/TEST_F3_verification.md) · Telemetry: [`logs/f3_verification_benchmark.json`](logs/f3_verification_benchmark.json) · Methodology: [`docs/F3_MEASUREMENT_VERIFICATION_03.md`](docs/F3_MEASUREMENT_VERIFICATION_03.md). The initial single-run +10.4% was an optimistic sample (first run: [`results/TEST_F3_async_scheduler.md`](results/TEST_F3_async_scheduler.md)).
+
+> **Expert Technical Directive (2026-09-08):** Following F1.5 and F1.7, technical guidance from an external IA Generative / SD / ComfyUI runtime expert was formally adopted. Key directives: (1) Freeze prior optimizations to preserve causal attribution; (2) Reject adding new memory tricks before F3; (3) Mandate 7 quantitative metrics for F3 benchmark; (4) Retain INT8 as production baseline while restricting NF4 to extreme low-memory mode; (5) Architect F4 around *Performance* vs *Memory Safe* operational profiles; (6) Retain 480p/33f as primary scalability milestone. Full directive: [`docs/F3_F4_TECHNICAL_OPINION_01.md`](docs/F3_F4_TECHNICAL_OPINION_01.md).
 
 > **Provenance Note:** This roadmap represents the unified **v5 architectural consensus**, synthesized and hardened via a multi-agent review ensemble (ChatGPT, DeepSeek Pro, and Gemini Pro) and calibrated with external generative runtime advisory.
 
@@ -58,7 +60,7 @@ flowchart TD
     F1 --> F15["F1.5: Bottleneck Classification 🟢"]
     F15 --> F17["F1.7: Selective Quantization 🟢"]
     F15 -.->|"Frag < 1% (Bypassed)"| F2["F2: Static Slab Allocator ❌"]
-    F06 -.->|"Overlap 80-96% + Prefetch Safe"| F3["F3: Budgeted Async Scheduler 🟡"]
+    F06 -.->|"Overlap 80-96% + Prefetch Safe"| F3["F3: Budgeted Async Scheduler 🟢"]
     F17 --> F4["F4: Adaptive Memory Decision Engine (CORE)"]
     F3 --> F4
     F4 -.->|"Resolved in F0.5"| F5["F5: Temporal VAE Stitcher ⚪"]
@@ -68,8 +70,7 @@ flowchart TD
     classDef pass fill:#1b4332,stroke:#40916c,stroke-width:2px,color:#d8f3dc;
     classDef inprog fill:#5c4d00,stroke:#d4af37,stroke-width:2px,color:#fff3b0;
     classDef bypass fill:#4a1525,stroke:#9b2226,stroke-width:1px,color:#f8d7da;
-    class F0,F05,F06,F1,F15,F17 pass;
-    class F3 inprog;
+    class F0,F05,F06,F1,F15,F17,F3 pass;
     class F2 bypass;
 ```
 
@@ -211,7 +212,7 @@ flowchart TD
 
 ---
 
-### Phase F3 — Budgeted Asynchronous Scheduler · 🟢 GREENLIT / IN PROGRESS
+### Phase F3 — Budgeted Asynchronous Scheduler · 🟢 CERTIFIED PASS
 - **Trigger:** Activated if Phase F0.6 demonstrates **≥ 10% overlap** under WDDM and Phase F1.5 confirms double-buffering prefetching does not inflate peak residency past 4.8 GB.
 - **F1.5 & F1.7 Empirical Findings:** Overlap is **79.9–96.3%** and prefetch payload is **88.6 MB (FP16)** or **45.9 MB (8-bit proj)** vs. **+1,576.3 MB headroom** (leaves +1,487.7 MB safety margin).
 - **Goal:** Overlap PCIe weight streaming of block $i+1$ with DiT compute of block $i$ using dedicated non-default CUDA streams and pinned host memory.
@@ -219,14 +220,19 @@ flowchart TD
   - Configuration of reference is **frozen** (no ad-hoc memory levers added during F3).
   - Evaluated on **480p / 17 frames** baseline first before scaling temporal dimension.
 - **Mandatory Metric Scorecard:**
-  1. Total DiT denoising wall-clock time.
-  2. Cumulative PCIe H2D transfer time.
-  3. Effective overlapped compute/transfer duration.
+  1. Total DiT denoising wall-clock time (**external wall-clock = official metric**).
+  2. Cumulative PCIe H2D transfer time (measured via CUDA events).
+  3. Effective overlapped compute/transfer duration (**empirical**, per-block timeline).
   4. Physical peak VRAM sampled at 50ms via NVML (strictly $\le 4,800\text{ MB}$).
-  5. Stall latency from delayed prefetch.
+  5. Stall latency from delayed prefetch (**measured GPU stall**, not a constant).
   6. Count of forced stream synchronizations.
   7. Effective throughput (seconds/frame).
-- **Kill Gate:** If compute/transfer overlap drops below **5%** or triggers driver-level paging/OOM, revert immediately to synchronous execution.
+- **Measurement-integrity (Changes 8–10, [`docs/F3_CALIBRATION_CHANGES_02.md`](docs/F3_CALIBRATION_CHANGES_02.md)):**
+  - **Enmienda 1:** real overlap/stall measured per step & block via CUDA events → `per_block_*` timeline; overlap = `(1 − real_stall / measured_async_copy) × 100`.
+  - **Enmienda 2:** F3-B runs `--f3b-reps` repetitions with **alternating A/B order** + discarded warmup; mean/min/max/std reported.
+  - **Enmienda 3:** official speedup uses **external wall-clock**; internal time retained as diagnostic. F3-B kill gate now includes overlap (min over reps).
+- **Certified result:** mean **+7.2%** external wall-clock (range +6.0% / +8.4%, σ ±1.1%) over 5 A/B reps; overlap **100% measured** (0 ms stall); **2,584 MB NVML**; 0 NaNs/Inf. Report: [`results/TEST_F3_verification.md`](results/TEST_F3_verification.md) · Methodology: [`docs/F3_MEASUREMENT_VERIFICATION_03.md`](docs/F3_MEASUREMENT_VERIFICATION_03.md).
+- **Kill Gate:** compute/transfer overlap $< 5\%$ (min over reps) or driver-level paging/OOM → revert to synchronous execution. **None triggered.** → **F3 PASS, advance to F3 + INT8.**
 
 ---
 
@@ -280,7 +286,7 @@ flowchart TD
 | **F1.5** | Bottleneck Analysis | Unconditional | Unclassifiable allocations | Global black-box residency bounds | 🟢 **COMPLETE**<br>[`TEST_F1.5_bottleneck_classification.md`](results/TEST_F1.5_bottleneck_classification.md) |
 | **F1.7** | Selective Quantization | Evaluated in F0.5/F1.5 | Net physical VRAM drop $< 20\%$ or severe artifacts | Retain original numerical precision | 🟢 **PASS (T5 -50%, DiT -48.2%)**<br>Cosine: 0.9996: [`TEST_F1.7_selective_quantization.md`](results/TEST_F1.7_selective_quantization.md) |
 | **F2** | Slab Allocator | Allocator fragmentation $> 15\%$ | No measurable peak physical VRAM drop | Retain standard PyTorch caching allocator | ❌ **BYPASSED / DISCARDED**<br>(Frag = 44.9 MB < 1.0%) |
-| **F3** | Async Scheduler | F0.6 overlap $\ge 10\%$ & prefetch safe | Overlap $< 5\%$ or causes OOM under load | Synchronous layer transfer | 🟢 **GREENLIT / IN PROGRESS**<br>(Overlap 80-96% + 88MB buffer safe) |
+| **F3** | Async Scheduler | F0.6 overlap $\ge 10\%$ & prefetch safe | Overlap (real) $< 5\%$, speedup $< 0\%$, or OOM under load | Synchronous layer transfer | 🟢 **CERTIFIED PASS**<br>mean **+7.2%** external wall-clock (5 A/B reps) · overlap 100% measured · 2,584 MB · [`Verification`](results/TEST_F3_verification.md) |
 | **F4** | Adaptive Decision Engine | Unconditional (Core) | Fails to beat best static policy by $\ge 5\%$ | Deterministic static block policy | ⚪ **Core Stage** (Awaiting F3/F1.7) |
 | **F5** | Temporal VAE Stitcher | VAE is confirmed bottleneck | Saves $< 20\%$ VRAM or introduces seam artifacts | Tiled spatial decoding fallback | ⚪ **Addressed in F0.5 Test J**<br>(Micro-tiling resolved VAE spike) |
 | **F6** | Verification Benchmarks | Completion of prior phases | Wall-clock time $> 30\text{ min}$ without explanation | Document operational boundaries | ⚪ **Final Validation Stage** |

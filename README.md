@@ -30,7 +30,7 @@
 Rather than relying purely on blunt sequential CPU offloading, `marley-runtime` investigates and measures **adaptive, block-level memory management policies** that dynamically balance PCIe transfer latency, activation recomputation, tensor lifetime management, and selective quantization.
 
 > [!NOTE]
-> The current architectural design and phased milestone strategy is governed by **[Roadmap v5](ROADMAP.md)**, reviewed and approved through a multi-agent consensus using **free-tier models** (ChatGPT, DeepSeek Pro, and Gemini Pro). Active execution is performed by **Antigravity Pro** (Gemini 2.5 Flash and Claude Sonnet 4.6), with formal strategic adoption of technical guidance from an external **Generative AI & ComfyUI Runtime Expert** ([Technical Directive](docs/EXPERT_RECOMMENDATIONS_ADOPTION.md)).
+> The current architectural design and phased milestone strategy is governed by **[Roadmap v5](ROADMAP.md)**, reviewed and approved through a multi-agent consensus using **free-tier models** (ChatGPT, DeepSeek Pro, and Gemini Pro). Active execution is performed by **Antigravity Pro** (Gemini 2.5 Flash and Claude Sonnet 4.6), with formal strategic adoption of technical guidance from an external **Generative AI & ComfyUI Runtime Expert** ([Technical Directive](docs/F3_F4_TECHNICAL_OPINION_01.md)).
 
 ---
 
@@ -67,7 +67,7 @@ Memory is tracked across **three distinct layers** to prevent WDDM virtualizatio
 | **F1.5** | Bottleneck Analysis | 🟢 **PASS** | **5 Categories Decomposed** · Allocator frag 44.9 MB (<1%) → **F2 Bypassed**; Prefetch safe (88.6 MB vs 1.57 GB) → **F3 Greenlit** · [`TEST_F1.5_bottleneck_classification.md`](results/TEST_F1.5_bottleneck_classification.md) |
 | **F1.7** | Selective Quantization | 🟢 **PASS** | **T5 -50.0% (7.38 GB RAM saved)** · DiT Proj -48.2% (-76.9 GB PCIe payload) · Cosine 0.9996 · [`TEST_F1.7_selective_quantization.md`](results/TEST_F1.7_selective_quantization.md) |
 | **F2** | Static Slab Allocator | ❌ **BYPASSED** | Allocator fragmentation is < 1.0% (44.9 MB vs 720 MB threshold); custom allocator discarded |
-| **F3** | Async Stream Scheduler | 🟢 **GREENLIT** | Overlap 80–96% & 88.6 MB prefetch safe under 4.8 GB gate; next development focus |
+| **F3** | Async Stream Scheduler | 🟢 **PASS** | Real Wan2.1 DiT, measurement-corrected: **mean +7.2% wall-clock** (stable 6.0–8.4% over 5 A/B reps), overlap 100% measured, 2,584 MB VRAM. Certified → F3+INT8. · [`Verification`](results/TEST_F3_verification.md) · [`TEST_F3`](results/TEST_F3_async_scheduler.md) · [`Methodology`](docs/F3_MEASUREMENT_VERIFICATION_03.md) |
 | **F4** | Adaptive Decision Engine | ⚪ CORE | Dynamic AOT decision engine utilizing F1 telemetry & F3 async streaming |
 | **F5** | Temporal VAE Stitcher | ⚪ STANDBY | VAE memory spike already resolved in Phase F0.5 Test J (micro-tiling) |
 | **F6** | Validation Benchmarks | ⚪ Final | Multi-dimensional benchmarks at 480p/33f and 720p stretch |
@@ -201,6 +201,31 @@ Phase F1.7 evaluated selective 8-bit / 4-bit precision scaling targeted at the d
 
 > **Key Takeaway:** 8-bit text encoding saves **7.38 GB of host memory** with perfect semantic fidelity ($> 0.99$), eliminating paging on 16–24 GB laptops. 8-bit DiT projections save **-76.9 GB of cumulative PCIe transfers** across 30 denoising steps.  
 > **Kill Gate F1.7 Status:** 🟢 **PASS**. Full report: [`results/TEST_F1.7_selective_quantization.md`](results/TEST_F1.7_selective_quantization.md) · Benchmark script: [`f1_7_selective_quantizer.py`](f1_7_selective_quantizer.py).
+
+---
+
+## ⚡ Phase F3 — Budgeted Asynchronous Scheduler (🟢 CERTIFIED PASS)
+
+Phase F3 replaces synchronous per-block weight swapping with an **asynchronous double-buffered scheduler** (`marley.ops.async_stream.BudgetedAsyncStreamer`) on dual CUDA streams (`copy_stream`, `compute_stream`) with a bidirectional event-ownership protocol.
+
+### Certified result (2026-09-08, measurement-corrected)
+
+Following a post-certification audit, the overlap/stall instrumentation and benchmark were corrected (Enmiendas 1–3, [`docs/F3_MEASUREMENT_VERIFICATION_03.md`](docs/F3_MEASUREMENT_VERIFICATION_03.md)) and a repeated A/B verification battery was executed on the real Wan2.1-T2V-1.3B DiT (30 blocks · FP16 · 480p/17f). Full report: [`results/TEST_F3_verification.md`](results/TEST_F3_verification.md) · Telemetry: [`logs/f3_verification_benchmark.json`](logs/f3_verification_benchmark.json).
+
+| Metric | Marley Sync | Marley Async |
+| :--- | ---: | ---: |
+| External wall-clock (mean, 5 reps) | 18,127.4 ms | **16,824.1 ms** |
+| **Speedup (mean / min / max / σ)** | — | **+7.2%** / +6.0% / +8.4% / ±1.1% |
+| Effective overlap (measured) | 0.0% | **100.0%** (stall 0.00 ms, per-block timeline) |
+| Peak VRAM (NVML) | — | 2,584 MB |
+| NaN / Inf | 0 | 0 |
+| Forced stream syncs | 150 | 5 |
+
+- **Order alternated A/B ↔ B/A with discarded warmup** → the +7.2% is stable and reproducible (no regression in any of the 5 reps).
+- The initial single-run **+10.4%** was an optimistic sample; the corrected reproducible figure is **+7.2%**. The earlier "100% overlap" was an instrumentation artifact, now re-confirmed **empirically** (copies ~43 ms ≪ compute ~550 ms per block → zero GPU stall).
+- **Verdict:** 🟢 **F3 PASS — Certified. Advance to F3 + INT8.**
+
+First-run (preliminary) reference: [`results/TEST_F3_async_scheduler.md`](results/TEST_F3_async_scheduler.md).
 
 ---
 
