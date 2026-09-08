@@ -18,6 +18,10 @@ This file is the **index** of all test reports in `results/`. Each row below lis
 | 5 | [`TEST_F1_lifetime_profiler.md`](./TEST_F1_lifetime_profiler.md) | F1 | Tensor Lifetime Profiler (per-DiT-block residency, real model) | Peak NVML 3,223.7 MB; 32 components traced | 🟢 **PASS** (−1,576 MB) |
 
 > **Notes:**
+> - **F0 (Ref)** is the pre-report baseline and has **no report file** in `results/` — the report
+>   system (`TEST_*.md`) began at Phase F0.5. Its evidence is the telemetry JSON
+>   [`logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json`](../logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json),
+>   and it appears as the reference row of the F0.5 matrix in §2.
 > - `Test I` and `Test K` produced **no report file** (skipped / not required) — see §2 matrix.
 > - The order above is chronological by test **date**, which is the project's natural reading order
 >   (`F0.5 → F0.6 → F1`). Detailed scorecards for each phase follow in §2.
