@@ -5,9 +5,9 @@
 **Target Repository:** [`LARP/marley-runtime`](https://github.com/LARP/marley-runtime)  
 **Primary Objective:** Investigate and deploy adaptive memory management policies for Wan2.1-T2V-1.3B constrained to ~4.8 GB effective physical VRAM (NVIDIA GeForce RTX 3050 6GB Laptop, Windows WDDM), prioritizing 480p resolution (with 720p as secondary/stretch milestone).
 
-> **Phase F0 completed 2026-09-08T06:04:40Z.** First real Wan2.1-T2V-1.3B video generated at 480p/16f/FP16. Peak NVML: 5451 MB (gate exceeded by 651 MB in VAE decode). VAE confirmed as primary bottleneck — Phase F5 trigger pre-activated.
+> **Phase F0 completed 2026-09-08T06:04:40Z.** First real Wan2.1-T2V-1.3B video generated at 480p/16f/FP16. Peak NVML: 5,451 MB (gate exceeded by 651 MB in VAE decode). VAE confirmed as primary bottleneck — Phase F5 trigger pre-activated. Report: [`results/TEST_F0_baseline_ref.md`](results/TEST_F0_baseline_ref.md).
 
-> **Phase F0.5 completed 2026-09-08.** VAE BF16 + spatial-temporal tiling (Test J) cut peak NVML to **2,902 MB** and VAE decode 322s → 58s. Gate PASS with +1,898 MB headroom.
+> **Phase F0.5 completed 2026-09-08.** VAE BF16 + spatial-temporal tiling (Test J) cut peak NVML to **2,902 MB** and VAE decode 322s → 58s. Gate PASS with +1,898 MB headroom. Reports: [`results/TEST_J_vae_tiling_bf16.md`](results/TEST_J_vae_tiling_bf16.md), [`results/TEST_REGISTRY.md`](results/TEST_REGISTRY.md).
 
 > **Phase F0.6 completed 2026-09-08.** Measured WDDM PCIe/compute overlap of **79.9–96.3%** (≥10% gate) → Phase F3 stays active. Report: [`results/TEST_F0.6_wddm_overlap.md`](results/TEST_F0.6_wddm_overlap.md).
 
@@ -46,10 +46,10 @@ Under Windows Display Driver Model (WDDM), driver-level allocations, paging, and
 
 ```mermaid
 flowchart TD
-    F0["F0: Reproducible Baseline (480p, 16f, FP16)"] --> F05["F0.5: Progressive Exploration (FP16 -> INT8/INT4)"]
-    F05 --> F06["F0.6: WDDM Concurrency Benchmark"]
-    F06 --> F1["F1: Tensor Lifetime Profiler"]
-    F1 --> F15["F1.5: Bottleneck Classification"]
+    F0["F0: Reproducible Baseline 🟢"] --> F05["F0.5: VAE Memory Optimization 🟢"]
+    F05 --> F06["F0.6: WDDM Concurrency Benchmark 🟢"]
+    F06 --> F1["F1: Tensor Lifetime Profiler 🟢"]
+    F1 --> F15["F1.5: Bottleneck Classification 🟡"]
     F15 --> F17["F1.7: Selective Quantization (>=20% Drop)"]
     F15 -.->|"If Frag > 15%"| F2["F2: Static Slab Allocator"]
     F06 -.->|"If Overlap >= 10%"| F3["F3: Budgeted Async Scheduler"]
@@ -59,42 +59,50 @@ flowchart TD
     F4 -.->|"If VAE Bottleneck"| F5["F5: Temporal VAE Stitcher"]
     F4 --> F6["F6: Multidimensional Benchmarks"]
     F5 --> F6
+
+    classDef pass fill:#1b4332,stroke:#40916c,stroke-width:2px,color:#d8f3dc;
+    classDef inprog fill:#5c4d00,stroke:#d4af37,stroke-width:2px,color:#fff3b0;
+    class F0,F05,F06,F1 pass;
+    class F15 inprog;
 ```
 
 ---
 
-### Phase F0 — Reproducible Baseline · 🟢 COMPLETE
+### Phase F0 — Reproducible Baseline · 🟢 FUNCTIONAL PASS / ❌ GATE VIOLATION (+651 MB)
 
-**Completed:** 2026-09-08T06:04:40Z · Script: [`f0_baseline_real.py`](f0_baseline_real.py)
+**Completed:** 2026-09-08T06:04:40Z · Script: [`f0_baseline_real.py`](f0_baseline_real.py) · Report: [`results/TEST_F0_baseline_ref.md`](results/TEST_F0_baseline_ref.md) · Telemetry: [`logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json`](logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json)
 
 - **Goal:** Execute Wan2.1-T2V-1.3B in FP16 precision at 480p with 16 frames utilizing standard Diffusers pipeline offload.
-- **Kill Gate:** PASS — 480p execution achieved with `enable_sequential_cpu_offload()`.
+- **Execution Verdict:** Functional execution achieved without unhandled exceptions.
+- **Gate Verdict:** **VIOLATED (+650.7 MB)** — Peak NVML physical usage reached **5,450.7 MB**, exceeding the 4,800 MB safety envelope.
 
 #### Measured Results
 
-| Checkpoint | NVML Physical | PyTorch Alloc | Gate 4.8 GB |
-| :--- | :---: | :---: | :---: |
-| Idle / pre-load | 1261 MB | 0 MB | ✅ |
-| Post-VAE load | 1287 MB | 0 MB | ✅ |
-| Post-pipeline + offload | 1264 MB | 1 MB | ✅ |
-| **Peak (VAE decode)** | **5451 MB** | 15.9 MB | ❌ +651 MB |
+| Checkpoint / Metric | NVML Physical | PyTorch Allocated | Gate 4.8 GB | Status |
+| :--- | :---: | :---: | :---: | :---: |
+| Idle / pre-load | 1,261 MB | 0 MB | ≤ 4,800 MB | ✅ |
+| Post-VAE load | 1,287 MB | 0 MB | ≤ 4,800 MB | ✅ |
+| Post-pipeline + offload | 1,264 MB | 1 MB | ≤ 4,800 MB | ✅ |
+| **Peak (VAE decode)** | **5,450.7 MB** | **8,123.0 MB** | ≤ 4,800 MB | ❌ **+650.7 MB (FAIL)** |
 
-| Metric | Value |
-| :--- | :--- |
-| Resolution | 832×480 |
-| Frames | 16 (`num_frames=17` recommended for future runs: `(17-1)%4=0`) |
-| Denoising (30 steps) | 297s · 9.93 s/step |
-| VAE decode | 322s (**primary bottleneck**) |
-| Total wall-clock | 619.8s (~10.3 min) |
-| OOM crash | None (WDDM paged the excess) |
+| Execution Metric | Value | Reference Notes |
+| :--- | :--- | :--- |
+| Resolution | 832×480 | 480p Standard |
+| Frames | 16 | Subsequent tests standardise on 17 frames `(17-1)%4=0` |
+| Denoising (30 steps) | 297s · 9.93 s/step | Fits within physical VRAM |
+| VAE decode | 322s (**primary bottleneck**) | 52% of total runtime |
+| Total wall-clock | 619.78s (~10.3 min) | Exceeds 10m target by 19.8s |
+| OOM crash | None (WDDM paged the excess) | ~3 GB virtual spillover to shared memory |
 
-> **Key finding:** The DiT denoising phase fits within the 4.8 GB gate comfortably. The entire VRAM excess (+4,187 MB) occurred during VAE decode. This confirms the **Phase F5 (Temporal VAE Stitcher) trigger** criterion is met empirically.
+> **Key finding:** The DiT denoising phase fits within the 4.8 GB gate comfortably. The entire VRAM excess (+4,187 MB) occurred during un-tiled FP32 VAE decode. This established the empirical necessity for Phase F0.5.
 
 ---
 
-### Phase F0.5 — Progressive Configuration Exploration & VAE Memory Optimization
+### Phase F0.5 — Progressive Configuration Exploration & VAE Memory Optimization · 🟢 PASS
+
 - **Goal:** Lower peak physical VRAM residency (NVML) below the strict 4.8 GB gate while minimizing end-to-end latency.
 - **Kill Gate:** **PASS** — Achieved **2,902.0 MB** peak NVML physical residency (**1,898 MB below the 4.8 GB gate**).
+- **Reports:** Master Registry [`results/TEST_REGISTRY.md`](results/TEST_REGISTRY.md) · Winning Config (Test J) [`results/TEST_J_vae_tiling_bf16.md`](results/TEST_J_vae_tiling_bf16.md) · Exploration reports: [`results/TEST_G_model_cpu_offload.md`](results/TEST_G_model_cpu_offload.md), [`results/TEST_H_bfloat16_vae.md`](results/TEST_H_bfloat16_vae.md).
 
 #### Measured Results (Test J: BF16 + Spatial-Temporal Tiling)
 
@@ -221,19 +229,19 @@ flowchart TD
 
 ## 4. Kill Gates Summary Table
 
-| Phase | Phase Name | Activation Condition | Kill Gate / Cancellation Trigger | Fallback Path |
-| :--- | :--- | :--- | :--- | :--- |
-| **F0** | Baseline Pipeline | Unconditional | Cannot run 480p/16f with baseline offload | Re-scope model architecture / target |
-| **F0.5** | Progressive Configs | Unconditional | Quantization fails to reduce peak VRAM $\ge 20\%$ | Discard quantization track |
-| **F0.6** | WDDM Concurrency | Unconditional | PCIe/Compute overlap $< 10\%$ under WDDM | Discard Phase F3 (Async Scheduler) |
-| **F1** | Lifetime Profiler | Unconditional | Dynamic tracing too intrusive / infeasible | Static analytical memory estimation |
-| **F1.5** | Bottleneck Analysis | Unconditional | Unclassifiable allocations | Global black-box residency bounds |
-| **F1.7** | Selective Quantization | Evaluated in F0.5/F1.5 | Net physical VRAM drop $< 20\%$ or severe artifacts | Retain original numerical precision |
-| **F2** | Slab Allocator | Allocator fragmentation $> 15\%$ | No measurable peak physical VRAM drop | Retain standard PyTorch caching allocator |
-| **F3** | Async Scheduler | F0.6 overlap $\ge 10\%$ & prefetch safe | Overlap $< 5\%$ or causes OOM under load | Synchronous layer transfer |
-| **F4** | Adaptive Decision Engine | Unconditional (Core) | Fails to beat best static policy by $\ge 5\%$ | Deterministic static block policy |
-| **F5** | Temporal VAE Stitcher | VAE is confirmed bottleneck | Saves $< 20\%$ VRAM or introduces seam artifacts | Tiled spatial decoding fallback |
-| **F6** | Verification Benchmarks | Completion of prior phases | Wall-clock time $> 30\text{ min}$ without explanation | Document operational boundaries |
+| Phase | Phase Name | Activation Condition | Kill Gate / Cancellation Trigger | Fallback Path | Status / Evidence |
+| :---: | :--- | :--- | :--- | :--- | :---: |
+| **F0** | Baseline Pipeline | Unconditional | Cannot run 480p/16f with baseline offload | Re-scope model architecture / target | 🟢 **PASS (Func.) / ❌ +651 MB**<br>[`TEST_F0_baseline_ref.md`](results/TEST_F0_baseline_ref.md) |
+| **F0.5** | Progressive Configs (VAE Opt) | Unconditional | Quantization/Configs fail to fit ≤ 4,800 MB gate | Discard configuration track | 🟢 **PASS (-1,898 MB headroom)**<br>Test J (2,902 MB): [`TEST_J_vae_tiling_bf16.md`](results/TEST_J_vae_tiling_bf16.md) |
+| **F0.6** | WDDM Concurrency | Unconditional | PCIe/Compute overlap $< 10\%$ under WDDM | Discard Phase F3 (Async Scheduler) | 🟢 **PASS (79.9–96.3% overlap)**<br>[`TEST_F0.6_wddm_overlap.md`](results/TEST_F0.6_wddm_overlap.md) → F3 stays ACTIVE |
+| **F1** | Lifetime Profiler | Unconditional | Dynamic tracing too intrusive / infeasible | Static analytical memory estimation | 🟢 **PASS (3,223.7 MB peak)**<br>32 components traced: [`TEST_F1_lifetime_profiler.md`](results/TEST_F1_lifetime_profiler.md) |
+| **F1.5** | Bottleneck Analysis | Unconditional | Unclassifiable allocations | Global black-box residency bounds | 🟡 **IN PROGRESS / NEXT**<br>Telemetry ready for decomposition |
+| **F1.7** | Selective Quantization | Evaluated in F0.5/F1.5 | Net physical VRAM drop $< 20\%$ or severe artifacts | Retain original numerical precision | ⚪ **Pending F1.5 dispatch** |
+| **F2** | Slab Allocator | Allocator fragmentation $> 15\%$ | No measurable peak physical VRAM drop | Retain standard PyTorch caching allocator | ⚪ **Low Prior** (DiT residency uniform 1.65–1.74 GB) |
+| **F3** | Async Scheduler | F0.6 overlap $\ge 10\%$ & prefetch safe | Overlap $< 5\%$ or causes OOM under load | Synchronous layer transfer | ⚪ **Pre-Activated by F0.6 PASS** |
+| **F4** | Adaptive Decision Engine | Unconditional (Core) | Fails to beat best static policy by $\ge 5\%$ | Deterministic static block policy | ⚪ **Core Stage** (Awaiting F1.5/F3) |
+| **F5** | Temporal VAE Stitcher | VAE is confirmed bottleneck | Saves $< 20\%$ VRAM or introduces seam artifacts | Tiled spatial decoding fallback | ⚪ **Addressed in F0.5 Test J**<br>(Micro-tiling resolved VAE spike) |
+| **F6** | Verification Benchmarks | Completion of prior phases | Wall-clock time $> 30\text{ min}$ without explanation | Document operational boundaries | ⚪ **Final Validation Stage** |
 
 ---
 
