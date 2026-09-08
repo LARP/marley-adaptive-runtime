@@ -2,6 +2,8 @@
 
 <div align="center">
 
+<img src="docs/logo.png" alt="Marley Runtime logo" width="160"/>
+
 **Adaptive Memory Management Runtime for Video Diffusion Models on Ultra-Low VRAM GPUs**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
