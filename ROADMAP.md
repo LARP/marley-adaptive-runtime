@@ -1,7 +1,7 @@
 # Marley Runtime (`marley-runtime`) — Roadmap v5
 
 **Release Date:** 2026-09-08  
-**Status:** Active — Phases F1.5, F1.7 & **F3 COMPLETE (CERTIFIED PASS)** · Phase F3+INT8 NEXT  
+**Status:** Active — Phases F1.5, F1.7, **F3 (CERTIFIED PASS)** & **F3+INT8 (PASS)** · Phase F4 NEXT  
 **Target Repository:** [`LARP/marley-runtime`](https://github.com/LARP/marley-runtime)  
 **Primary Objective:** Investigate and deploy adaptive memory management policies for Wan2.1-T2V-1.3B constrained to ~4.8 GB effective physical VRAM (NVIDIA GeForce RTX 3050 6GB Laptop, Windows WDDM), prioritizing 480p resolution (with 720p as secondary/stretch milestone).
 
@@ -233,6 +233,43 @@ flowchart TD
   - **Enmienda 3:** official speedup uses **external wall-clock**; internal time retained as diagnostic. F3-B kill gate now includes overlap (min over reps).
 - **Certified result:** mean **+7.2%** external wall-clock (range +6.0% / +8.4%, σ ±1.1%) over 5 A/B reps; overlap **100% measured** (0 ms stall); **2,584 MB NVML**; 0 NaNs/Inf. Report: [`results/TEST_F3_verification.md`](results/TEST_F3_verification.md) · Methodology: [`docs/F3_MEASUREMENT_VERIFICATION_03.md`](docs/F3_MEASUREMENT_VERIFICATION_03.md).
 - **Kill Gate:** compute/transfer overlap $< 5\%$ (min over reps) or driver-level paging/OOM → revert to synchronous execution. **None triggered.** → **F3 PASS, advance to F3 + INT8.**
+- **Formal closure (consultor técnico externo, 2026-09-08):** F3 congelado como **baseline certificado** — Sync 18,127 ms / Async 16,824 ms / **+7,2%** / overlap 100% medido / **2,584 MB** / **0/0 NaN-Inf**. Se autoriza avanzar a **F3 + INT8** (aislado; sin NF4 ni F4 simultáneos). Plan experimental: [`docs/F3_INT8_EXPERIMENT_PLAN_01.md`](docs/F3_INT8_EXPERIMENT_PLAN_01.md).
+
+> **Phase F3 + INT8 PASS 2026-09-08 (isolation experiment).** INT8 linear projections
+> (`INT8BudgetedStreamer`, on-device per-row dequant, FP16 compute, scheduler unchanged)
+> halve the per-block H2D payload (**−49.9%**, 92.9 → 46.5 MB). Measured **Async-vs-Sync
+> speedup +13.2%** (min +10.4 / max +15.4), overlap **98.1%** (residual stall ~324 ms from
+> the on-device dequantize on the critical path), peak NVML **2,076 MB (−508 MB vs FP16)**,
+> dequant fidelity cos ≥ 0.9999, **0 NaNs/Infs**. Report: [`results/TEST_F3_INT8_benchmark.md`](results/TEST_F3_INT8_benchmark.md) · Telemetry: [`logs/f3_int8_benchmark.json`](logs/f3_int8_benchmark.json). F3 FP16 baseline remains frozen and is NOT superseded. → **Advance to F4 Adaptive Decision Engine.**
+
+---
+
+### Phase F3 + INT8 — Transfer-Volume Isolation · 🟢 PASS
+
+**Isolation scope:** single changed variable = per-block H2D byte volume (INT8 linear
+projections vs FP16) on the frozen F3 async scheduler with FP16 compute. NF4/F4 excluded.
+- **Goal:** quantify the effect of the F1.7 −48.2% DiT projection reduction when combined
+  with async prefetch that already hides transfers.
+- **Implementation:** [`marley/ops/async_stream_int8.py`](marley/ops/async_stream_int8.py)
+  (`INT8BudgetedStreamer`) — inherits `BudgetedAsyncStreamer` scheduler/event protocol
+  unchanged; quantizes 2-D linear-projection weights per output row to INT8, moves the INT8
+  payload across PCIe, and dequantizes on-device into the FP16 compute slot before forward.
+  Runner: [`f3_int8_scheduler_benchmark.py`](f3_int8_scheduler_benchmark.py).
+- **Measured result (3 A/B reps, warmup discarded):**
+  | Metric | Value |
+  | :--- | :---: |
+  | H2D payload / block | 46.5 MB (**−49.9%** vs 92.9 MB FP16) |
+  | Async-vs-Sync wall-clock speedup | **+13.2%** (min +10.4 / max +15.4, σ ±2.5) |
+  | Effective overlap | **98.1%** (97.9–98.3) |
+  | Peak VRAM (NVML) | **2,076 MB** (−508 MB vs 2,584 MB FP16) |
+  | INT8 dequant fidelity (float64) | cos mean 0.999959 / min 0.999935 |
+  | NaN / Inf | 0 / 0 |
+- **Kill Gate:** same as F3 (overlap ≥ 5%, speedup > 0%, VRAM ≤ 4,800 MB, no NaN/Inf).
+  All PASS. Report: [`results/TEST_F3_INT8_benchmark.md`](results/TEST_F3_INT8_benchmark.md).
+- **F3 FP16 baseline remains frozen and is NOT superseded.**
+- **Outcome:** H-a/H-b hybrid — wider Async-vs-Sync margin (+7.2% → +13.2%) *and* −508 MB
+  peak VRAM. Residual ~324 ms stall from the on-device dequantize critical path is flagged
+  as the F4 optimization target. → **Advance to F4 Adaptive Decision Engine.**
 
 ---
 
@@ -287,6 +324,7 @@ flowchart TD
 | **F1.7** | Selective Quantization | Evaluated in F0.5/F1.5 | Net physical VRAM drop $< 20\%$ or severe artifacts | Retain original numerical precision | 🟢 **PASS (T5 -50%, DiT -48.2%)**<br>Cosine: 0.9996: [`TEST_F1.7_selective_quantization.md`](results/TEST_F1.7_selective_quantization.md) |
 | **F2** | Slab Allocator | Allocator fragmentation $> 15\%$ | No measurable peak physical VRAM drop | Retain standard PyTorch caching allocator | ❌ **BYPASSED / DISCARDED**<br>(Frag = 44.9 MB < 1.0%) |
 | **F3** | Async Scheduler | F0.6 overlap $\ge 10\%$ & prefetch safe | Overlap (real) $< 5\%$, speedup $< 0\%$, or OOM under load | Synchronous layer transfer | 🟢 **CERTIFIED PASS**<br>mean **+7.2%** external wall-clock (5 A/B reps) · overlap 100% measured · 2,584 MB · [`Verification`](results/TEST_F3_verification.md) |
+| **F3+INT8** | Transfer-Volume Isolation | F3 certified PASS | Same gates as F3; fidelity cos $< 0.99$ | Retain FP16 baseline | 🟢 **PASS**<br>Async-vs-Sync **+13.2%** · overlap 98.1% · **2,076 MB** (−508) · payload −49.9% · [`Report`](results/TEST_F3_INT8_benchmark.md) |
 | **F4** | Adaptive Decision Engine | Unconditional (Core) | Fails to beat best static policy by $\ge 5\%$ | Deterministic static block policy | ⚪ **Core Stage** (Awaiting F3/F1.7) |
 | **F5** | Temporal VAE Stitcher | VAE is confirmed bottleneck | Saves $< 20\%$ VRAM or introduces seam artifacts | Tiled spatial decoding fallback | ⚪ **Addressed in F0.5 Test J**<br>(Micro-tiling resolved VAE spike) |
 | **F6** | Verification Benchmarks | Completion of prior phases | Wall-clock time $> 30\text{ min}$ without explanation | Document operational boundaries | ⚪ **Final Validation Stage** |

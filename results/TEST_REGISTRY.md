@@ -21,6 +21,7 @@ This file is the **index** of all test reports in `results/`. Each row below lis
 | 7 | [`TEST_F1.7_selective_quantization.md`](./TEST_F1.7_selective_quantization.md) | F1.7 | Selective & Adaptive Quantization | T5 8-bit (-50% / -7.38 GB); DiT 8-bit (-48.2%); Cosine Sim 0.9996; Gate $\ge 20\%$ PASS | 🟢 **PASS** |
 | 8 | [`TEST_F3_async_scheduler.md`](./TEST_F3_async_scheduler.md) | F3 | Budgeted Asynchronous Scheduler (Double-buffer) | First run: +10.4% (optimistic sample). **Certified by [`TEST_F3_verification.md`](./TEST_F3_verification.md): mean +7.2%** (6.0–8.4%); overlap 100% measured; VRAM 2,584 MB; 0 NaNs | 🟢 **PASS** (§7) |
 | 9 | [`TEST_F3_verification.md`](./TEST_F3_verification.md) | F3 | Final Measurement Verification (Enmiendas 1–3) | External wall-clock speedup mean **+7.2%** (stable over 5 A/B reps); stall 0 ms; peak 2,584 MB | 🟢 **CERTIFIED PASS** → F3+INT8 |
+| 10 | [`TEST_F3_INT8_benchmark.md`](./TEST_F3_INT8_benchmark.md) | F3+INT8 | Isolation: transfer-volume reduction (INT8 linear proj, FP16 compute, scheduler frozen) | Async-vs-Sync **+13.2%**; payload −49.9%; overlap 98.1%; peak **2,076 MB** (−508 vs FP16); cos ≥ 0.9999; 0 NaNs | 🟢 **PASS** |
 
 > **Notes:**
 > - **F0 (Ref)** is documented in [`TEST_F0_baseline_ref.md`](./TEST_F0_baseline_ref.md) with ground-truth telemetry from [`logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json`](../logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json).
