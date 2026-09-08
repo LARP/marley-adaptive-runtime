@@ -1,9 +1,11 @@
 # Marley Runtime (`marley-runtime`) — Roadmap v5
 
 **Release Date:** 2026-09-08  
-**Status:** Approved for Implementation  
+**Status:** Active — Phase F0 COMPLETE · Phase F0.5 NEXT  
 **Target Repository:** [`LARP/marley-runtime`](https://github.com/LARP/marley-runtime)  
 **Primary Objective:** Investigate and deploy adaptive memory management policies for Wan2.1-T2V-1.3B constrained to ~4.8 GB effective physical VRAM (NVIDIA GeForce RTX 3050 6GB Laptop, Windows WDDM), prioritizing 480p resolution (with 720p as secondary/stretch milestone).
+
+> **Phase F0 completed 2026-09-08T06:04:40Z.** First real Wan2.1-T2V-1.3B video generated at 480p/16f/FP16. Peak NVML: 5451 MB (gate exceeded by 651 MB in VAE decode). VAE confirmed as primary bottleneck — Phase F5 trigger pre-activated.
 
 > **Provenance Note:** This roadmap represents the unified **v5 architectural consensus**, synthesized and hardened via a multi-agent review ensemble (ChatGPT, DeepSeek Pro, and Gemini Pro).
 
@@ -55,10 +57,32 @@ flowchart TD
 
 ---
 
-### Phase F0 — Reproducible Baseline
+### Phase F0 — Reproducible Baseline · 🟢 COMPLETE
+
+**Completed:** 2026-09-08T06:04:40Z · Script: [`f0_baseline_real.py`](f0_baseline_real.py)
+
 - **Goal:** Execute Wan2.1-T2V-1.3B in FP16 precision at 480p with 16 frames utilizing standard Diffusers pipeline offload.
-- **Deliverable:** Reproducible execution script, baseline telemetry logs, and initial OOM boundary documentation.
-- **Kill Gate:** If 480p execution cannot be achieved even with standard sequential offloading, re-evaluate target scope and model architecture.
+- **Kill Gate:** PASS — 480p execution achieved with `enable_sequential_cpu_offload()`.
+
+#### Measured Results
+
+| Checkpoint | NVML Physical | PyTorch Alloc | Gate 4.8 GB |
+| :--- | :---: | :---: | :---: |
+| Idle / pre-load | 1261 MB | 0 MB | ✅ |
+| Post-VAE load | 1287 MB | 0 MB | ✅ |
+| Post-pipeline + offload | 1264 MB | 1 MB | ✅ |
+| **Peak (VAE decode)** | **5451 MB** | 15.9 MB | ❌ +651 MB |
+
+| Metric | Value |
+| :--- | :--- |
+| Resolution | 832×480 |
+| Frames | 16 (`num_frames=17` recommended for future runs: `(17-1)%4=0`) |
+| Denoising (30 steps) | 297s · 9.93 s/step |
+| VAE decode | 322s (**primary bottleneck**) |
+| Total wall-clock | 619.8s (~10.3 min) |
+| OOM crash | None (WDDM paged the excess) |
+
+> **Key finding:** The DiT denoising phase fits within the 4.8 GB gate comfortably. The entire VRAM excess (+4,187 MB) occurred during VAE decode. This confirms the **Phase F5 (Temporal VAE Stitcher) trigger** criterion is met empirically.
 
 ---
 
