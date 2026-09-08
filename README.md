@@ -57,17 +57,17 @@ Memory is tracked across **three distinct layers** to prevent WDDM virtualizatio
 | Phase | Name | Status | Key Result |
 | :---: | :--- | :---: | :--- |
 | **F0.1** | Hardware Verification | 🟢 **PASS** | Driver 581.86 · CUDA 13.0 · RTX 3050 6GB confirmed |
-| **F0** | Reproducible Baseline | 🟢 **PASS** | Wan2.1-T2V-1.3B run at 480p/16f/FP16 — video generated |
-| **F0.5** | Progressive Exploration | 🟢 **PASS** | **Peak NVML 2,902 MB (+1,898 MB headroom)** · VAE BF16 + Tiling |
-| **F0.6** | WDDM Concurrency | 🟢 **PASS** | **Overlap 79.9–96.3%** · PCIe async copy hides compute → F3 ACTIVE |
-| **F1** | Lifetime Profiler | 🟢 **PASS** | **Peak NVML 3,224 MB** · 32 components traced (text/DiT×30/VAE) → F1.5 NEXT |
-| **F1.5** | Bottleneck Analysis | ⚪ Scheduled | — |
-| **F1.7** | Selective Quantization | ⚪ Conditional | — |
-| **F2** | Static Slab Allocator | ⚪ Conditional | fragmentation > 15% |
-| **F3** | Async Stream Scheduler | ⚪ Conditional | WDDM overlap ≥ 10% |
-| **F4** | Adaptive Decision Engine | ⚪ CORE | — |
-| **F5** | Temporal VAE Stitcher | 🟡 **TRIGGERED** | VAE confirmed as VRAM bottleneck in F0 |
-| **F6** | Validation Benchmarks | ⚪ Final | — |
+| **F0** | Reproducible Baseline | 🟢 **PASS (Func.) / ❌ Gate** | Wan2.1 run at 480p/16f; peak 5,451 MB (+651 MB gate violation) · [`TEST_F0_baseline_ref.md`](results/TEST_F0_baseline_ref.md) |
+| **F0.5** | Progressive Exploration | 🟢 **PASS** | **Peak NVML 2,902 MB (+1,898 MB headroom)** · VAE BF16 + Tiling (Test J) · [`TEST_J_vae_tiling_bf16.md`](results/TEST_J_vae_tiling_bf16.md) |
+| **F0.6** | WDDM Concurrency | 🟢 **PASS** | **Overlap 79.9–96.3%** · PCIe async copy hides compute → F3 ACTIVE · [`TEST_F0.6_wddm_overlap.md`](results/TEST_F0.6_wddm_overlap.md) |
+| **F1** | Lifetime Profiler | 🟢 **PASS** | **Peak NVML 3,223.7 MB** · 32 components traced live (text/DiT×30/VAE) · [`TEST_F1_lifetime_profiler.md`](results/TEST_F1_lifetime_profiler.md) |
+| **F1.5** | Bottleneck Analysis | 🟢 **PASS** | **5 Categories Decomposed** · Allocator frag 44.9 MB (<1%) → **F2 Bypassed**; Prefetch safe (88.6 MB vs 1.57 GB) → **F3 Greenlit** · [`TEST_F1.5_bottleneck_classification.md`](results/TEST_F1.5_bottleneck_classification.md) |
+| **F1.7** | Selective Quantization | 🟡 **IN PROGRESS** | Prioritized target: T5-XXL text encoder (14.7 GB) & DiT projection layers |
+| **F2** | Static Slab Allocator | ❌ **BYPASSED** | Allocator fragmentation is < 1.0% (44.9 MB vs 720 MB threshold); custom allocator discarded |
+| **F3** | Async Stream Scheduler | 🟢 **GREENLIT** | Overlap 80–96% & 88.6 MB prefetch safe under 4.8 GB gate; next development focus |
+| **F4** | Adaptive Decision Engine | ⚪ CORE | Dynamic AOT decision engine utilizing F1 telemetry & F3 async streaming |
+| **F5** | Temporal VAE Stitcher | ⚪ STANDBY | VAE memory spike already resolved in Phase F0.5 Test J (micro-tiling) |
+| **F6** | Validation Benchmarks | ⚪ Final | Multi-dimensional benchmarks at 480p/33f and 720p stretch |
 
 ---
 
@@ -114,7 +114,7 @@ Following Phase F0, an experimental ladder of low-cost isolation tests was execu
 
 | Test ID | Strategy / Configuration | Peak NVML (50ms) | PyTorch Alloc | VAE Decode | Total Time | Gate (4.8 GB) | Report |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **F0 (Ref)** | `sequential_cpu_offload` + FP32 VAE | 5,451 MB | ~7.9 GB virt | 322s | 619.8s (10.3m) | ❌ +651 MB | [F0 Baseline](logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json) |
+| **F0 (Ref)** | `sequential_cpu_offload` + FP32 VAE | 5,451 MB | ~7.9 GB virt | 322s | 619.8s (10.3m) | ❌ +651 MB | [TEST_F0](results/TEST_F0_baseline_ref.md) |
 | **Test G** | `model_cpu_offload` + FP32 VAE | 5,861 MB | 13,036.9 MB | 484s | 696.3s (11.6m) | ❌ +1,061 MB | [Test G Report](results/TEST_G_model_cpu_offload.md) |
 | **Test H** | `sequential_cpu_offload` + BF16 VAE | 6,028 MB | 4,366.2 MB | 65s 🟢 | 339.0s (5.65m) | ⚠️ Post: 4,839 MB | [Test H Report](results/TEST_H_bfloat16_vae.md) |
 | **Test J** | **`sequential_cpu_offload` + BF16 + VAE Tiling** | **2,902.0 MB** 🟢 | **2,021.1 MB** 🟢 | **58s** 🟢 | **328.2s (5.47m)** 🟢 | 🟢 **PASS (-1,898 MB)** | [Test J Report](results/TEST_J_vae_tiling_bf16.md) |
@@ -156,6 +156,29 @@ A `TensorLifetimeProfiler` (`marley/profiler/lifetime.py`) hooked every leaf of 
 | vae (tiled decode) | vae | 242.0 MB | **2,112.1 MB** | 96.0 MB |
 
 > **Key findings:** (1) Dynamic tracing is **viable** — the pure static analytical fallback is preserved but not required. (2) DiT block residency is **uniform** (1.65–1.74 GB) → low fragmentation prior (Phase F2 unlikely to trigger). (3) VAE peak is **activation-dominated** (2,112 MB on only 242 MB of weights). (4) **Peak NVML 3,223.7 MB** stays well under the 4.8 GB gate, keeping headroom for F3/F4. Report: [`results/TEST_F1_lifetime_profiler.md`](results/TEST_F1_lifetime_profiler.md).
+
+---
+
+## 🎯 Phase F1.5 — Real Bottleneck Identification & Roadmap Dispatch (2026-09-08)
+
+Phase F1.5 ingested canonical Phase F1 telemetry to quantitatively classify memory into the 5 core categories and evaluate conditional roadmap triggers.
+
+### 5-Category Memory Decomposition
+
+| # | Category | Measured Footprint | Key Architectural Behavior |
+| :---: | :--- | :---: | :--- |
+| **1** | **Static Model Weights** | **17,658.5 MB total** (88.6 MB active) | T5 Text Encoder is 83.6% of weights. Under sequential offload, only ~88.6 MB resides on GPU. |
+| **2** | **DiT Attention Activations** | **~550–600 MB** (1,743.5 MB peak) | Highly uniform across 30 blocks (delta < 98 MB). Per-block activation delta is ~22.8 MB. |
+| **3** | **VAE Decoding Activations** | **~770 MB pure** (2,112.1 MB peak) | Activation-dominated (8.7× weights), but fully contained via 256×256 spatial micro-tiling. |
+| **4** | **Allocator Fragmentation** | **44.9 MB (< 1.0% of Gate)** | Measured delta between PyTorch reserved and allocated. Trigger threshold (>15%) refuted. |
+| **5** | **Prefetch Buffers (F3)** | **88.6 MB buffer needed** | Consumes only **5.6%** of +1,576.3 MB free headroom, leaving +1,487.7 MB safety buffer. |
+
+### Binding Dispatch Verdicts
+1. **Phase F2 (Static Slab Allocator) → ❌ BYPASSED / DISCARDED:** Fragmentation is < 1% (44.9 MB vs 720 MB threshold). PyTorch's allocator is optimal.
+2. **Phase F3 (Budgeted Async Scheduler) → 🟢 GREENLIT / APPROVED:** Overlap of 80–96% + 88.6 MB prefetch safe under the 4.8 GB gate. Will overlap PCIe transfers to reduce the 455s inference latency.
+3. **Phase F1.7 (Selective Quantization) → 🟡 PRIORITIZED FOR T5:** Quantizing the 14.7 GB T5 text encoder to reduce system RAM demand.
+
+Full technical report: [`results/TEST_F1.5_bottleneck_classification.md`](results/TEST_F1.5_bottleneck_classification.md) · Telemetry: [`logs/f1_5_bottleneck_decomposition.json`](logs/f1_5_bottleneck_decomposition.json).
 
 ---
 
