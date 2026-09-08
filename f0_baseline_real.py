@@ -161,7 +161,14 @@ RES_MAP = {
 # ---------------------------------------------------------------------------
 # Phase F0 — Real pipeline run
 # ---------------------------------------------------------------------------
-def run_f0_baseline(res: str, frames: int, dtype_str: str, offload: str, vae_dtype_str: str = "fp32"):
+def run_f0_baseline(
+    res: str,
+    frames: int,
+    dtype_str: str,
+    offload: str,
+    vae_dtype_str: str = "fp32",
+    vae_tiling: bool = False,
+):
     """
     Executes Wan2.1-T2V-1.3B via WanPipeline with the requested offload strategy.
 
@@ -187,6 +194,7 @@ def run_f0_baseline(res: str, frames: int, dtype_str: str, offload: str, vae_dty
     log(f"  Frames:     {frames}")
     log(f"  Dtype:      {dtype_str} ({dtype})")
     log(f"  VAE Dtype:  {vae_dtype_str} ({vae_dtype})")
+    log(f"  VAE Tiling: {vae_tiling}")
     log(f"  Offload:    {offload}")
     log(f"  Log:        {_log_file_path}")
     log("=" * 72)
@@ -200,6 +208,9 @@ def run_f0_baseline(res: str, frames: int, dtype_str: str, offload: str, vae_dty
     vae = AutoencoderKLWan.from_pretrained(
         MODEL_ID, subfolder="vae", torch_dtype=vae_dtype
     )
+    if vae_tiling:
+        log("   [VAE TILING] Enabling pipe.vae.enable_tiling()...")
+        vae.enable_tiling()
     log(f"   VAE loaded in {time.time()-t0:.1f}s")
     log_snap(vram_snapshot("post-vae-load"))
 
@@ -224,6 +235,9 @@ def run_f0_baseline(res: str, frames: int, dtype_str: str, offload: str, vae_dty
     else:
         log(">> Step 3: No offload — moving pipeline to CUDA:0...")
         pipe = pipe.to("cuda")
+
+    if vae_tiling:
+        pipe.vae.enable_tiling()
 
     log_snap(vram_snapshot("post-offload-setup"))
 
@@ -261,7 +275,8 @@ def run_f0_baseline(res: str, frames: int, dtype_str: str, offload: str, vae_dty
 
         # ── 5. Save output ───────────────────────────────────────────────────
         ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        out_path = os.path.join(LOG_DIR, f"f0_{res}_{frames}f_{dtype_str}_vae_{vae_dtype_str}_{offload}_{ts}.mp4")
+        tiling_tag = "_tiled" if vae_tiling else ""
+        out_path = os.path.join(LOG_DIR, f"f0_{res}_{frames}f_{dtype_str}_vae_{vae_dtype_str}{tiling_tag}_{offload}_{ts}.mp4")
         export_to_video(output.frames[0], out_path, fps=16)
         log(f"   Video saved → {out_path}")
 
@@ -274,6 +289,7 @@ def run_f0_baseline(res: str, frames: int, dtype_str: str, offload: str, vae_dty
             "frames": frames,
             "dtype": dtype_str,
             "vae_dtype": vae_dtype_str,
+            "vae_tiling": vae_tiling,
             "offload": offload,
             "inference_time_s": round(t_inf_elapsed, 2),
             "peak_torch_allocated_mb": round(snap_post.get("torch_max_allocated_mb", 0), 1),
@@ -303,6 +319,7 @@ def run_f0_baseline(res: str, frames: int, dtype_str: str, offload: str, vae_dty
         peak_nvml_real_mb = tracker.stop()
         snap_oom = log_snap(vram_snapshot("OOM-moment"))
         peak_nvml = max(peak_nvml_real_mb, snap_oom.get("nvml_used_mb", 0))
+        tiling_tag = "_tiled" if vae_tiling else ""
         log("*" * 72)
         log(">>> GATE F0: CUDA OUT OF MEMORY <<<")
         log(f"    Elapsed before OOM: {t_oom:.2f}s")
@@ -317,6 +334,7 @@ def run_f0_baseline(res: str, frames: int, dtype_str: str, offload: str, vae_dty
             "frames": frames,
             "dtype": dtype_str,
             "vae_dtype": vae_dtype_str,
+            "vae_tiling": vae_tiling,
             "offload": offload,
             "status": "OOM",
             "oom_elapsed_s": round(t_oom, 2),
@@ -324,7 +342,7 @@ def run_f0_baseline(res: str, frames: int, dtype_str: str, offload: str, vae_dty
             "oom_nvml_used_mb": round(peak_nvml, 1),
             "oom_exception": str(oom)[:300],
         }
-        json_path = os.path.join(LOG_DIR, f"f0_OOM_{res}_{frames}f_{dtype_str}_vae_{vae_dtype_str}_{offload}.json")
+        json_path = os.path.join(LOG_DIR, f"f0_OOM_{res}_{frames}f_{dtype_str}_vae_{vae_dtype_str}{tiling_tag}_{offload}.json")
         with open(json_path, "w", encoding="utf-8") as fh:
             json.dump(summary, fh, indent=2)
         log(f"  OOM telemetry → {json_path}")
@@ -342,6 +360,7 @@ def main():
     parser.add_argument("--frames", type=int, default=17, help="Number of video frames (default: 17; must satisfy (N-1)%%4==0)")
     parser.add_argument("--dtype", default="fp16", choices=["fp16", "bf16", "fp32"], help="Precision for DiT/Text encoder")
     parser.add_argument("--vae-dtype", default="fp32", choices=["fp32", "bf16", "fp16"], help="Precision for VAE (default: fp32)")
+    parser.add_argument("--vae-tiling", action="store_true", help="Enable VAE spatial-temporal tiled decode")
     parser.add_argument(
         "--offload",
         default="cpu",
@@ -355,7 +374,8 @@ def main():
     )
     args = parser.parse_args()
 
-    tag = f"{args.res}_{args.frames}f_{args.dtype}_vae_{args.vae_dtype}_{args.offload}"
+    tiling_str = "_tiled" if args.vae_tiling else ""
+    tag = f"{args.res}_{args.frames}f_{args.dtype}_vae_{args.vae_dtype}{tiling_str}_{args.offload}"
     _init_log(tag)
 
     if not torch.cuda.is_available():
@@ -366,7 +386,7 @@ def main():
     total_vram = torch.cuda.get_device_properties(0).total_memory / 2**20
     log(f"Device: {gpu_name} | Total VRAM: {total_vram:.0f} MB")
 
-    result = run_f0_baseline(args.res, args.frames, args.dtype, args.offload, args.vae_dtype)
+    result = run_f0_baseline(args.res, args.frames, args.dtype, args.offload, args.vae_dtype, args.vae_tiling)
 
     if result["status"] == "OOM":
         log("\n[WARN] Run ended with OOM. Review telemetry and try --offload cpu or --offload model_cpu.")

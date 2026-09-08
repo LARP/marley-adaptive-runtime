@@ -14,10 +14,10 @@ Carpeta dedicada a la documentación, telemetría y análisis de resultados de t
 | **F0 (Ref)** | Sequential CPU Offload + FP32 VAE | `res=480p, 16f, DiT=fp16, VAE=fp32, offload=cpu` | 5,451 MB | 297s | 322s | 619.8s | ❌ +651 MB | [Baseline F0](../logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json) |
 | **Test G** | Model CPU Offload (submodel level) | `res=480p, 17f, DiT=fp16, VAE=fp32, offload=model_cpu` | **5,861 MB** (live peak) | **212s** (6.3s/it) | **484s** | **696.3s** | ❌ +1,061 MB (Paginado WDDM 13GB) | [TEST_G_model_cpu_offload.md](./TEST_G_model_cpu_offload.md) |
 | **Test H** | Sequential Offload + bfloat16 VAE | `res=480p, 17f, DiT=fp16, VAE=bf16, offload=cpu` | **6,028 MB** (peak) / 4,839 post | **274s** (9.1s/it) | **65s** 🟢 | **339.0s** 🟢 | ⚠️ Alloc 4,366 MB (VAE -80% tiempo) | [TEST_H_bfloat16_vae.md](./TEST_H_bfloat16_vae.md) |
-| **Test I** | Sequential Offload + float16 VAE | `res=480p, 17f, DiT=fp16, VAE=fp16, offload=cpu` | *Opcional* (mismo consumo que BF16) | *TBD* | *TBD* | *TBD* | *Riesgo inestabilidad* | Pendiente |
-| **Test J** | Chunked VAE (chunk=2, overlap=1) | Condicional a Sprint 2 | — | — | — | — | *Standby* | Standby |
-| **Test K** | Chunked VAE (chunk=1, overlap=1) | Condicional a Sprint 2 | — | — | — | — | *Standby* | Standby |
-| **Test L** | Chunked VAE + GPU Residency | Condicional a Sprint 3 | — | — | — | — | *Standby* | Standby |
+| **Test I** | Sequential Offload + float16 VAE | `res=480p, 17f, DiT=fp16, VAE=fp16, offload=cpu` | *Omitido* (mismo consumo que BF16) | — | — | — | *Superado por Test J* | Omitido |
+| **Test J** | **Sequential Offload + BF16 + VAE Tiling** | `res=480p, 17f, DiT=fp16, VAE=bf16, vae_tiling=True` | **2,902 MB** 🟢 | **270s** (9.0s/it) | **58s** 🟢 | **328.2s (5.4m)** 🟢 | 🟢 **PASS (-1,898 MB holgura masiva)** | [TEST_J_vae_tiling_bf16.md](./TEST_J_vae_tiling_bf16.md) |
+| **Test K** | Chunked VAE personalizado | *No requerido* | — | — | — | — | *Gate F0.5 ya superado por Test J* | Standby |
+| **Test L** | Chunked VAE + GPU Residency | *Evaluación futura* | — | — | — | — | *Standby para F4* | Standby |
 
 ---
 
