@@ -17,7 +17,9 @@
 
 > **Phase F1.7 completed 2026-09-08.** Selective quantization of T5-XXL text encoder achieved **-50.0% (-7,379.2 MB)** weight reduction with **0.999607** cosine similarity (zero NaNs). DiT linear projection quantization reduces per-block PCIe streaming payload from 88.6 MB to 45.9 MB (-48.2%). Gate PASS (>> 20% target). Report: [`results/TEST_F1.7_selective_quantization.md`](results/TEST_F1.7_selective_quantization.md).
 
-> **Provenance Note:** This roadmap represents the unified **v5 architectural consensus**, synthesized and hardened via a multi-agent review ensemble (ChatGPT, DeepSeek Pro, and Gemini Pro).
+> **Expert Technical Directive (2026-09-08):** Following F1.5 and F1.7, technical guidance from an external IA Generative / SD / ComfyUI runtime expert was formally adopted. Key directives: (1) Freeze prior optimizations to preserve causal attribution; (2) Reject adding new memory tricks before F3; (3) Mandate 7 quantitative metrics for F3 benchmark; (4) Retain INT8 as production baseline while restricting NF4 to extreme low-memory mode; (5) Architect F4 around *Performance* vs *Memory Safe* operational profiles; (6) Retain 480p/33f as primary scalability milestone. Full directive: [`docs/EXPERT_RECOMMENDATIONS_ADOPTION.md`](docs/EXPERT_RECOMMENDATIONS_ADOPTION.md).
+
+> **Provenance Note:** This roadmap represents the unified **v5 architectural consensus**, synthesized and hardened via a multi-agent review ensemble (ChatGPT, DeepSeek Pro, and Gemini Pro) and calibrated with external generative runtime advisory.
 
 ---
 
@@ -211,8 +213,19 @@ flowchart TD
 
 ### Phase F3 — Budgeted Asynchronous Scheduler · 🟢 GREENLIT / IN PROGRESS
 - **Trigger:** Activated if Phase F0.6 demonstrates **≥ 10% overlap** under WDDM and Phase F1.5 confirms double-buffering prefetching does not inflate peak residency past 4.8 GB.
-- **F1.5 Empirical Finding:** Overlap is **79.9–96.3%** and prefetch buffer is **88.6 MB** vs. **+1,576.3 MB headroom** (leaves +1,487.7 MB safety margin).
-- **Goal:** Overlap PCIe weight streaming of block $i+1$ with DiT compute of block $i$ using dedicated CUDA streams.
+- **F1.5 & F1.7 Empirical Findings:** Overlap is **79.9–96.3%** and prefetch payload is **88.6 MB (FP16)** or **45.9 MB (8-bit proj)** vs. **+1,576.3 MB headroom** (leaves +1,487.7 MB safety margin).
+- **Goal:** Overlap PCIe weight streaming of block $i+1$ with DiT compute of block $i$ using dedicated non-default CUDA streams and pinned host memory.
+- **Expert Directive Constraints:**
+  - Configuration of reference is **frozen** (no ad-hoc memory levers added during F3).
+  - Evaluated on **480p / 17 frames** baseline first before scaling temporal dimension.
+- **Mandatory Metric Scorecard:**
+  1. Total DiT denoising wall-clock time.
+  2. Cumulative PCIe H2D transfer time.
+  3. Effective overlapped compute/transfer duration.
+  4. Physical peak VRAM sampled at 50ms via NVML (strictly $\le 4,800\text{ MB}$).
+  5. Stall latency from delayed prefetch.
+  6. Count of forced stream synchronizations.
+  7. Effective throughput (seconds/frame).
 - **Kill Gate:** If compute/transfer overlap drops below **5%** or triggers driver-level paging/OOM, revert immediately to synchronous execution.
 
 ---
@@ -224,6 +237,10 @@ flowchart TD
   - Recent PCIe transfer latency
   - Layer compute elapsed time
   - Exponential moving average of system memory pressure
+- **Operational Profiles (Expert Directive §6):**
+  - **Performance Profile:** Aggressive prefetching + INT8 DiT projections + maximal allowable VRAM utilization for minimum generation latency.
+  - **Memory Safe Profile:** Conservative prefetch + early eviction + high safety margin (+1.5 GB headroom) to withstand sudden background WDDM pressure.
+- **Scalability Pathway:** Progression from 480p / 17f $\rightarrow$ **480p / 33f (Primary target)** $\rightarrow$ 720p stretch.
 - **Execution Model:** Ahead-Of-Time (AOT) static plan generated following Step 1 warmup, with periodic re-evaluation checkpoints every $N$ diffusion steps or upon abrupt memory pressure deviations.
 - **Kill Gate:** If the adaptive engine does not outperform the best static baseline policy by at least **5%** in memory headroom or execution speed, simplify to a fixed policy.
 

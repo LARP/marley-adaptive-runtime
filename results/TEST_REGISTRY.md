@@ -110,7 +110,15 @@ This file is the **index** of all test reports in `results/`. Each row below lis
 
 ---
 
-## 7. Test Documentation Architecture
+---
+
+## 7. Strategic Governance & Technical Directives
+
+- **[Directiva Técnica de Experto Externo (SD & ComfyUI)](../docs/EXPERT_RECOMMENDATIONS_ADOPTION.md):** Documento vinculante aprobado por supervisión humana el 2026-09-08. Establece la congelación de optimizaciones antes de F3, la ratificación de descarte de F2, el confinamiento de NF4 como modo extremo, y las 7 métricas cuantitativas obligatorias para la validación de F3.
+
+---
+
+## 8. Test Documentation Architecture
 
 Each test run contains an individual technical report in this directory:
 - `TEST_<ID>_<strategy>.md`: Document covering the technical hypothesis, reproducible command line, multi-layer memory telemetry, bottleneck analysis, and gate verdict.
