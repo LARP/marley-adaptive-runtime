@@ -18,12 +18,13 @@ This file is the **index** of all test reports in `results/`. Each row below lis
 | 4 | [`TEST_F0.6_wddm_overlap.md`](./TEST_F0.6_wddm_overlap.md) | F0.6 | WDDM `cudaMemcpyAsync` H2D vs. Tensor-Core `matmul` overlap | Overlap 79.9–96.3% | 🟢 **PASS** (F3 active) |
 | 5 | [`TEST_F1_lifetime_profiler.md`](./TEST_F1_lifetime_profiler.md) | F1 | Tensor Lifetime Profiler (per-DiT-block residency, real model) | Peak NVML 3,223.7 MB; 32 components traced | 🟢 **PASS** (−1,576 MB) |
 | 6 | [`TEST_F1.5_bottleneck_classification.md`](./TEST_F1.5_bottleneck_classification.md) | F1.5 | Real Bottleneck Identification & Roadmap Dispatch | Allocator frag 44.9 MB (<1%); Prefetch safe (88.6 MB vs 1.57 GB); F3 Greenlit, F2 Bypassed | 🟢 **COMPLETE** |
+| 7 | [`TEST_F1.7_selective_quantization.md`](./TEST_F1.7_selective_quantization.md) | F1.7 | Selective & Adaptive Quantization | T5 8-bit (-50% / -7.38 GB); DiT 8-bit (-48.2%); Cosine Sim 0.9996; Gate $\ge 20\%$ PASS | 🟢 **PASS** |
 
 > **Notes:**
 > - **F0 (Ref)** is documented in [`TEST_F0_baseline_ref.md`](./TEST_F0_baseline_ref.md) with ground-truth telemetry from [`logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json`](../logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json).
 > - `Test I` and `Test K` produced **no report file** (skipped / not required) — see §2 matrix.
 > - The order above is chronological by test **date**, which is the project's natural reading order
->   (`F0 → F0.5 → F0.6 → F1 → F1.5`). Detailed scorecards for each phase follow in §2.
+>   (`F0 → F0.5 → F0.6 → F1 → F1.5 → F1.7`). Detailed scorecards for each phase follow in §2.
 
 ---
 
@@ -92,7 +93,24 @@ This file is the **index** of all test reports in `results/`. Each row below lis
 
 ---
 
-## 6. Test Documentation Architecture
+## 6. Phase F1.7 — Selective & Adaptive Quantization 🟢 PASS
+
+**Gate Target:** Lower memory footprint by $\ge 20\%$ through selective quantization while preserving numerical fidelity (Cosine Similarity $\ge 0.99$).
+
+**Result:**
+- **Text Encoder (T5-XXL / 14,758.5 MB):** 8-bit quantization achieved **-50.0% (-7,379.2 MB)** weight reduction with **0.999607** cosine similarity and zero NaNs $\rightarrow$ 🟢 **PASS (+30% above gate)**.
+- **DiT Blocks (30 blocks):** 8-bit projection quantization shrinks per-block payload from **88.6 MB $\rightarrow$ 45.9 MB (-48.2%)**, saving **-76.9 GB** in cumulative PCIe transfer across 30 diffusion steps.
+- Report: [`TEST_F1.7_selective_quantization.md`](./TEST_F1.7_selective_quantization.md) · Telemetry: [`logs/f1_7_quantization_benchmark.json`](../logs/f1_7_quantization_benchmark.json).
+
+| Component | FP16 Footprint | Quantized (8-bit) | Net Savings | Fidelity (Cosine Sim) | Gate ($\ge 20\%$) |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Text Encoder (T5-XXL)** | 14,758.5 MB | **7,379.2 MB** | **-7,379.2 MB (-50.0%)** | **0.999607** | 🟢 **PASS** |
+| **Single DiT Block** | 88.6 MB | **45.9 MB** | **-42.7 MB (-48.2%)** | Near-lossless | 🟢 **PASS** |
+| **Total DiT (30 blocks)** | 2,658.0 MB | **1,377.0 MB** | **-1,281.0 MB (-48.2%)** | Near-lossless | 🟢 **PASS** |
+
+---
+
+## 7. Test Documentation Architecture
 
 Each test run contains an individual technical report in this directory:
 - `TEST_<ID>_<strategy>.md`: Document covering the technical hypothesis, reproducible command line, multi-layer memory telemetry, bottleneck analysis, and gate verdict.
