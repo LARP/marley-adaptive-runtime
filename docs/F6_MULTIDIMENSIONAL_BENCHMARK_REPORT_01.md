@@ -189,3 +189,13 @@ Utiliza `INT8BudgetedStreamer` con:
 | **Video MP4 Generado** | [`logs/..._sync_...mp4`](../logs/f6_832x480_33f_sync_20260908_202057.mp4) | [`logs/..._async_fp16_...mp4`](../logs/f6_832x480_33f_async_fp16_20260908_203148.mp4) | [`logs/..._async_int8_...mp4`](../logs/f6_832x480_33f_async_int8_20260908_204210.mp4) | MP4 Válido |
 | **Veredicto General** | 🟢 **PASS** | 🟢 **PASS** | 🟢 **PASS** | 🟢 **PASS** |
 
+---
+
+## 8. Alerta Técnica Identificada: Sobrecarga Host RSS en F6-C
+
+Durante la evaluación de F6-C se registró un aumento del Host RSS del proceso a **3,805.5 MB** (+2,288.9 MB sobre F6-B).  
+El análisis forense determinó que `INT8BudgetedStreamer` genera una réplica de pesos `pinned INT8` (~1.38 GB) sin liberar los tensores originales `param.data` en FP16 (~2.66 GB) de los 30 bloques DiT en CPU, produciendo una doble residencia transitoria en memoria host.
+
+Análisis forense detallado y plan de remediación: [`docs/F6_ALERT_01_INT8_HOST_RSS_OVERHEAD.md`](F6_ALERT_01_INT8_HOST_RSS_OVERHEAD.md).
+
+
