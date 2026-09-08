@@ -370,15 +370,21 @@ projections vs FP16) on the frozen F3 async scheduler with FP16 compute. NF4/F4 
   - Output Integrity: exact match `[1, 3, 33, 480, 832]`, 0 NaNs / 0 Infs.
 - **Verdict & Action:** Scaling the temporal axis to 33 frames produces no memory cliff or latency stall under native tiling ($~2.1\text{ GB}$ VRAM, $27\text{ s}$). Writing a custom temporal chunker (`marley/ops/vae_stitch.py`) is **unnecessary**. F5-C is **CANCELLED / RETIRED**. Phase F5 is formally closed; project advances directly to **Phase F6**. Report: [`results/TEST_F5_vae_probe_33f.md`](results/TEST_F5_vae_probe_33f.md).
 
+> [!IMPORTANT]
+> **VAE Non-Regression Rule (Binding Directive per `docs/F5_CLOSURE_RESOLUTION_01.md`):**  
+> Any future pipeline integration or scheduler changes in Phase F6 must respect the F5-A baseline: physical peak VRAM $\le 2,109\text{ MB}$ and decode latency $\approx 27\text{ s}$ (ceiling $\le 35\text{ s}$).  
+> The VAE is no longer a project bottleneck; 100% of technical risk is now shifted to the **DiT denoising loop (30 steps)** at 33 frames.
+
 ---
 
 ### Phase F6 — Multidimensional Benchmarks & Verification
 - **Target Workload:** Wan2.1-T2V-1.3B at **480p, 33 frames** (Primary target); 720p evaluation as secondary stretch capability.
+- **Architectural Shift:** Reuses the frozen, validated primitives (`BudgetedAsyncStreamer`, `INT8BudgetedStreamer`, `AdaptiveEngine`, and native BF16 tiled VAE). No new VAE layers. Focus is 100% on DiT 30-step denoising latency, PCIe transfer overlap, and memory stability under 4.8 GB.
 - **Evaluation Dimensions:**
-  1. Peak physical VRAM residency (NVML)
-  2. Total wall-clock generation time
+  1. Peak physical VRAM residency (NVML $\le 4.8\text{ GB}$)
+  2. Total wall-clock generation time (Milestone B: $< 10\text{ minutes}$)
   3. Spatial reconstruction fidelity (PSNR / SSIM)
-  4. Temporal coherence (Warp error / Fréchet Video Distance)
+  4. Temporal coherence (zero flicker / seam artifacts, Warp error)
   5. Policy adaptation responsiveness under varying external VRAM load
 - **Success Criteria Milestones:**
   - **Milestone A:** $\le 4.8\text{ GB}$ physical GPU residency without Out-Of-Memory exceptions.

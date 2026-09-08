@@ -317,7 +317,12 @@ Per the **Decision-First** protocol agreed with the Director and External Consul
 **Conclusion & Action:**  
 Because the existing tiled VAE path (`bfloat16` + $256 \times 256$ spatial tiling) decodes 33 frames in **26.99 seconds** using only **2,109 MB** of VRAM, building a custom temporal stitcher (`marley/ops/vae_stitch.py`) is completely unnecessary. F5-C is **CANCELLED / RETIRED** as resolved by existing tiling. Phase F5 is formally closed; project advances directly to **Phase F6 (480p / 33f End-to-End Pipeline)**.
 
-Full report: [`results/TEST_F5_vae_probe_33f.md`](results/TEST_F5_vae_probe_33f.md) · Telemetry: [`logs/f5_vae_probe_33f.json`](logs/f5_vae_probe_33f.json) · Probe: [`f5_vae_probe_33f.py`](f5_vae_probe_33f.py).
+> [!IMPORTANT]
+> **VAE Non-Regression Rule (Binding Directive):**  
+> Any future changes in Phase F6 pipeline integration must maintain the canonical F5-A baseline: physical peak VRAM $\le 2,109\text{ MB}$ (noise ceiling $\le 2,300\text{ MB}$) and decode latency $\approx 27\text{ s}$ (ceiling $\le 35\text{ s}$).  
+> The VAE is no longer considered a project bottleneck; 100% of technical risk is now shifted to the **DiT denoising loop (30 steps)** at 33 frames.
+
+Full report: [`results/TEST_F5_vae_probe_33f.md`](results/TEST_F5_vae_probe_33f.md) · Telemetry: [`logs/f5_vae_probe_33f.json`](logs/f5_vae_probe_33f.json) · Probe: [`f5_vae_probe_33f.py`](f5_vae_probe_33f.py) · Closure Resolution: [`docs/F5_CLOSURE_RESOLUTION_01.md`](docs/F5_CLOSURE_RESOLUTION_01.md).
 
 ---
 
