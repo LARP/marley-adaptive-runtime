@@ -12,6 +12,7 @@
 [![Phase F0: PASS](https://img.shields.io/badge/Phase%20F0-PASS-22c55e.svg)](ROADMAP.md)
 [![Phase F0.5: PASS](https://img.shields.io/badge/Phase%20F0.5-PASS%20(2.9GB)-22c55e.svg)](results/TEST_J_vae_tiling_bf16.md)
 [![Phase F0.6: PASS](https://img.shields.io/badge/Phase%20F0.6-PASS%20(WDDM%20overlap)-22c55e.svg)](results/TEST_F0.6_wddm_overlap.md)
+[![Phase F1: PASS](https://img.shields.io/badge/Phase%20F1-PASS%20(3.2GB)-22c55e.svg)](results/TEST_F1_lifetime_profiler.md)
 
 *In loving memory of Marley 🐾*
 
@@ -59,7 +60,7 @@ Memory is tracked across **three distinct layers** to prevent WDDM virtualizatio
 | **F0** | Reproducible Baseline | 🟢 **PASS** | Wan2.1-T2V-1.3B run at 480p/16f/FP16 — video generated |
 | **F0.5** | Progressive Exploration | 🟢 **PASS** | **Peak NVML 2,902 MB (+1,898 MB headroom)** · VAE BF16 + Tiling |
 | **F0.6** | WDDM Concurrency | 🟢 **PASS** | **Overlap 79.9–96.3%** · PCIe async copy hides compute → F3 ACTIVE |
-| **F1** | Lifetime Profiler | ⚪ Scheduled | — |
+| **F1** | Lifetime Profiler | 🟢 **PASS** | **Peak NVML 3,224 MB** · 32 components traced (text/DiT×30/VAE) → F1.5 NEXT |
 | **F1.5** | Bottleneck Analysis | ⚪ Scheduled | — |
 | **F1.7** | Selective Quantization | ⚪ Conditional | — |
 | **F2** | Static Slab Allocator | ⚪ Conditional | fragmentation > 15% |
@@ -139,6 +140,22 @@ Phase F0.6 measured whether the Windows WDDM driver scheduler permits genuine ov
 | 2048 MB | 174.4 ms | 172.0 ms | 178.4 ms | **96.3%** | 🟢 **PASS** |
 
 > **Key finding:** Concurrent makespan tracked the *copy-alone* time (not the serial sum), proving the WDDM copy engine runs **in parallel** with SM compute. With overlap of **79.9–96.3%** — an order of magnitude above the 10% gate — **Phase F3 (async prefetch scheduler) is justified and stays active**. Report: [`results/TEST_F0.6_wddm_overlap.md`](results/TEST_F0.6_wddm_overlap.md).
+
+---
+
+## 🔬 Phase F1 — Tensor Lifetime Profiler Results (2026-09-08)
+
+A `TensorLifetimeProfiler` (`marley/profiler/lifetime.py`) hooked every leaf of the real Wan2.1 pipeline under sequential CPU offload (DiT=FP16, VAE=BF16+tiling) and attributed NVML physical residency to whichever component was actively driving execution, at 50 ms sampling.
+
+### Per-Component Lifetime & Residency (480p · 17f · 30 steps)
+
+| Component | Kind | Static weights | **Peak live NVML** | Activation Δ |
+| :--- | :---: | :---: | :---: | :---: |
+| text_encoder[0] | text_encoder | 14,758.5 MB | **3,223.7 MB** | 12.1 MB |
+| 30 × diT_block[i] | diT_block | 88.6 MB each | 1,645.7–1,743.5 MB | 22.9–23.2 MB |
+| vae (tiled decode) | vae | 242.0 MB | **2,112.1 MB** | 96.0 MB |
+
+> **Key findings:** (1) Dynamic tracing is **viable** — the pure static analytical fallback is preserved but not required. (2) DiT block residency is **uniform** (1.65–1.74 GB) → low fragmentation prior (Phase F2 unlikely to trigger). (3) VAE peak is **activation-dominated** (2,112 MB on only 242 MB of weights). (4) **Peak NVML 3,223.7 MB** stays well under the 4.8 GB gate, keeping headroom for F3/F4. Report: [`results/TEST_F1_lifetime_profiler.md`](results/TEST_F1_lifetime_profiler.md).
 
 ---
 
@@ -229,10 +246,11 @@ marley-runtime/
 │   ├── core/                # Adaptive engine & layer scheduler
 │   ├── models/              # Wan2.1 / DiT model adapters
 │   ├── ops/                 # Slab allocator, async streams, VAE stitcher
-│   └── profiler/            # NVML telemetry & WDDM benchmarks
+│   └── profiler/            # Tensor lifetime & residency profiler (Phase F1)
 ├── tests/                   # Unit and integration tests
 ├── baseline_profiler.py     # Synthetic stress profiler (Phase F0 OOM boundary)
 ├── f0_baseline_real.py      # Real Wan2.1 pipeline baseline & profiler (F0/F0.5 ✅)
+├── f1_lifetime_profiler.py  # Phase F1 tensor lifetime / residency profiler
 ├── requirements.txt         # Python dependencies (torch cu124, diffusers, etc.)
 ├── LICENSE                  # MIT License
 ├── README.md                # This file

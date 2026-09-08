@@ -1,11 +1,17 @@
 # Marley Runtime (`marley-runtime`) — Roadmap v5
 
 **Release Date:** 2026-09-08  
-**Status:** Active — Phase F0 COMPLETE · Phase F0.5 NEXT  
+**Status:** Active — Phase F1 COMPLETE · Phase F1.5 NEXT  
 **Target Repository:** [`LARP/marley-runtime`](https://github.com/LARP/marley-runtime)  
 **Primary Objective:** Investigate and deploy adaptive memory management policies for Wan2.1-T2V-1.3B constrained to ~4.8 GB effective physical VRAM (NVIDIA GeForce RTX 3050 6GB Laptop, Windows WDDM), prioritizing 480p resolution (with 720p as secondary/stretch milestone).
 
 > **Phase F0 completed 2026-09-08T06:04:40Z.** First real Wan2.1-T2V-1.3B video generated at 480p/16f/FP16. Peak NVML: 5451 MB (gate exceeded by 651 MB in VAE decode). VAE confirmed as primary bottleneck — Phase F5 trigger pre-activated.
+
+> **Phase F0.5 completed 2026-09-08.** VAE BF16 + spatial-temporal tiling (Test J) cut peak NVML to **2,902 MB** and VAE decode 322s → 58s. Gate PASS with +1,898 MB headroom.
+
+> **Phase F0.6 completed 2026-09-08.** Measured WDDM PCIe/compute overlap of **79.9–96.3%** (≥10% gate) → Phase F3 stays active. Report: [`results/TEST_F0.6_wddm_overlap.md`](results/TEST_F0.6_wddm_overlap.md).
+
+> **Phase F1 completed 2026-09-08.** Tensor Lifetime Profiler traced all 32 components (1 text encoder + 30 DiT blocks + VAE) live on the real model under sequential CPU offload. Peak NVML **3,223.7 MB** (< 4.8 GB gate). DiT blocks uniform (1.65–1.74 GB); VAE decode activation-dominated (2,112 MB); text encoder weight-dominated (3,224 MB). Static analytical fallback preserved. Report: [`results/TEST_F1_lifetime_profiler.md`](results/TEST_F1_lifetime_profiler.md).
 
 > **Provenance Note:** This roadmap represents the unified **v5 architectural consensus**, synthesized and hardened via a multi-agent review ensemble (ChatGPT, DeepSeek Pro, and Gemini Pro).
 
@@ -115,10 +121,35 @@ flowchart TD
 
 ---
 
-### Phase F1 — Tensor Lifetime Profiler
+### Phase F1 — Tensor Lifetime Profiler · 🟢 COMPLETE
 - **Goal:** Trace lifecycle events (allocation, utilization, deallocation) and per-component peak residency across DiT layers, text encoders, and VAE.
 - **Boundary Handling:** Custom compiled or attention kernels that hide explicit allocation calls will be bounded by NVML hardware sampling.
 - **Kill Gate:** If fine-grained dynamic profiling proves intractable due to runtime overhead or driver virtualization, fall back to static analytical memory modeling.
+- **Implementation:** [`marley/profiler/lifetime.py`](marley/profiler/lifetime.py) (`TensorLifetimeProfiler` + `static_weights`) · runner [`f1_lifetime_profiler.py`](f1_lifetime_profiler.py).
+- **Completed:** 2026-09-08 · Config: `480p/17f/30 steps · DiT=FP16 · VAE=BF16+tiling · sequential CPU offload`. Report: [`results/TEST_F1_lifetime_profiler.md`](results/TEST_F1_lifetime_profiler.md).
+
+#### Measured Results
+
+| Metric | Value |
+| :--- | :---: |
+| Components traced live | 32 (text_encoder + 30 DiT blocks + VAE) |
+| **Peak NVML physical residency** | **3,223.7 MB** (< 4,800 MB gate) |
+| torch peak allocated / reserved | 2,021.1 MB / 2,066.0 MB |
+| Aggregate static weights (fp16/bf16) | 17,658.5 MB |
+| Kill-gate fallback (static) | ✅ Preserved (no-CUDA analytical model) |
+
+| Component | Static weights | Peak live NVML | Forward calls |
+| :--- | :---: | :---: | :---: |
+| text_encoder[0] | 14,758.5 MB | **3,223.7 MB** | 2 |
+| 30 × diT_block[i] | 88.6 MB each | 1,645.7–1,743.5 MB | 60 each |
+| vae (tiled decode) | 242.0 MB | **2,112.1 MB** | 9,570 |
+
+> **Key findings:** (1) Dynamic tracing is viable with acceptable overhead → no fallback required.
+> (2) DiT block residency is **uniform** (1.65–1.74 GB), so no single block is a fragmentation or
+> activation outlier → **low prior for the Phase F2 (>15% fragmentation) trigger**. (3) VAE peak is
+> **activation-dominated** (2,112 MB on only 242 MB of weights). (4) torch peak allocated (2,021 MB)
+> < NVML peak (3,224 MB) — the ~1.2 GB delta is WDDM driver residency/paging, consistent with the
+> three-layer accounting model in §2.
 
 ---
 

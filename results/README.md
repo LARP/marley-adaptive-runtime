@@ -34,6 +34,22 @@ Dedicated directory for test documentation, telemetry capture, and performance a
 
 ---
 
+## Phase F1 — Tensor Lifetime Profiler 🟢 COMPLETE
+
+**Gate Target:** Verify per-component & per-DiT-block lifecycle/residency profiling is feasible on the real model (with pure static analytical fallback preserved), and confirm physical residency stays ≤ 4,800 MB.
+
+**Result:** All 32 components traced live · **Peak NVML = 3,223.7 MB** (≤ 4,800 MB) · DiT blocks uniform 1.65–1.74 GB stream · VAE decode activation-dominated (2,112 MB) · text encoder weight-dominated (3,224 MB).
+
+| Component | Kind | Static weights | Peak live NVML | Report |
+| :--- | :---: | :---: | :---: | :---: |
+| text_encoder[0] | text_encoder | 14,758.5 MB | **3,223.7 MB** | [TEST_F1](./TEST_F1_lifetime_profiler.md) |
+| 30 × diT_block[i] | diT_block | 88.6 MB each | 1,645.7–1,743.5 MB | [TEST_F1](./TEST_F1_lifetime_profiler.md) |
+| vae (tiled decode) | vae | 242.0 MB | **2,112.1 MB** | [TEST_F1](./TEST_F1_lifetime_profiler.md) |
+
+**Feed-forward:** Uniform DiT residency → low fragmentation prior (F2 unlikely to trigger). VAE residency is activation-driven → sharpens F1.5 decomposition. Physical peak 3.2 GB keeps headroom for F3/F4.
+
+---
+
 ## 2. Test Documentation Architecture
 
 Each test run contains an individual technical report in this directory:
