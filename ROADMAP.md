@@ -1,7 +1,7 @@
 # Marley Runtime (`marley-runtime`) — Roadmap v5
 
 **Release Date:** 2026-09-08  
-**Status:** Active — Phases F1.5, F1.7, **F3 (CERTIFIED PASS)** & **F3+INT8 (PASS)** · Phase F4 NEXT  
+**Status:** Active — F1.5, F1.7, **F3 (CERTIFIED PASS)**, **F3+INT8 (PASS)** & **F4 (CORE SYSTEM VALIDATED)** · Phase F4 performance-certification pending · F6 NEXT  
 **Target Repository:** [`LARP/marley-runtime`](https://github.com/LARP/marley-runtime)  
 **Primary Objective:** Investigate and deploy adaptive memory management policies for Wan2.1-T2V-1.3B constrained to ~4.8 GB effective physical VRAM (NVIDIA GeForce RTX 3050 6GB Laptop, Windows WDDM), prioritizing 480p resolution (with 720p as secondary/stretch milestone).
 
@@ -22,6 +22,24 @@
 > **Phase F3 + INT8 CLOSED / FROZEN 2026-09-08.** Isolation experiment certified **PASS**: halving the per-block H2D payload to **INT8** (92.9 → 46.5 MB, **−49.9%**) on the unchanged async scheduler (FP16 compute, on-device dequant) raised the **Async-vs-Sync margin to +13.2%** (min +10.4 / max +15.4, σ ±2.5) with overlap **98.1%**, peak NVML **2,076 MB (−508 vs FP16)** and dequant fidelity cos ≥ **0.9999** (0 NaNs/Infs). Result flagged for official docs: the +13.2% is the *within-run* Async-vs-Sync margin (NOT an absolute cross-session claim). Closure acta: [`docs/F3_INT8_CLOSURE_01.md`](docs/F3_INT8_CLOSURE_01.md) · Report: [`results/TEST_F3_INT8_benchmark.md`](results/TEST_F3_INT8_benchmark.md). Architecture frozen → **advance to F4**. A same-session A/B/C (Sync-FP16 / Async-FP16 / Async-INT8) is scheduled as F4 validation methodology.
 
 > **Expert Technical Directive (2026-09-08):** Following F1.5 and F1.7, technical guidance from an external IA Generative / SD / ComfyUI runtime expert was formally adopted. Key directives: (1) Freeze prior optimizations to preserve causal attribution; (2) Reject adding new memory tricks before F3; (3) Mandate 7 quantitative metrics for F3 benchmark; (4) Retain INT8 as production baseline while restricting NF4 to extreme low-memory mode; (5) Architect F4 around *Performance* vs *Memory Safe* operational profiles; (6) Retain 480p/33f as primary scalability milestone. Full directive: [`docs/F3_F4_TECHNICAL_OPINION_01.md`](docs/F3_F4_TECHNICAL_OPINION_01.md).
+
+> **Phase F4 CORE SYSTEM VALIDATED 2026-09-08 (adaptative decision engine).** The F4 decision loop
+> ([`marley/core/adaptive.py`](marley/core/adaptive.py) + [`marley/core/policies.py`](marley/core/policies.py),
+> runner [`f4_adaptive_benchmark.py`](f4_adaptive_benchmark.py)) was implemented per the approved
+> test-spec v3 ([`docs/F4_TEST_SPEC_01.md`](docs/F4_TEST_SPEC_01.md)) and validated end-to-end on
+> real Wan2.1 DiT blocks. Same-session A/B/C/D (30 steps × 3 reps, alternating order, warmup
+> discarded): Safety PASS (peak **2,882 MB** < 4,000 target, 0 NaN/Inf), **decision overhead 0.16 ms**
+> (negligible). **Adaptive Gate PASS** (`--pressure-test`): deterministic
+> `performance → memory_safe → performance` cycle with hysteresis, **no oscillation** (overhead
+> 0.07 ms). Optimization Target **not met** on the no-pressure run (D vs best static B = **−3.40%**;
+> D remained on INT8 because no switch was demanded) — a *valid* negative, not a refutation.
+> Key finding: **Async FP16 beats Async INT8 by ~3.5% at this length** (dequant on critical path),
+> reinforcing F4's purpose (pick FP16 under no pressure). Verdict: **CORE SYSTEM VALIDATED —
+> PERFORMANCE CERTIFICATION PENDING**. Decision on engine retention vs fixed policy (Async INT8 /
+> Performance) reserved to the Director per Consejero §7 scenarios. Report:
+> [`results/TEST_F4_adaptive_benchmark.md`](results/TEST_F4_adaptive_benchmark.md) · Telemetry:
+> [`logs/f4_adaptive_benchmark.json`](logs/f4_adaptive_benchmark.json) · Change analysis:
+> [`docs/F4_IMPLEMENTATION_CHANGES_01.md`](docs/F4_IMPLEMENTATION_CHANGES_01.md).
 
 > **Provenance Note:** This roadmap represents the unified **v5 architectural consensus**, synthesized and hardened via a multi-agent review ensemble (ChatGPT, DeepSeek Pro, and Gemini Pro) and calibrated with external generative runtime advisory.
 
@@ -297,6 +315,30 @@ projections vs FP16) on the frozen F3 async scheduler with FP16 compute. NF4/F4 
   absolute comparison. Design plan: [`docs/F4_ADAPTIVE_ENGINE_PLAN_01.md`](docs/F4_ADAPTIVE_ENGINE_PLAN_01.md).
 - **Kill Gate:** If the adaptive engine does not outperform the **best same-session static policy**
   by at least **5%** in memory headroom or execution speed, simplify to a fixed policy.
+  *(v3 refinement per Consejero: the ≥5% is an **Optimization Target**, not the sole validity
+  criterion — it is evaluated alongside separate Safety and Adaptive Gates; see
+  [`docs/F4_TEST_SPEC_01.md`](docs/F4_TEST_SPEC_01.md).)*
+
+#### F4 Measured Result (2026-09-08 · same-session A/B/C/D, 30 steps × 3 reps)
+
+| Condition | Strategy | Mean (ms) | Min (ms) | Max (ms) | Overlap | NaN/Inf |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| **A** | Sync FP16 | 113,538.7 | 112,695.5 | 114,992.8 | 0.0% | 0/0 |
+| **B** | Async FP16 | **105,441.5** | 104,864.5 | 106,205.0 | 100.0% | 0/0 |
+| **C** | Async INT8 | 109,157.9 | 108,946.6 | 109,475.6 | 98.1% | 0/0 |
+| **D** | Adaptive (engine) | 109,022.8 | 108,875.6 | 109,275.0 | ~88.4% | 0/0 |
+
+- **Safety Gate:** 🟢 PASS — peak **2,882 MB** (≤ 4,800; target ≤ 4,000 MET), 0 NaN/Inf, policy correct.
+- **Adaptive Gate:** 🟢 PASS — `--pressure-test` deterministic `performance → memory_safe →
+  performance`, hysteresis dwell honored, **no oscillation** (overhead 0.07 ms).
+- **Optimization Target:** 🟡 NOT MET on the no-pressure run — **D vs best static B = −3.40%**.
+  D stayed on INT8 because no pressure ever demanded a switch (a *valid* negative).
+- **Decision overhead:** 0.16 ms total · switch 0 · replan 0.
+- **Key finding:** **Async FP16 ≈3.5% faster than Async INT8** here (dequant on critical path) →
+  reinforces the adaptive rationale (choose FP16 when no pressure).
+- **Status:** **CORE SYSTEM VALIDATED — PERFORMANCE CERTIFICATION PENDING.** Retention decision
+  (F4 vs fixed Async-INT8/Performance policy) reserved to the Director per Consejero §7.
+
 
 ---
 
@@ -336,7 +378,7 @@ projections vs FP16) on the frozen F3 async scheduler with FP16 compute. NF4/F4 
 | **F2** | Slab Allocator | Allocator fragmentation $> 15\%$ | No measurable peak physical VRAM drop | Retain standard PyTorch caching allocator | ❌ **BYPASSED / DISCARDED**<br>(Frag = 44.9 MB < 1.0%) |
 | **F3** | Async Scheduler | F0.6 overlap $\ge 10\%$ & prefetch safe | Overlap (real) $< 5\%$, speedup $< 0\%$, or OOM under load | Synchronous layer transfer | 🟢 **CERTIFIED PASS**<br>mean **+7.2%** external wall-clock (5 A/B reps) · overlap 100% measured · 2,584 MB · [`Verification`](results/TEST_F3_verification.md) |
 | **F3+INT8** | Transfer-Volume Isolation | F3 certified PASS | Same gates as F3; fidelity cos $< 0.99$ | Retain FP16 baseline | 🟢 **PASS**<br>Async-vs-Sync **+13.2%** · overlap 98.1% · **2,076 MB** (−508) · payload −49.9% · [`Report`](results/TEST_F3_INT8_benchmark.md) |
-| **F4** | Adaptive Decision Engine | Unconditional (Core) | Fails to beat best same-session static policy by $\ge 5\%$ | Deterministic static block policy (Async INT8 / Performance) | ⚪ **Planned**<br>[`F4_ADAPTIVE_ENGINE_PLAN_01.md`](docs/F4_ADAPTIVE_ENGINE_PLAN_01.md) (baselines: F3 +7.2%, F3+INT8 +13.2%) |
+| **F4** | Adaptive Decision Engine | Unconditional (Core) | Does not meet ≥5% Optimization Target over best same-session static (validated vs Safety/Adaptive Gates per v3) | Deterministic static block policy (Async INT8 / Performance) | 🟡 **CORE VALIDATED**<br>[`TEST_F4_adaptive_benchmark.md`](results/TEST_F4_adaptive_benchmark.md) (Safety 2,882 MB/0 NaN · Adaptive PASS · D vs best B −3.40% no-pressure · overhead 0.16 ms) |
 | **F5** | Temporal VAE Stitcher | VAE is confirmed bottleneck | Saves $< 20\%$ VRAM or introduces seam artifacts | Tiled spatial decoding fallback | ⚪ **Addressed in F0.5 Test J**<br>(Micro-tiling resolved VAE spike) |
 | **F6** | Verification Benchmarks | Completion of prior phases | Wall-clock time $> 30\text{ min}$ without explanation | Document operational boundaries | ⚪ **Final Validation Stage** |
 
