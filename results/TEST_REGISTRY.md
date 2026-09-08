@@ -11,6 +11,7 @@ This file is the **index** of all test reports in `results/`. Each row below lis
 
 | # | Report file | Phase | Subject | Key result | Status |
 | :---: | :--- | :---: | :--- | :--- | :---: |
+| 0 | [`TEST_F0_baseline_ref.md`](./TEST_F0_baseline_ref.md) | F0 | Reproducible Baseline Reference (`f0_baseline_real.py`) | Peak NVML 5,451 MB; VAE decode 322s; total 619.8s | ❌ Gate +651 MB |
 | 1 | [`TEST_G_model_cpu_offload.md`](./TEST_G_model_cpu_offload.md) | F0.5 | Model-level CPU offload (`--offload model_cpu`) | Peak NVML 5,861 MB; VAE paging 13 GB virtual | ❌ Gate +1,061 MB |
 | 2 | [`TEST_H_bfloat16_vae.md`](./TEST_H_bfloat16_vae.md) | F0.5 | Sequential offload + `bfloat16` VAE | VAE decode 322s → 65s | ⚠️ Alloc 4,366 MB |
 | 3 | [`TEST_J_vae_tiling_bf16.md`](./TEST_J_vae_tiling_bf16.md) | F0.5 | Sequential offload + BF16 VAE + spatial-temporal tiling | Peak NVML 2,902 MB; VAE decode 58s | 🟢 **PASS** (−1,898 MB) |
@@ -18,13 +19,10 @@ This file is the **index** of all test reports in `results/`. Each row below lis
 | 5 | [`TEST_F1_lifetime_profiler.md`](./TEST_F1_lifetime_profiler.md) | F1 | Tensor Lifetime Profiler (per-DiT-block residency, real model) | Peak NVML 3,223.7 MB; 32 components traced | 🟢 **PASS** (−1,576 MB) |
 
 > **Notes:**
-> - **F0 (Ref)** is the pre-report baseline and has **no report file** in `results/` — the report
->   system (`TEST_*.md`) began at Phase F0.5. Its evidence is the telemetry JSON
->   [`logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json`](../logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json),
->   and it appears as the reference row of the F0.5 matrix in §2.
+> - **F0 (Ref)** is documented in [`TEST_F0_baseline_ref.md`](./TEST_F0_baseline_ref.md) with ground-truth telemetry from [`logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json`](../logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json).
 > - `Test I` and `Test K` produced **no report file** (skipped / not required) — see §2 matrix.
 > - The order above is chronological by test **date**, which is the project's natural reading order
->   (`F0.5 → F0.6 → F1`). Detailed scorecards for each phase follow in §2.
+>   (`F0 → F0.5 → F0.6 → F1`). Detailed scorecards for each phase follow in §2.
 
 ---
 
@@ -35,7 +33,7 @@ This file is the **index** of all test reports in `results/`. Each row below lis
 
 | Test ID | Description / Strategy | Configuration | Peak NVML (50ms) | Denoise Time | VAE Decode | Total Wall-Clock | Gate F0.5 | Report |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **F0 (Ref)** | Sequential CPU Offload + FP32 VAE | `res=480p, 16f, DiT=fp16, VAE=fp32, offload=cpu` | 5,451 MB | 297s | 322s | 619.8s (10.3m) | ❌ +651 MB | [F0 Baseline](../logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json) |
+| **F0 (Ref)** | Sequential CPU Offload + FP32 VAE | `res=480p, 16f, DiT=fp16, VAE=fp32, offload=cpu` | 5,451 MB | 297s | 322s | 619.8s (10.3m) | ❌ +651 MB | [TEST_F0](./TEST_F0_baseline_ref.md) |
 | **Test G** | Model CPU Offload (submodel level) | `res=480p, 17f, DiT=fp16, VAE=fp32, offload=model_cpu` | **5,861 MB** (live peak) | **212s** (6.3s/it) | **484s** | **696.3s (11.6m)** | ❌ +1,061 MB (WDDM 13GB paging) | [TEST_G](./TEST_G_model_cpu_offload.md) |
 | **Test H** | Sequential Offload + bfloat16 VAE | `res=480p, 17f, DiT=fp16, VAE=bf16, offload=cpu` | **6,028 MB** (peak) / 4,839 post | **274s** (9.1s/it) | **65s** 🟢 | **339.0s (5.65m)** 🟢 | ⚠️ Alloc 4,366 MB (VAE -80% time) | [TEST_H](./TEST_H_bfloat16_vae.md) |
 | **Test I** | Sequential Offload + float16 VAE | `res=480p, 17f, DiT=fp16, VAE=fp16, offload=cpu` | *Skipped* (same memory footprint as BF16) | — | — | — | *Superseded by Test J* | Skipped |
