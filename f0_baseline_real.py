@@ -71,6 +71,42 @@ def log(msg: str, console: bool = True):
             fh.write(entry + "\n")
 
 
+import threading
+
+# ---------------------------------------------------------------------------
+# Continuous NVML Peak Tracker (samples every 50ms in background thread)
+# ---------------------------------------------------------------------------
+class NVMLPeakTracker:
+    def __init__(self, interval_s: float = 0.05):
+        self.interval_s = interval_s
+        self.stop_event = threading.Event()
+        self.peak_mb = 0.0
+        self.thread = None
+
+    def _loop(self):
+        while not self.stop_event.is_set():
+            if _NVML_OK:
+                info = pynvml.nvmlDeviceGetMemoryInfo(_NVML_HANDLE)
+                used_mb = info.used / 2**20
+                if used_mb > self.peak_mb:
+                    self.peak_mb = used_mb
+            time.sleep(self.interval_s)
+
+    def start(self):
+        if _NVML_OK:
+            info = pynvml.nvmlDeviceGetMemoryInfo(_NVML_HANDLE)
+            self.peak_mb = info.used / 2**20
+        self.stop_event.clear()
+        self.thread = threading.Thread(target=self._loop, daemon=True)
+        self.thread.start()
+
+    def stop(self) -> float:
+        self.stop_event.set()
+        if self.thread:
+            self.thread.join(timeout=1.0)
+        return self.peak_mb
+
+
 # ---------------------------------------------------------------------------
 # VRAM telemetry — all 3 layers from ROADMAP §2
 # ---------------------------------------------------------------------------
@@ -125,7 +161,7 @@ RES_MAP = {
 # ---------------------------------------------------------------------------
 # Phase F0 — Real pipeline run
 # ---------------------------------------------------------------------------
-def run_f0_baseline(res: str, frames: int, dtype_str: str, offload: str):
+def run_f0_baseline(res: str, frames: int, dtype_str: str, offload: str, vae_dtype_str: str = "fp32"):
     """
     Executes Wan2.1-T2V-1.3B via WanPipeline with the requested offload strategy.
 
@@ -139,27 +175,30 @@ def run_f0_baseline(res: str, frames: int, dtype_str: str, offload: str):
 
     MODEL_ID = "Wan-AI/Wan2.1-T2V-1.3B-Diffusers"
     height, width = RES_MAP[res]
-    dtype = {"fp16": torch.float16, "bf16": torch.bfloat16, "fp32": torch.float32}[dtype_str]
+    dtype_map = {"fp16": torch.float16, "bf16": torch.bfloat16, "fp32": torch.float32}
+    dtype = dtype_map[dtype_str]
+    vae_dtype = dtype_map[vae_dtype_str]
 
     log("=" * 72)
     log("  MARLEY RUNTIME - PHASE F0 - REPRODUCIBLE BASELINE (REAL MODEL)")
     log("=" * 72)
-    log(f"  Model:    {MODEL_ID}")
-    log(f"  Res:      {res} ({width}x{height})")
-    log(f"  Frames:   {frames}")
-    log(f"  Dtype:    {dtype_str} ({dtype})")
-    log(f"  Offload:  {offload}")
-    log(f"  Log:      {_log_file_path}")
+    log(f"  Model:      {MODEL_ID}")
+    log(f"  Res:        {res} ({width}x{height})")
+    log(f"  Frames:     {frames}")
+    log(f"  Dtype:      {dtype_str} ({dtype})")
+    log(f"  VAE Dtype:  {vae_dtype_str} ({vae_dtype})")
+    log(f"  Offload:    {offload}")
+    log(f"  Log:        {_log_file_path}")
     log("=" * 72)
 
     torch.cuda.reset_peak_memory_stats()
     snap_pre = log_snap(vram_snapshot("pre-load"))
 
-    # ── 1. Load VAE separately in FP32 (Wan2.1 requirement) ─────────────────
-    log(">> Step 1: Loading VAE (float32)...")
+    # ── 1. Load VAE separately with requested precision ─────────────────────
+    log(f">> Step 1: Loading VAE ({vae_dtype_str})...")
     t0 = time.time()
     vae = AutoencoderKLWan.from_pretrained(
-        MODEL_ID, subfolder="vae", torch_dtype=torch.float32
+        MODEL_ID, subfolder="vae", torch_dtype=vae_dtype
     )
     log(f"   VAE loaded in {time.time()-t0:.1f}s")
     log_snap(vram_snapshot("post-vae-load"))
@@ -199,6 +238,9 @@ def run_f0_baseline(res: str, frames: int, dtype_str: str, offload: str):
     log(f"   Prompt: {PROMPT[:80]}...")
     t_inf_start = time.time()
 
+    tracker = NVMLPeakTracker(interval_s=0.05)
+    tracker.start()
+
     try:
         output = pipe(
             prompt=PROMPT,
@@ -211,12 +253,15 @@ def run_f0_baseline(res: str, frames: int, dtype_str: str, offload: str):
             generator=torch.Generator("cpu").manual_seed(42),
         )
         t_inf_elapsed = time.time() - t_inf_start
+        peak_nvml_real_mb = tracker.stop()
         log(f"   [OK] Inference completed in {t_inf_elapsed:.1f}s")
         snap_post = log_snap(vram_snapshot("post-inference"))
+        peak_nvml = max(peak_nvml_real_mb, snap_post.get("nvml_used_mb", 0))
+        log(f"   [PEAK NVML DURING INFERENCE]: {peak_nvml:.1f} MB")
 
         # ── 5. Save output ───────────────────────────────────────────────────
         ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        out_path = os.path.join(LOG_DIR, f"f0_{res}_{frames}f_{dtype_str}_{offload}_{ts}.mp4")
+        out_path = os.path.join(LOG_DIR, f"f0_{res}_{frames}f_{dtype_str}_vae_{vae_dtype_str}_{offload}_{ts}.mp4")
         export_to_video(output.frames[0], out_path, fps=16)
         log(f"   Video saved → {out_path}")
 
@@ -228,11 +273,12 @@ def run_f0_baseline(res: str, frames: int, dtype_str: str, offload: str):
             "resolution_px": f"{width}x{height}",
             "frames": frames,
             "dtype": dtype_str,
+            "vae_dtype": vae_dtype_str,
             "offload": offload,
             "inference_time_s": round(t_inf_elapsed, 2),
             "peak_torch_allocated_mb": round(snap_post.get("torch_max_allocated_mb", 0), 1),
-            "peak_nvml_used_mb": round(snap_post.get("nvml_used_mb", 0), 1),
-            "vram_gate_4800mb_ok": snap_post.get("nvml_used_mb", 9999) <= 4915.2,
+            "peak_nvml_used_mb": round(peak_nvml, 1),
+            "vram_gate_4800mb_ok": peak_nvml <= 4915.2,
             "output_video": out_path,
             "status": "SUCCESS",
         }
@@ -254,7 +300,9 @@ def run_f0_baseline(res: str, frames: int, dtype_str: str, offload: str):
 
     except torch.cuda.OutOfMemoryError as oom:
         t_oom = time.time() - t_inf_start
+        peak_nvml_real_mb = tracker.stop()
         snap_oom = log_snap(vram_snapshot("OOM-moment"))
+        peak_nvml = max(peak_nvml_real_mb, snap_oom.get("nvml_used_mb", 0))
         log("*" * 72)
         log(">>> GATE F0: CUDA OUT OF MEMORY <<<")
         log(f"    Elapsed before OOM: {t_oom:.2f}s")
@@ -268,14 +316,15 @@ def run_f0_baseline(res: str, frames: int, dtype_str: str, offload: str):
             "res": res,
             "frames": frames,
             "dtype": dtype_str,
+            "vae_dtype": vae_dtype_str,
             "offload": offload,
             "status": "OOM",
             "oom_elapsed_s": round(t_oom, 2),
             "oom_torch_allocated_mb": round(snap_oom.get("torch_allocated_mb", 0), 1),
-            "oom_nvml_used_mb": round(snap_oom.get("nvml_used_mb", 0), 1),
+            "oom_nvml_used_mb": round(peak_nvml, 1),
             "oom_exception": str(oom)[:300],
         }
-        json_path = os.path.join(LOG_DIR, f"f0_OOM_{res}_{frames}f_{dtype_str}_{offload}.json")
+        json_path = os.path.join(LOG_DIR, f"f0_OOM_{res}_{frames}f_{dtype_str}_vae_{vae_dtype_str}_{offload}.json")
         with open(json_path, "w", encoding="utf-8") as fh:
             json.dump(summary, fh, indent=2)
         log(f"  OOM telemetry → {json_path}")
@@ -290,8 +339,9 @@ def main():
         description="Marley Runtime Phase F0 — Reproducible Baseline (Real Wan2.1 Model)"
     )
     parser.add_argument("--res", default="480p", choices=list(RES_MAP), help="Target resolution")
-    parser.add_argument("--frames", type=int, default=16, help="Number of video frames (default: 16)")
-    parser.add_argument("--dtype", default="fp16", choices=["fp16", "bf16", "fp32"], help="Precision")
+    parser.add_argument("--frames", type=int, default=17, help="Number of video frames (default: 17; must satisfy (N-1)%%4==0)")
+    parser.add_argument("--dtype", default="fp16", choices=["fp16", "bf16", "fp32"], help="Precision for DiT/Text encoder")
+    parser.add_argument("--vae-dtype", default="fp32", choices=["fp32", "bf16", "fp16"], help="Precision for VAE (default: fp32)")
     parser.add_argument(
         "--offload",
         default="cpu",
@@ -305,7 +355,7 @@ def main():
     )
     args = parser.parse_args()
 
-    tag = f"{args.res}_{args.frames}f_{args.dtype}_{args.offload}"
+    tag = f"{args.res}_{args.frames}f_{args.dtype}_vae_{args.vae_dtype}_{args.offload}"
     _init_log(tag)
 
     if not torch.cuda.is_available():
@@ -316,7 +366,7 @@ def main():
     total_vram = torch.cuda.get_device_properties(0).total_memory / 2**20
     log(f"Device: {gpu_name} | Total VRAM: {total_vram:.0f} MB")
 
-    result = run_f0_baseline(args.res, args.frames, args.dtype, args.offload)
+    result = run_f0_baseline(args.res, args.frames, args.dtype, args.offload, args.vae_dtype)
 
     if result["status"] == "OOM":
         log("\n[WARN] Run ended with OOM. Review telemetry and try --offload cpu or --offload model_cpu.")
