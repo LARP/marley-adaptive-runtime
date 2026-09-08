@@ -387,10 +387,20 @@ projections vs FP16) on the frozen F3 async scheduler with FP16 compute. NF4/F4 
   4. Temporal coherence (zero flicker / seam artifacts, Warp error)
   5. Policy adaptation responsiveness under varying external VRAM load
 - **Success Criteria Milestones:**
-  - **Milestone A:** $\le 4.8\text{ GB}$ physical GPU residency without Out-Of-Memory exceptions.
-  - **Milestone B:** End-to-end generation time $< 10\text{ minutes}$ (or competitive with baseline low-VRAM sequential offload).
-  - **Milestone C:** Free of perceptual visual degradation and severe temporal jitter.
+  - **Milestone A:** $\le 4.8\text{ GB}$ physical GPU residency without Out-Of-Memory exceptions (🟢 **ACHIEVED: 2,624 MB [F6-A] / 2,698 MB [F6-B]**).
+  - **Milestone B:** End-to-end generation time $< 10\text{ minutes}$ (🟢 **ACHIEVED: 9.33 min [F6-A] / 8.73 min [F6-B]**).
+  - **Milestone C:** Free of perceptual visual degradation and severe temporal jitter (🟢 **ACHIEVED: 0 NaNs, clean MP4 output**).
   - **Milestone D:** Dynamic policy switching demonstrated when external VRAM pressure is injected.
+
+#### Measured Benchmarks (480p / 33 frames / 30 steps)
+
+| Benchmark Condition | Streaming Mode | Denoising Latency | Total Wall-Clock | Peak NVML VRAM | Gate (4,800 MB) | Status |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **F6-0 Smoke** | Async FP16 (2 steps) | 30.40 s (15.20 s/step) | 113.93 s (1.90 min) | 2,647.8 MB | 🟢 PASS | 🟢 PASS |
+| **F6-A Baseline** | Sync FP16 (30 steps) | 456.98 s (15.23 s/step) | 559.93 s (9.33 min) | 2,624.3 MB | 🟢 PASS | 🟢 PASS |
+| **F6-B Overlapped** | Async FP16 (30 steps)| **436.92 s (14.56 s/step)** | **523.68 s (8.73 min)** | 2,698.0 MB | 🟢 PASS | 🟢 PASS |
+
+Full report: [`docs/F6_MULTIDIMENSIONAL_BENCHMARK_REPORT_01.md`](docs/F6_MULTIDIMENSIONAL_BENCHMARK_REPORT_01.md).
 
 ---
 
@@ -409,7 +419,7 @@ projections vs FP16) on the frozen F3 async scheduler with FP16 compute. NF4/F4 
 | **F3+INT8** | Transfer-Volume Isolation | F3 certified PASS | Same gates as F3; fidelity cos $< 0.99$ | Retain FP16 baseline | 🟢 **PASS**<br>Async-vs-Sync **+13.2%** · overlap 98.1% · **2,076 MB** (−508) · payload −49.9% · [`Report`](results/TEST_F3_INT8_benchmark.md) |
 | **F4** | Adaptive Decision Engine | Unconditional (Core) | ≥5% Optimization Target is a *target*, not a validity gate (validated vs Safety/Adaptive Gates per v3) | Deterministic static policy (Async FP16 or Async INT8 / Performance) | 🟢 **CORE VALIDATED**<br>[`TEST_F4_adaptive_benchmark.md`](results/TEST_F4_adaptive_benchmark.md) (Safety 2,882 MB/0 NaN · Adaptive PASS · D vs best B −3.40% no-pressure · overhead 0.16 ms) |
 | **F5** | Temporal VAE Stitcher | VAE is confirmed bottleneck at 33f | Saves $< 20\%$ VRAM or introduces seam artifacts | Tiled spatial-temporal decoding (Test J) | 🟢 **RETIRED (Resolved by Tiling)**<br>Probe F5-A certified: **2,109 MB peak NVML** (Gate ≤ 4,800), **26.99 s decode** (Target ≤ 150 s), 0 NaNs at 33f. Stitcher unnecessary. [`TEST_F5`](results/TEST_F5_vae_probe_33f.md) |
-| **F6** | Verification Benchmarks | Completion of prior phases | Wall-clock time $> 30\text{ min}$ without explanation | Document operational boundaries | ⚪ **Final Validation Stage** |
+| **F6** | Verification Benchmarks | Completion of prior phases | Wall-clock time $> 30\text{ min}$ without explanation | Document operational boundaries | 🟢 **ACTIVE / F6-A & F6-B PASS**<br>F6-0 Smoke PASS · F6-A Sync PASS (559.9s, 2,624 MB) · F6-B Async FP16 PASS (523.7s, 2,698 MB) · [`Report`](docs/F6_MULTIDIMENSIONAL_BENCHMARK_REPORT_01.md) |
 
 ---
 
