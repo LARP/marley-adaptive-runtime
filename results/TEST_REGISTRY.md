@@ -24,6 +24,7 @@ This file is the **index** of all test reports in `results/`. Each row below lis
 | 10 | [`TEST_F3_INT8_benchmark.md`](./TEST_F3_INT8_benchmark.md) | F3+INT8 | Isolation: transfer-volume reduction (INT8 linear proj, FP16 compute, scheduler frozen) | Async-vs-Sync **+13.2%**; payload −49.9%; overlap 98.1%; peak **2,076 MB** (−508 vs FP16); cos ≥ 0.9999; 0 NaNs | 🟢 **PASS** |
 | — | [`F3_INT8_CLOSURE_01.md`](../docs/F3_INT8_CLOSURE_01.md) | F3+INT8 | Formal closure acta (freeze as F4 baseline) | +13.2% Async-vs-Sync; 46.5 MB/block; 2,076 MB; cos ≥ 0.9999; precise intra-session interpretation | 🟢 **CLOSED / FROZEN** |
 | — | [`F4_ADAPTIVE_ENGINE_PLAN_01.md`](../docs/F4_ADAPTIVE_ENGINE_PLAN_01.md) | F4 | Design plan (CORE) | Dynamic FP16/INT8 + prefetch + residency; same-session A/B/C; kill gate vs best static ≥ 5% | 🟡 **PLANNED** |
+| 11 | [`TEST_F4_adaptive_benchmark.md`](./TEST_F4_adaptive_benchmark.md) | F4 | Adaptive Memory Decision Engine (decision loop, A/B/C/D same-session) | Smoke e2e PASS (Safety 2,778 MB, 0 NaN); D vs best static −4.08% (1-rep/3-step, **not certified**); overhead 0.01 ms | 🟡 **PRELIMINARY** |
 
 > **Notes:**
 > - **F0 (Ref)** is documented in [`TEST_F0_baseline_ref.md`](./TEST_F0_baseline_ref.md) with ground-truth telemetry from [`logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json`](../logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json).
@@ -141,7 +142,38 @@ This file is the **index** of all test reports in `results/`. Each row below lis
 
 ---
 
-## 9. Test Documentation Architecture
+## 9. Phase F4 — Adaptive Memory Decision Engine 🟡 PRELIMINARY
+
+**Gate Targets (authorized contract [`docs/F4_TEST_SPEC_01.md`](../docs/F4_TEST_SPEC_01.md) v3, §4.4):**
+- **Hard Gate:** Peak NVML ≤ 4,800 MB · 0 NaN/Inf · policy correct.
+- **Adaptive Gate:** pressure detection + replan + correct switch + headroom recovery ≥ +1.5 GB (deterministic `--pressure-test`).
+- **Engineering Target:** Peak NVML ≤ 4,000 MB (not a gate).
+- **Optimization Target:** D vs best same-session `{A,B,C}` ≥ 5% (target only, not a validity gate).
+
+**Status:** smoke end-to-end validation **PASS** (Safety). Certified A/B/C/D + pressure-test pending.
+Report: [`TEST_F4_adaptive_benchmark.md`](./TEST_F4_adaptive_benchmark.md) · Telemetry: [`logs/f4_adaptive_benchmark.json`](../logs/f4_adaptive_benchmark.json) · Contract: [`docs/F4_TEST_SPEC_01.md`](../docs/F4_TEST_SPEC_01.md).
+
+| Condition | Strategy | Wall (ms) | Overlap | Peak VRAM (MB) | NaN/Inf |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| **A** | Sync FP16 | 10,870.3 | 0.0% | 2,200 | 0/0 |
+| **B** | Async FP16 | **9,599.7** | 100.0% | 2,200 | 0/0 |
+| **C** | Async INT8 | 9,930.3 | 97.7% | 2,778 | 0/0 |
+| **D** | Adaptive (engine) | 9,991.7 | 97.2% | ≤ 2,778 | 0/0 |
+
+**Same-session (1 rep · 3 steps — preliminary only, NOT certified):**
+- Best static = **B** (9,599.7 ms); **D vs best = −4.08%** (Optimization Target not met on this sample — expected, target only).
+- Decision overhead (D) = **0.01 ms** · switch 0 · replan 0 (static `performance` AOT in ABC mode).
+- **Hard Gate PASS** (peak 2,778 MB ≤ 4,800; 0 NaN/Inf) · **Engineering Target MET** (≤ 4,000).
+
+**Artifacts (F4 decision loop):** [`marley/core/policies.py`](../marley/core/policies.py) (pure selector, 3-state residency) ·
+[`marley/core/adaptive.py`](../marley/core/adaptive.py) (EMA observer + hysteresis) · [`f4_adaptive_benchmark.py`](../f4_adaptive_benchmark.py).
+Frozen F3/F3+INT8 primitives (`marley/ops/async_stream*.py`) **unchanged**.
+
+**Pending for certification:** `--abc --steps 30 --reps 3` (alternating order, warmup discarded) + `--pressure-test` (Adaptive Gate), then Director decision on engine retention vs fixed-policy fallback.
+
+---
+
+## 10. Test Documentation Architecture
 
 Each test run contains an individual technical report in this directory:
 - `TEST_<ID>_<strategy>.md`: Document covering the technical hypothesis, reproducible command line, multi-layer memory telemetry, bottleneck analysis, and gate verdict.
