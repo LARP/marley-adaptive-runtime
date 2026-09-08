@@ -22,6 +22,8 @@ This file is the **index** of all test reports in `results/`. Each row below lis
 | 8 | [`TEST_F3_async_scheduler.md`](./TEST_F3_async_scheduler.md) | F3 | Budgeted Asynchronous Scheduler (Double-buffer) | First run: +10.4% (optimistic sample). **Certified by [`TEST_F3_verification.md`](./TEST_F3_verification.md): mean +7.2%** (6.0–8.4%); overlap 100% measured; VRAM 2,584 MB; 0 NaNs | 🟢 **PASS** (§7) |
 | 9 | [`TEST_F3_verification.md`](./TEST_F3_verification.md) | F3 | Final Measurement Verification (Enmiendas 1–3) | External wall-clock speedup mean **+7.2%** (stable over 5 A/B reps); stall 0 ms; peak 2,584 MB | 🟢 **CERTIFIED PASS** → F3+INT8 |
 | 10 | [`TEST_F3_INT8_benchmark.md`](./TEST_F3_INT8_benchmark.md) | F3+INT8 | Isolation: transfer-volume reduction (INT8 linear proj, FP16 compute, scheduler frozen) | Async-vs-Sync **+13.2%**; payload −49.9%; overlap 98.1%; peak **2,076 MB** (−508 vs FP16); cos ≥ 0.9999; 0 NaNs | 🟢 **PASS** |
+| — | [`F3_INT8_CLOSURE_01.md`](../docs/F3_INT8_CLOSURE_01.md) | F3+INT8 | Formal closure acta (freeze as F4 baseline) | +13.2% Async-vs-Sync; 46.5 MB/block; 2,076 MB; cos ≥ 0.9999; precise intra-session interpretation | 🟢 **CLOSED / FROZEN** |
+| — | [`F4_ADAPTIVE_ENGINE_PLAN_01.md`](../docs/F4_ADAPTIVE_ENGINE_PLAN_01.md) | F4 | Design plan (CORE) | Dynamic FP16/INT8 + prefetch + residency; same-session A/B/C; kill gate vs best static ≥ 5% | 🟡 **PLANNED** |
 
 > **Notes:**
 > - **F0 (Ref)** is documented in [`TEST_F0_baseline_ref.md`](./TEST_F0_baseline_ref.md) with ground-truth telemetry from [`logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json`](../logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json).

@@ -19,6 +19,8 @@
 
 > **Phase F3 CERTIFIED PASS 2026-09-08 (measurement-corrected).** After a post-certification audit corrected the overlap/stall instrumentation (Enmiendas 1–3), a repeated A/B verification battery (5 reps, order alternated, warmup discarded) on real Wan2.1 DiT blocks confirmed a **stable external wall-clock speedup of mean +7.2%** (range +6.0% to +8.4%, σ ±1.1%), **overlap 100% measured** (0.00 ms stall, per-block timelines), **2,584 MB peak NVML** and **0 NaNs/Infs**. All F3-B gates PASS → **advance to F3 + INT8**. Certified report: [`results/TEST_F3_verification.md`](results/TEST_F3_verification.md) · Telemetry: [`logs/f3_verification_benchmark.json`](logs/f3_verification_benchmark.json) · Methodology: [`docs/F3_MEASUREMENT_VERIFICATION_03.md`](docs/F3_MEASUREMENT_VERIFICATION_03.md). The initial single-run +10.4% was an optimistic sample (first run: [`results/TEST_F3_async_scheduler.md`](results/TEST_F3_async_scheduler.md)).
 
+> **Phase F3 + INT8 CLOSED / FROZEN 2026-09-08.** Isolation experiment certified **PASS**: halving the per-block H2D payload to **INT8** (92.9 → 46.5 MB, **−49.9%**) on the unchanged async scheduler (FP16 compute, on-device dequant) raised the **Async-vs-Sync margin to +13.2%** (min +10.4 / max +15.4, σ ±2.5) with overlap **98.1%**, peak NVML **2,076 MB (−508 vs FP16)** and dequant fidelity cos ≥ **0.9999** (0 NaNs/Infs). Result flagged for official docs: the +13.2% is the *within-run* Async-vs-Sync margin (NOT an absolute cross-session claim). Closure acta: [`docs/F3_INT8_CLOSURE_01.md`](docs/F3_INT8_CLOSURE_01.md) · Report: [`results/TEST_F3_INT8_benchmark.md`](results/TEST_F3_INT8_benchmark.md). Architecture frozen → **advance to F4**. A same-session A/B/C (Sync-FP16 / Async-FP16 / Async-INT8) is scheduled as F4 validation methodology.
+
 > **Expert Technical Directive (2026-09-08):** Following F1.5 and F1.7, technical guidance from an external IA Generative / SD / ComfyUI runtime expert was formally adopted. Key directives: (1) Freeze prior optimizations to preserve causal attribution; (2) Reject adding new memory tricks before F3; (3) Mandate 7 quantitative metrics for F3 benchmark; (4) Retain INT8 as production baseline while restricting NF4 to extreme low-memory mode; (5) Architect F4 around *Performance* vs *Memory Safe* operational profiles; (6) Retain 480p/33f as primary scalability milestone. Full directive: [`docs/F3_F4_TECHNICAL_OPINION_01.md`](docs/F3_F4_TECHNICAL_OPINION_01.md).
 
 > **Provenance Note:** This roadmap represents the unified **v5 architectural consensus**, synthesized and hardened via a multi-agent review ensemble (ChatGPT, DeepSeek Pro, and Gemini Pro) and calibrated with external generative runtime advisory.
@@ -61,8 +63,8 @@ flowchart TD
     F15 --> F17["F1.7: Selective Quantization 🟢"]
     F15 -.->|"Frag < 1% (Bypassed)"| F2["F2: Static Slab Allocator ❌"]
     F06 -.->|"Overlap 80-96% + Prefetch Safe"| F3["F3: Budgeted Async Scheduler 🟢"]
-    F17 --> F4["F4: Adaptive Memory Decision Engine (CORE)"]
-    F3 --> F4
+    F17 --> F4["F4: Adaptive Memory Decision Engine (CORE) 🟡"]
+    F3 --> F3I8["F3+INT8: Transfer-Volume Isolation 🟢"] --> F4
     F4 -.->|"Resolved in F0.5"| F5["F5: Temporal VAE Stitcher ⚪"]
     F4 --> F6["F6: Multidimensional Benchmarks"]
     F5 --> F6
@@ -71,6 +73,7 @@ flowchart TD
     classDef inprog fill:#5c4d00,stroke:#d4af37,stroke-width:2px,color:#fff3b0;
     classDef bypass fill:#4a1525,stroke:#9b2226,stroke-width:1px,color:#f8d7da;
     class F0,F05,F06,F1,F15,F17,F3 pass;
+    class F3I8 pass;
     class F2 bypass;
 ```
 
@@ -280,12 +283,20 @@ projections vs FP16) on the frozen F3 async scheduler with FP16 compute. NF4/F4 
   - Recent PCIe transfer latency
   - Layer compute elapsed time
   - Exponential moving average of system memory pressure
+  - **Prefetch state / measured stall** (from F3 event timelines)
+  - **Dequantization cost on the critical path** (new signal from F3 + INT8, ~324 ms total stall)
+- **Decision levers (frozen primitives reused, not rewritten):** weight precision (FP16/INT8),
+  prefetch aggressiveness (aggressive/conservative/off), residency (keep/prefetch/evict).
 - **Operational Profiles (Expert Directive §6):**
   - **Performance Profile:** Aggressive prefetching + INT8 DiT projections + maximal allowable VRAM utilization for minimum generation latency.
   - **Memory Safe Profile:** Conservative prefetch + early eviction + high safety margin (+1.5 GB headroom) to withstand sudden background WDDM pressure.
 - **Scalability Pathway:** Progression from 480p / 17f $\rightarrow$ **480p / 33f (Primary target)** $\rightarrow$ 720p stretch.
 - **Execution Model:** Ahead-Of-Time (AOT) static plan generated following Step 1 warmup, with periodic re-evaluation checkpoints every $N$ diffusion steps or upon abrupt memory pressure deviations.
-- **Kill Gate:** If the adaptive engine does not outperform the best static baseline policy by at least **5%** in memory headroom or execution speed, simplify to a fixed policy.
+- **Same-session A/B/C validation (mandatory):** Sync-FP16 / Async-FP16 / Async-INT8 in one
+  controlled session to isolate scheduler vs INT8 vs thermal/clock variance before any
+  absolute comparison. Design plan: [`docs/F4_ADAPTIVE_ENGINE_PLAN_01.md`](docs/F4_ADAPTIVE_ENGINE_PLAN_01.md).
+- **Kill Gate:** If the adaptive engine does not outperform the **best same-session static policy**
+  by at least **5%** in memory headroom or execution speed, simplify to a fixed policy.
 
 ---
 
@@ -325,7 +336,7 @@ projections vs FP16) on the frozen F3 async scheduler with FP16 compute. NF4/F4 
 | **F2** | Slab Allocator | Allocator fragmentation $> 15\%$ | No measurable peak physical VRAM drop | Retain standard PyTorch caching allocator | ❌ **BYPASSED / DISCARDED**<br>(Frag = 44.9 MB < 1.0%) |
 | **F3** | Async Scheduler | F0.6 overlap $\ge 10\%$ & prefetch safe | Overlap (real) $< 5\%$, speedup $< 0\%$, or OOM under load | Synchronous layer transfer | 🟢 **CERTIFIED PASS**<br>mean **+7.2%** external wall-clock (5 A/B reps) · overlap 100% measured · 2,584 MB · [`Verification`](results/TEST_F3_verification.md) |
 | **F3+INT8** | Transfer-Volume Isolation | F3 certified PASS | Same gates as F3; fidelity cos $< 0.99$ | Retain FP16 baseline | 🟢 **PASS**<br>Async-vs-Sync **+13.2%** · overlap 98.1% · **2,076 MB** (−508) · payload −49.9% · [`Report`](results/TEST_F3_INT8_benchmark.md) |
-| **F4** | Adaptive Decision Engine | Unconditional (Core) | Fails to beat best static policy by $\ge 5\%$ | Deterministic static block policy | ⚪ **Core Stage** (Awaiting F3/F1.7) |
+| **F4** | Adaptive Decision Engine | Unconditional (Core) | Fails to beat best same-session static policy by $\ge 5\%$ | Deterministic static block policy (Async INT8 / Performance) | ⚪ **Planned**<br>[`F4_ADAPTIVE_ENGINE_PLAN_01.md`](docs/F4_ADAPTIVE_ENGINE_PLAN_01.md) (baselines: F3 +7.2%, F3+INT8 +13.2%) |
 | **F5** | Temporal VAE Stitcher | VAE is confirmed bottleneck | Saves $< 20\%$ VRAM or introduces seam artifacts | Tiled spatial decoding fallback | ⚪ **Addressed in F0.5 Test J**<br>(Micro-tiling resolved VAE spike) |
 | **F6** | Verification Benchmarks | Completion of prior phases | Wall-clock time $> 30\text{ min}$ without explanation | Document operational boundaries | ⚪ **Final Validation Stage** |
 
