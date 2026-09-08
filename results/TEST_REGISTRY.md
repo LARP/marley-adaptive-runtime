@@ -17,12 +17,13 @@ This file is the **index** of all test reports in `results/`. Each row below lis
 | 3 | [`TEST_J_vae_tiling_bf16.md`](./TEST_J_vae_tiling_bf16.md) | F0.5 | Sequential offload + BF16 VAE + spatial-temporal tiling | Peak NVML 2,902 MB; VAE decode 58s | 🟢 **PASS** (−1,898 MB) |
 | 4 | [`TEST_F0.6_wddm_overlap.md`](./TEST_F0.6_wddm_overlap.md) | F0.6 | WDDM `cudaMemcpyAsync` H2D vs. Tensor-Core `matmul` overlap | Overlap 79.9–96.3% | 🟢 **PASS** (F3 active) |
 | 5 | [`TEST_F1_lifetime_profiler.md`](./TEST_F1_lifetime_profiler.md) | F1 | Tensor Lifetime Profiler (per-DiT-block residency, real model) | Peak NVML 3,223.7 MB; 32 components traced | 🟢 **PASS** (−1,576 MB) |
+| 6 | [`TEST_F1.5_bottleneck_classification.md`](./TEST_F1.5_bottleneck_classification.md) | F1.5 | Real Bottleneck Identification & Roadmap Dispatch | Allocator frag 44.9 MB (<1%); Prefetch safe (88.6 MB vs 1.57 GB); F3 Greenlit, F2 Bypassed | 🟢 **COMPLETE** |
 
 > **Notes:**
 > - **F0 (Ref)** is documented in [`TEST_F0_baseline_ref.md`](./TEST_F0_baseline_ref.md) with ground-truth telemetry from [`logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json`](../logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json).
 > - `Test I` and `Test K` produced **no report file** (skipped / not required) — see §2 matrix.
 > - The order above is chronological by test **date**, which is the project's natural reading order
->   (`F0 → F0.5 → F0.6 → F1`). Detailed scorecards for each phase follow in §2.
+>   (`F0 → F0.5 → F0.6 → F1 → F1.5`). Detailed scorecards for each phase follow in §2.
 
 ---
 
@@ -72,7 +73,26 @@ This file is the **index** of all test reports in `results/`. Each row below lis
 
 ---
 
-## 5. Test Documentation Architecture
+## 5. Phase F1.5 — Real Bottleneck Identification & Roadmap Dispatch 🟢 COMPLETE
+
+**Gate Target:** Quantify memory consumption across the 5 categories from ROADMAP §3, evaluate conditional triggers for F2 and F3, and issue formal dispatch.
+
+**Result:**
+- Allocator fragmentation is only **44.9 MB (< 1.0% of Gate)** → **Phase F2 (Slab Allocator) BYPASSED / DISCARDED**.
+- Phase F3 double-buffering prefetch requires **88.6 MB** against **+1,576.3 MB** free headroom (consumes 5.6% of headroom) → **Phase F3 (Async Scheduler) GREENLIT / APPROVED**.
+- Report: [`TEST_F1.5_bottleneck_classification.md`](./TEST_F1.5_bottleneck_classification.md) · Telemetry: [`logs/f1_5_bottleneck_decomposition.json`](../logs/f1_5_bottleneck_decomposition.json).
+
+| Category | Measured Footprint | Nature | Roadmap Decision |
+| :--- | :---: | :--- | :--- |
+| **1. Static Weights** | 17,658.5 MB total (88.6 MB active) | T5 Text Encoder is 83.6% of weights | Target for Phase F1.7 selective quantization |
+| **2. DiT Activations** | ~550–600 MB (1,743.5 MB peak NVML) | Uniform across 30 blocks (delta < 98 MB) | Predictable streaming surface for Phase F3/F4 |
+| **3. VAE Activations** | ~770 MB pure activations (2,112 MB peak) | Activation-dominated (8.7× weights) | Contained via 256×256 micro-tiling (Test J) |
+| **4. Allocator Frag.** | **44.9 MB** (0.94% of 4.8 GB Gate) | Negligible caching pool delta | **Phase F2 Trigger Refuted (Bypassed)** |
+| **5. Prefetch Buffers** | **88.6 MB** (Leaves +1,487.7 MB safety buffer) | Fully safe under 4,800 MB Gate | **Phase F3 Trigger Approved (Greenlit)** |
+
+---
+
+## 6. Test Documentation Architecture
 
 Each test run contains an individual technical report in this directory:
 - `TEST_<ID>_<strategy>.md`: Document covering the technical hypothesis, reproducible command line, multi-layer memory telemetry, bottleneck analysis, and gate verdict.
