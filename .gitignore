@@ -216,3 +216,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# AI / Agent local files & configuration (Strictly local, do not push)
+.agents/
+.agent/
+.gemini/
+GEMINI.md
+AGENTS.md
