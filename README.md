@@ -10,6 +10,8 @@
 [![Target: RTX 3050 Laptop](https://img.shields.io/badge/Hardware-RTX%203050%206GB%20Laptop-76b900.svg)](https://www.nvidia.com/)
 [![Roadmap: v5 Approved](https://img.shields.io/badge/Roadmap-v5%20Approved-8b5cf6.svg)](ROADMAP.md)
 [![Phase F0: PASS](https://img.shields.io/badge/Phase%20F0-PASS-22c55e.svg)](ROADMAP.md)
+[![Phase F0.5: PASS](https://img.shields.io/badge/Phase%20F0.5-PASS%20(2.9GB)-22c55e.svg)](results/TEST_J_vae_tiling_bf16.md)
+[![Phase F0.6: NEXT](https://img.shields.io/badge/Phase%20F0.6-NEXT%20(WDDM)-3b82f6.svg)](ROADMAP.md)
 
 *In loving memory of Marley 🐾*
 
@@ -45,7 +47,7 @@ Memory is tracked across **three distinct layers** to prevent WDDM virtualizatio
 
 1. `torch.cuda.memory_allocated()` — active PyTorch tensor footprint
 2. `torch.cuda.memory_reserved()` — PyTorch caching allocator pool
-3. **NVML physical residency** — hardware ground-truth · **the strict 4.8 GB gate applies here**
+3. **NVML physical residency** — hardware ground-truth (sampled continuously at 50ms) · **the strict 4.8 GB gate applies here**
 
 ---
 
@@ -55,8 +57,8 @@ Memory is tracked across **three distinct layers** to prevent WDDM virtualizatio
 | :---: | :--- | :---: | :--- |
 | **F0.1** | Hardware Verification | 🟢 **PASS** | Driver 581.86 · CUDA 13.0 · RTX 3050 6GB confirmed |
 | **F0** | Reproducible Baseline | 🟢 **PASS** | Wan2.1-T2V-1.3B run at 480p/16f/FP16 — video generated |
-| **F0.5** | Progressive Exploration | 🔵 **NEXT** | INT8/INT4 quantization · target NVML ≤ 4.8 GB |
-| **F0.6** | WDDM Concurrency | ⚪ Scheduled | — |
+| **F0.5** | Progressive Exploration | 🟢 **PASS** | **Peak NVML 2,902 MB (+1,898 MB headroom)** · VAE BF16 + Tiling |
+| **F0.6** | WDDM Concurrency | 🔵 **NEXT** | PCIe async transfer vs. Tensor Core matmul overlap |
 | **F1** | Lifetime Profiler | ⚪ Scheduled | — |
 | **F1.5** | Bottleneck Analysis | ⚪ Scheduled | — |
 | **F1.7** | Selective Quantization | ⚪ Conditional | — |
@@ -100,6 +102,29 @@ The first real model run with `Wan-AI/Wan2.1-T2V-1.3B-Diffusers` completed succe
 > The 4.8 GB NVML gate was exceeded **only during VAE decode** (+4,187 MB delta).
 > The DiT denoising phase itself fits comfortably within the budget.
 > This pre-activates the **Phase F5 (Temporal VAE Stitcher)** trigger.
+
+---
+
+## 🚀 Phase F0.5 — VAE Memory Optimization & Benchmark Results (2026-09-08)
+
+Following Phase F0, an experimental ladder of low-cost isolation tests was executed to resolve the VAE memory bottleneck without introducing unnecessary algorithmic complexity:
+
+### Experimental Ladder & Scorecard
+
+| Test ID | Strategy / Configuration | Peak NVML (50ms) | PyTorch Alloc | VAE Decode | Total Time | Gate (4.8 GB) | Report |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **F0 (Ref)** | `sequential_cpu_offload` + FP32 VAE | 5,451 MB | ~7.9 GB virt | 322s | 619.8s (10.3m) | ❌ +651 MB | [F0 Baseline](logs/f0_480p_16f_fp16_cpu_20260908_030437_telemetry.json) |
+| **Test G** | `model_cpu_offload` + FP32 VAE | 5,861 MB | 13,036.9 MB | 484s | 696.3s (11.6m) | ❌ +1,061 MB | [Test G Report](results/TEST_G_model_cpu_offload.md) |
+| **Test H** | `sequential_cpu_offload` + BF16 VAE | 6,028 MB | 4,366.2 MB | 65s 🟢 | 339.0s (5.65m) | ⚠️ Post: 4,839 MB | [Test H Report](results/TEST_H_bfloat16_vae.md) |
+| **Test J** | **`sequential_cpu_offload` + BF16 + VAE Tiling** | **2,902.0 MB** 🟢 | **2,021.1 MB** 🟢 | **58s** 🟢 | **328.2s (5.47m)** 🟢 | 🟢 **PASS (-1,898 MB)** | [Test J Report](results/TEST_J_vae_tiling_bf16.md) |
+
+### Key Breakthroughs Achieved in Test J:
+1. **Physical VRAM Plummeted to 2,902 MB:** The full pipeline now runs utilizing only **47.2% of the physical 6 GB VRAM**, leaving **~1.9 GB of free headroom** below the strict 4.8 GB gate.
+2. **VAE Latency Decimated by 82%:** VAE decode time dropped from **322 seconds to 58 seconds**, eliminating the primary pipeline bottleneck.
+3. **Total Generation Time Cut in Half:** Wall-clock runtime for 17 frames at 480p dropped from 10.3 minutes to **5.47 minutes**.
+4. **Zero Visual Artifacts:** Native spatial tiling (256×256 px) with causal temporal caching preserved video smoothness and quality with zero NaNs.
+
+All test reports and raw telemetry are centralized in the [`results/`](results/) directory.
 
 ---
 
@@ -149,17 +174,17 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-### Run Phase F0 Baseline (Real Model)
+### Run Inference & Benchmarks
 
 ```bash
-# 480p / 16 frames / FP16 / sequential CPU offload (recommended — lowest VRAM)
-python f0_baseline_real.py --res 480p --frames 17 --dtype fp16 --offload cpu
+# 🟢 Optimal Phase F0.5 configuration (Peak NVML: 2,902 MB · 58s VAE decode · 5.4 min total)
+python f0_baseline_real.py --res 480p --frames 17 --dtype fp16 --offload cpu --vae-dtype bf16 --vae-tiling
 
-# Without offload (all weights on GPU — will OOM on 6GB)
-python f0_baseline_real.py --res 480p --frames 17 --offload none
+# Sequential offload with FP32 VAE (Baseline F0 — 5,451 MB peak · 322s VAE decode)
+python f0_baseline_real.py --res 480p --frames 17 --dtype fp16 --offload cpu --vae-dtype fp32
 
-# Model-level offload (faster than sequential, higher VRAM peak)
-python f0_baseline_real.py --res 480p --frames 17 --offload model_cpu
+# Model-level offload (Test G — 6.3s/it DiT, but 13 GB virtual VAE paging in FP32)
+python f0_baseline_real.py --res 480p --frames 17 --dtype fp16 --offload model_cpu
 ```
 
 > [!NOTE]
@@ -167,10 +192,10 @@ python f0_baseline_real.py --res 480p --frames 17 --offload model_cpu
 > automatically from HuggingFace Hub and cached locally.
 > Use `num_frames` values where `(frames - 1) % 4 == 0` (e.g. 5, 9, 13, 17, 21…).
 
-Outputs are saved to `logs/`:
-- `f0_*.mp4` — generated video
-- `f0_*_telemetry.json` — VRAM metrics (all 3 layers)
-- `f0_real_*.log` — full run log with per-checkpoint snapshots
+Outputs are saved to:
+- `logs/f0_*.mp4` — generated video
+- `logs/f0_*_telemetry.json` — VRAM metrics (all 3 layers + 50ms continuous NVML tracker)
+- `results/` — markdown technical reports for each benchmark run
 
 ---
 
@@ -178,6 +203,11 @@ Outputs are saved to `logs/`:
 
 ```
 marley-runtime/
+├── results/                 # Benchmarks, test reports & validation logs
+│   ├── README.md            # Central test registry & gate scorecard
+│   ├── TEST_G_*.md          # Model-level offload test report
+│   ├── TEST_H_*.md          # bfloat16 VAE precision test report
+│   └── TEST_J_*.md          # VAE spatial-temporal tiling report (F0.5 PASS ✅)
 ├── logs/                    # Profiling run outputs (gitignored: *.mp4, *.json, *.log)
 │   └── .gitkeep
 ├── benchmarks/              # Standardized benchmark suites
@@ -188,7 +218,7 @@ marley-runtime/
 │   └── profiler/            # NVML telemetry & WDDM benchmarks
 ├── tests/                   # Unit and integration tests
 ├── baseline_profiler.py     # Synthetic stress profiler (Phase F0 OOM boundary)
-├── f0_baseline_real.py      # Real Wan2.1 pipeline baseline (Phase F0 ✅)
+├── f0_baseline_real.py      # Real Wan2.1 pipeline baseline & profiler (F0/F0.5 ✅)
 ├── requirements.txt         # Python dependencies (torch cu124, diffusers, etc.)
 ├── LICENSE                  # MIT License
 ├── README.md                # This file
