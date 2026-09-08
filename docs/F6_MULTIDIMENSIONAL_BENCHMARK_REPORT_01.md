@@ -171,31 +171,70 @@ Utiliza `INT8BudgetedStreamer` con:
 * **Estabilidad Numérica:** 0 NaNs / 0 Infs (`False`)
 * **Veredicto F6-C:** 🟢 **PASS** en los 5 ejes.
 
+## 7. Benchmark F6-D: Marley Motor Adaptativo (Adaptive Engine)
+
+### 7.1 Comando de Ejecución
+```powershell
+.venv\Scripts\python.exe f6_end_to_end_benchmark.py --mode adaptive --steps 30 --frames 33 --output logs/f6_condition_d_adaptive.json
+```
+
+### 7.2 Mecanismo Técnico
+Utiliza `AdaptiveEngine` (validado en Phase F4) con:
+* **Monitoreo en Ventanas ($N=5$ pasos):** Muestreo continuo de presión y evaluación de histéresis cada 5 pasos de difusión.
+* **Selección Dinámica de Política:** Arbitraje en tiempo real entre perfiles `performance` (Async FP16 con prefetch agresivo), `balanced` (Async INT8 con compresión PCIe) y `safety` (Sync conservador ante presión extrema).
+* **Gestión Dual de Streamers:** Dispone de ambos motores instanciados en memoria para conmutación inmediata sin recompilación de grafos ni re-cuantización.
+
+### 7.3 Métricas y Telemetría Auditada
+* **Fecha y Hora de Inicio:** 2026-09-08 20:46:37 -03:00
+* **Fecha y Hora de Finalización:** 2026-09-08 20:56:01 -03:00
+* **Archivo de Telemetría JSON:** [`logs/f6_condition_d_adaptive.json`](../logs/f6_condition_d_adaptive.json)
+* **Archivo de Video Exportado:** [`logs/f6_832x480_33f_adaptive_20260908_205600.mp4`](../logs/f6_832x480_33f_adaptive_20260908_205600.mp4) (756,148 bytes)
+
+#### Desglose de Latencias por Etapa:
+1. **Prompt Encoding (UMT5-XXL en CPU):** 44.29 s
+2. **Preparación de Latentes & Scheduler:** 0.13 s
+3. **Bucle DiT Denoising (30 pasos adaptativos):** **443.21 s** (**14.77 s/paso**)
+4. **Decodificación VAE Tiled (33f bfloat16):** 29.81 s
+5. **Serialización y Exportación MP4:** 0.60 s
+* **Tiempo Total End-to-End (Wall-Clock):** **530.00 s (8.83 min)**
+
+#### Huella de Memoria:
+* **Pico Físico NVML (VRAM Real a 50 ms):** **3,244.6 MB**
+  * *Margen vs Hard Gate (4,800 MB):* **+1,555.4 MB** de holgura.
+  * *Margen vs Target (4,000 MB):* **+755.4 MB** de holgura.
+* **PyTorch Allocator Peak:** 1,202.9 MB
+* **PyTorch Reserved Peak:** 1,870.0 MB
+* **Host RAM RSS del Proceso:** **881.4 MB** (Excelente control de memoria host)
+* **Estabilidad Numérica:** 0 NaNs / 0 Infs (`False`)
+* **Veredicto F6-D:** 🟢 **PASS** en los 5 ejes.
+
 ---
 
-## 7. Tabla Comparativa Multidimensional Consolidada (Tríada Canónica Oficial)
+## 8. Tabla Comparativa Multidimensional Consolidada (Tetralogía Canónica Completa)
 
-| Eje de Evaluación | Condición A (Sync FP16) | Condición B (Async FP16) | Condición C (Async INT8) | Target / Gate |
-| :--- | :---: | :---: | :---: | :---: |
-| **Mecanismo de Streaming** | Secuencial síncrono | Doble stream FP16 | Doble stream INT8 | — |
-| **Payload PCIe / Bloque** | 88.6 MB | 88.6 MB | **45.9 MB (-48.2%)** | — |
-| **Tiempo DiT (30 pasos)** | 456.98 s | **436.92 s (-20.1 s)** | 451.32 s (-5.66 s) | — |
-| **Cadencia (s/paso)** | 15.23 s | **14.56 s (-0.67 s)** | 15.04 s (-0.19 s) | $\le 15.0\text{ s}$ |
-| **Tiempo Total End-to-End**| 559.93 s (9.33 min) | **523.68 s (8.73 min)** | 538.67 s (8.98 min) | $< 600.0\text{ s}$ |
-| **Pico VRAM Físico (NVML)**| **2,624.3 MB** | 2,698.0 MB | 2,962.5 MB | $\le 4,800.0\text{ MB}$ |
-| **Holgura vs Hard Gate** | **+2,175.7 MB** | +2,102.0 MB | +1,837.5 MB | $> 0\text{ MB}$ |
-| **VAE Decode (33 frames)** | 28.92 s | 31.11 s | 29.87 s | $\approx 27.0\text{ s}$ |
-| **Estabilidad Numérica** | 0 NaNs | 0 NaNs | 0 NaNs | 0 NaNs |
-| **Video MP4 Generado** | [`logs/..._sync_...mp4`](../logs/f6_832x480_33f_sync_20260908_202057.mp4) | [`logs/..._async_fp16_...mp4`](../logs/f6_832x480_33f_async_fp16_20260908_203148.mp4) | [`logs/..._async_int8_...mp4`](../logs/f6_832x480_33f_async_int8_20260908_204210.mp4) | MP4 Válido |
-| **Veredicto General** | 🟢 **PASS** | 🟢 **PASS** | 🟢 **PASS** | 🟢 **PASS** |
+| Eje de Evaluación | F6-A (Sync FP16) | F6-B (Async FP16) | F6-C (Async INT8) | F6-D (Adaptive Engine) | Target / Gate |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Mecanismo de Streaming** | Secuencial síncrono | Doble stream FP16 | Doble stream INT8 | Orquestador Dinámico | — |
+| **Payload PCIe / Bloque** | 88.6 MB | 88.6 MB | 45.9 MB (-48.2%) | Dinámico (FP16/INT8) | — |
+| **Tiempo DiT (30 pasos)** | 456.98 s | **436.92 s (-20.1 s)**| 451.32 s (-5.66 s)| 443.21 s (-13.77 s) | — |
+| **Cadencia (s/paso)** | 15.23 s | **14.56 s (-0.67 s)** | 15.04 s (-0.19 s) | 14.77 s (-0.46 s) | $\le 15.0\text{ s}$ |
+| **Tiempo Total End-to-End**| 559.93 s (9.33 min) | **523.68 s (8.73 min)**| 538.67 s (8.98 min)| 530.00 s (8.83 min) | $< 600.0\text{ s}$ |
+| **Pico VRAM Físico (NVML)**| **2,624.3 MB** | 2,698.0 MB | 2,962.5 MB | 3,244.6 MB | $\le 4,800.0\text{ MB}$ |
+| **Holgura vs Hard Gate** | **+2,175.7 MB** | +2,102.0 MB | +1,837.5 MB | +1,555.4 MB | $> 0\text{ MB}$ |
+| **VAE Decode (33 frames)** | 28.92 s | 31.11 s | 29.87 s | 29.81 s | $\approx 27.0\text{ s}$ |
+| **Host RAM RSS** | **744.9 MB** | 1,516.6 MB | 3,805.5 MB (Alerta F6-01) | 881.4 MB | $\le 24\text{ GB}$ |
+| **Estabilidad Numérica** | 0 NaNs | 0 NaNs | 0 NaNs | 0 NaNs | 0 NaNs |
+| **Video MP4 Generado** | [`logs/..._sync_...mp4`](../logs/f6_832x480_33f_sync_20260908_202057.mp4) | [`logs/..._async_fp16_...mp4`](../logs/f6_832x480_33f_async_fp16_20260908_203148.mp4) | [`logs/..._async_int8_...mp4`](../logs/f6_832x480_33f_async_int8_20260908_204210.mp4) | [`logs/..._adaptive_...mp4`](../logs/f6_832x480_33f_adaptive_20260908_205600.mp4) | MP4 Válido |
+| **Veredicto General** | 🟢 **PASS** | 🟢 **PASS** | 🟢 **PASS** | 🟢 **PASS** | 🟢 **PASS** |
 
 ---
 
-## 8. Alerta Técnica Identificada: Sobrecarga Host RSS en F6-C
+## 9. Alerta Técnica Identificada: Sobrecarga Host RSS en F6-C
 
 Durante la evaluación de F6-C se registró un aumento del Host RSS del proceso a **3,805.5 MB** (+2,288.9 MB sobre F6-B).  
 El análisis forense determinó que `INT8BudgetedStreamer` genera una réplica de pesos `pinned INT8` (~1.38 GB) sin liberar los tensores originales `param.data` en FP16 (~2.66 GB) de los 30 bloques DiT en CPU, produciendo una doble residencia transitoria en memoria host.
 
 Análisis forense detallado y plan de remediación: [`docs/F6_ALERT_01_INT8_HOST_RSS_OVERHEAD.md`](F6_ALERT_01_INT8_HOST_RSS_OVERHEAD.md).
+
 
 
