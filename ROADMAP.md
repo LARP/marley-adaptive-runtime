@@ -420,6 +420,28 @@ Full report: [`docs/F6_MULTIDIMENSIONAL_BENCHMARK_REPORT_01.md`](docs/F6_MULTIDI
 
 ---
 
+### Phase F7 — 720p Strategy & Forensic Memory Profiling
+
+- **Target Workload:** Wan2.1-T2V-1.3B at **720p (1280×720), 33 frames**. Spatial latent area: $90 \times 160 = 14,400$ ($2.31\times$ over 480p).
+- **Baseline Probe F7-0 Result (Completed 2026-09-09):**
+  - Executed exploratory probe ($1280 \times 720$ @ 33f, 5 steps, `adaptive` mode, frozen commit `c6e4bfb`).
+  - **Peak Físico NVML:** **6,058.5 MB** vs Hard Gate $\le 4,800.0\text{ MB}$ (**❌ FAIL**, margen $-1,258.5\text{ MB}$, $+26.2\%$).
+  - **PyTorch Allocated:** 2,187.5 MB vs **PyTorch Reserved:** 5,894.0 MB ($\Delta = 3,706.5\text{ MB}$).
+  - **Cadencia DiT:** 68.75 s/paso (frente a 14.25 s/paso en F6, degradación $4.82\times$). VAE decode: 69.13 s. Total: 521.93 s.
+  - **Integridad Numérica:** 0 NaNs / 0 Infs (**🟢 PASS**). Salida MP4 decodificable (**🟢 PASS**).
+  - **Conclusión F7-0:** Ejecutabilidad computacional demostrada a 720p; viabilidad física $\le 4,800\text{ MB}$ NO cumplida. Baseline F7-0 **CERRADO, CONGELADO E INMUTABLE**.
+  - Reporte oficial: [`docs/F7_0_FEASIBILITY_PROBE_REPORT_01.md`](docs/F7_0_FEASIBILITY_PROBE_REPORT_01.md) · Telemetría: [`logs/f7_probe_720p_5steps.json`](logs/f7_probe_720p_5steps.json).
+
+- **Formal Resolution — Director de Proyecto (2026-09-09):**
+  - **F6:** 🔒 CERRADA / CONGELADA.
+  - **F7-0:** ❌ Memory Gate FAIL / 🟢 Integrity PASS / 🔒 INMUTABLE.
+  - **F7-D1:** 🟢 **AUTORIZADA FORMALMENTE (Forensic Memory Profiling)**.
+  - **Optimización F7:** ⏸️ **PENDIENTE DE NUEVA AUTORIZACIÓN HUMANA** (Moratoria absoluta de cambios de tile, cuantización, `empty_cache()`, poda o alteraciones de streaming).
+  - **Objetivo F7-D1:** Responder P1–P5 (localización de pico, evento detonante de reserved, desglose de segmentos, residencia de streaming, correlación cadencia vs presión) y evaluar hipótesis H1–H4 sin optimizar el runtime.
+  - Especificación técnica: [`docs/F7_D1_FORENSIC_SPEC_01.md`](docs/F7_D1_FORENSIC_SPEC_01.md).
+
+---
+
 ## 4. Kill Gates Summary Table
 
 | Phase | Phase Name | Activation Condition | Kill Gate / Cancellation Trigger | Fallback Path | Status / Evidence |
@@ -436,7 +458,8 @@ Full report: [`docs/F6_MULTIDIMENSIONAL_BENCHMARK_REPORT_01.md`](docs/F6_MULTIDI
 | **F4** | Adaptive Decision Engine | Unconditional (Core) | ≥5% Optimization Target is a *target*, not a validity gate (validated vs Safety/Adaptive Gates per v3) | Deterministic static policy (Async FP16 or Async INT8 / Performance) | 🟢 **CORE VALIDATED**<br>[`TEST_F4_adaptive_benchmark.md`](results/TEST_F4_adaptive_benchmark.md) (Safety 2,882 MB/0 NaN · Adaptive PASS · D vs best B −3.40% no-pressure · overhead 0.16 ms) |
 | **F5** | Temporal VAE Stitcher | VAE is confirmed bottleneck at 33f | Saves $< 20\%$ VRAM or introduces seam artifacts | Tiled spatial-temporal decoding (Test J) | 🟢 **RETIRED (Resolved by Tiling)**<br>Probe F5-A certified: **2,109 MB peak NVML** (Gate ≤ 4,800), **26.99 s decode** (Target ≤ 150 s), 0 NaNs at 33f. Stitcher unnecessary. [`TEST_F5`](results/TEST_F5_vae_probe_33f.md) |
 | **F6** | Verification Benchmarks | Completion of prior phases | Wall-clock time $> 30\text{ min}$ without explanation | Document operational boundaries | 🟢 **CERTIFIED PASS & FROZEN**<br>F6-0 to F6-E verified across 5 dimensions · Multirun 4x3 certified (12/12 individual pass) · [`Certification`](docs/F6_FINAL_CERTIFICATION_REPORT_01.md) · [`Report`](docs/F6_REPRODUCIBILITY_VARIABILITY_REPORT_01.md) |
-| **F7** | 720p Strategy (Memory Probe) | F6 certified & frozen | Peak NVML $> 4,800.0\text{ MB}$ or OOM on 720p 5-step probe | Calibrate VAE spatial tiling, DiT block eviction or INT8 policy | 🟡 **ACTIVE / PROBE IN PROGRESS**<br>1280x720 @ 33f (5 steps) memory feasibility probe |
+| **F7-0** | 720p Memory Feasibility Probe | F6 certified & frozen | Peak NVML $> 4,800.0\text{ MB}$ on 720p 5-step probe | Forensic memory profiling (F7-D1) | ❌ **FAIL (Peak 6,058.5 MB)**<br>Integrity PASS (0 NaNs, MP4 OK) · Frozen baseline · [`Report`](docs/F7_0_FEASIBILITY_PROBE_REPORT_01.md) |
+| **F7-D1**| Forensic Memory Profiling | F7-0 baseline failure | Observational failure or distortion of memory causality | Re-scope diagnostic instrumentation | 🟢 **AUTORIZADA POR DIRECTOR**<br>Forensic diagnostic without optimization · [`Spec`](docs/F7_D1_FORENSIC_SPEC_01.md) |
 
 ---
 
