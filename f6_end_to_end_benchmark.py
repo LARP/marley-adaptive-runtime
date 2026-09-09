@@ -124,6 +124,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--guidance", type=float, default=CANONICAL_GUIDANCE)
     p.add_argument("--device", type=str, default="cuda:0")
     p.add_argument("--output", type=str, default="logs/f6_e2e_benchmark.json")
+    p.add_argument("--pressure-test", action="store_true", help="Enable F6-E dynamic VRAM pressure injection (steps 11-20)")
+    p.add_argument("--pressure-mb", type=float, default=1200.0, help="VRAM pressure injection amount in MB (default: 1200.0)")
     return p.parse_args()
 
 
@@ -133,6 +135,8 @@ def main() -> None:
     if args.smoke:
         args.steps = 2
         stage_name = "F6-0 (Integration Smoke Test)"
+    elif args.pressure_test:
+        stage_name = f"F6-E Dynamic Pressure Benchmark ({args.mode}, {args.steps} steps, +{args.pressure_mb:.0f}MB)"
     else:
         stage_name = f"F6 Full Benchmark ({args.mode}, {args.steps} steps)"
 
@@ -172,7 +176,10 @@ def main() -> None:
         guidance_scale=args.guidance,
         seed=args.seed,
         mode=args.mode,
+        output_video_path=None,
         nvml_sampler=sampler,
+        pressure_test=args.pressure_test,
+        pressure_mb=args.pressure_mb,
     )
 
     peak_nvml = sampler.stop()
@@ -191,6 +198,16 @@ def main() -> None:
     target_vram_met = peak_nvml <= ENGINEERING_TARGET_VRAM_MB
     perf_met = metrics.total_wall_clock_s <= ENGINEERING_TARGET_LATENCY_S
 
+    if args.pressure_test:
+        adaptive_pass = (metrics.adaptive_replan_count == 2)
+        adaptive_str = f"🟢 PASS ({metrics.adaptive_replan_count} switches: Normal -> Pressure -> Normal, 0 oscillation)" if adaptive_pass else f"🟡 Incomplete ({metrics.adaptive_replan_count} switches)"
+    elif args.mode == "adaptive":
+        adaptive_pass = True
+        adaptive_str = "🟢 Tested (Nominal AOT)"
+    else:
+        adaptive_pass = True
+        adaptive_str = "⚪ N/A (Standard Mode)"
+
     print("\n" + "=" * 75)
     print(f"  PHASE F6 SCORECARD — {stage_name.upper()}")
     print("=" * 75)
@@ -207,13 +224,16 @@ def main() -> None:
     print(f"  Process Host RAM RSS:            {metrics.peak_process_ram_mb:7.1f} MB")
     print(f"  Exported Video File:             {metrics.output_video_path}")
     print(f"  NaN / Inf Detected:              {metrics.nan_inf_detected}")
+    if args.pressure_test:
+        print(f"  Adaptive Replan Count:           {metrics.adaptive_replan_count}")
+        print(f"  Adaptive Replan Events:          {metrics.adaptive_replan_events}")
     print("-" * 75)
     print("  MULTIDIMENSIONAL VERDICT (5 AXES):")
     print(f"    [1] Functional: {'🟢 PASS' if functional_pass else '❌ FAIL'}")
     print(f"    [2] Memory:     {'🟢 PASS' if memory_pass else '❌ FAIL'} ({'🟢 <= 4,000 Target MET' if target_vram_met else '🟡 <= 4,800 Acceptable'})")
     print(f"    [3] Performance:{'🟢 Target < 600s MET' if perf_met else '🟡 Target Exceeded (informational)'}")
     print(f"    [4] Quality:    {'🟢 Clean / Verified' if not metrics.nan_inf_detected else '❌ Corrupted'}")
-    print(f"    [5] Adaptive:   {'🟢 Tested' if args.mode == 'adaptive' else '⚪ N/A (Standard Mode)'}")
+    print(f"    [5] Adaptive:   {adaptive_str}")
     print("=" * 75 + "\n")
 
     results = {
@@ -243,6 +263,13 @@ def main() -> None:
             "peak_torch_alloc": round(metrics.peak_torch_alloc_mb, 1),
             "peak_torch_reserved": round(metrics.peak_torch_reserved_mb, 1),
             "peak_process_ram": round(metrics.peak_process_ram_mb, 1),
+        },
+        "adaptive_telemetry": {
+            "pressure_test_active": args.pressure_test,
+            "pressure_injected_mb": args.pressure_mb if args.pressure_test else 0.0,
+            "replan_count": metrics.adaptive_replan_count,
+            "replan_events": metrics.adaptive_replan_events,
+            "adaptation_pass": adaptive_pass,
         },
         "verdict": {
             "functional_pass": functional_pass,

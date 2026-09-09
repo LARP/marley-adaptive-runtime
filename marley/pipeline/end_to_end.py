@@ -51,6 +51,10 @@ class EndToEndMetrics:
     output_video_path: Optional[str] = None
     step_times_s: List[float] = field(default_factory=list)
     mode: str = "async_fp16"
+    adaptive_replan_count: int = 0
+    adaptive_replan_events: List[Dict] = field(default_factory=list)
+    pressure_test_active: bool = False
+    pressure_injected_mb: float = 0.0
 
 
 class MarleyEndToEndPipeline:
@@ -179,6 +183,8 @@ class MarleyEndToEndPipeline:
         mode: str = "async_fp16",
         output_video_path: Optional[str] = None,
         nvml_sampler=None,
+        pressure_test: bool = False,
+        pressure_mb: float = 1200.0,
     ) -> Tuple[torch.Tensor, EndToEndMetrics]:
         """
         Executes full text-to-video generation with exact stage-by-stage timing.
@@ -235,12 +241,29 @@ class MarleyEndToEndPipeline:
         # Step 3: Initialize Marley Streamer
         # -------------------------------------------------------------------
         print(f">> [3/5] Setting up Marley Streamer (mode='{mode}')...")
+
+        def vram_pressure_sampler() -> float:
+            if nvml_sampler is not None and getattr(nvml_sampler, "_nvml_available", False) and getattr(nvml_sampler, "_handle", None) is not None:
+                try:
+                    import pynvml
+                    info = pynvml.nvmlDeviceGetMemoryInfo(nvml_sampler._handle)
+                    return float(info.used / (1024 * 1024))
+                except Exception:
+                    pass
+            return (torch.cuda.memory_allocated() / (1024 * 1024)) + 1500.0
+
         if mode == "sync" or mode == "async_fp16":
             streamer = BudgetedAsyncStreamer(blocks=self.blocks, device=device, dtype=dtype)
         elif mode == "async_int8":
             streamer = INT8BudgetedStreamer(blocks=self.blocks, device=device, dtype=dtype)
         elif mode == "adaptive":
-            streamer = AdaptiveEngine(blocks=self.blocks, device=device, dtype=dtype, window=5)
+            streamer = AdaptiveEngine(
+                blocks=self.blocks,
+                device=device,
+                dtype=dtype,
+                window=1,
+                pressure_sampler=vram_pressure_sampler,
+            )
         else:
             raise ValueError(f"Unsupported mode: {mode}")
 
@@ -261,9 +284,33 @@ class MarleyEndToEndPipeline:
         # Detach module blocks during patched execution so diffusers doesnt conflict
         self.transformer.blocks = nn.ModuleList([])
 
+        pressure_tensor = None
+        if pressure_test:
+            metrics.pressure_test_active = True
+            metrics.pressure_injected_mb = pressure_mb
+            print(f"   [F6-E Mode] Dynamic Pressure Injection armed: +{pressure_mb:.0f} MB at steps 11-20")
+
         try:
             for step_idx, t in enumerate(timesteps):
                 t_step_start = time.perf_counter()
+
+                # Dynamic Pressure Injection for F6-E:
+                # Phase E1: steps 0..9 (steps 1..10) -> normal performance regime
+                # Phase E2: steps 10..19 (steps 11..20) -> inject pressure tensor
+                # Phase E3: steps 20..29 (steps 21..30) -> release pressure tensor
+                if pressure_test:
+                    if step_idx == 10 and pressure_tensor is None:
+                        print(f"\n   ⚡ [F6-E Pressure Injected] Allocating {pressure_mb:.0f} MB tensor on GPU for steps 11-20...")
+                        elements = int(pressure_mb * 1024 * 1024 // 4)
+                        pressure_tensor = torch.zeros((elements,), dtype=torch.float32, device=device)
+                        torch.cuda.synchronize(device)
+                    elif step_idx == 20 and pressure_tensor is not None:
+                        print(f"\n   🟢 [F6-E Pressure Released] Deallocating {pressure_mb:.0f} MB tensor on GPU for steps 21-30...")
+                        del pressure_tensor
+                        pressure_tensor = None
+                        torch.cuda.empty_cache()
+                        torch.cuda.synchronize(device)
+
                 latent_model_input = latents.to(dtype)
 
                 # Patchify & compute embeddings
@@ -343,6 +390,11 @@ class MarleyEndToEndPipeline:
                     print(f"   Step [{step_idx+1}/{num_inference_steps}] completed in {step_elapsed:.2f}s (avg: {sum(metrics.step_times_s)/len(metrics.step_times_s):.2f}s/step)")
 
         finally:
+            if pressure_tensor is not None:
+                del pressure_tensor
+                pressure_tensor = None
+                torch.cuda.empty_cache()
+
             self.transformer.blocks = transformer_blocks_orig
             # Release streamer allocations
             if hasattr(streamer, "restore_all_to_cpu"):
@@ -350,6 +402,10 @@ class MarleyEndToEndPipeline:
             if hasattr(streamer, "release"):
                 streamer.release()
             torch.cuda.empty_cache()
+
+            if mode == "adaptive" and isinstance(streamer, AdaptiveEngine):
+                metrics.adaptive_replan_count = streamer._replan_count
+                metrics.adaptive_replan_events = list(streamer._replan_events)
 
         metrics.denoise_time_s = time.perf_counter() - t_denoise_start
         print(f"   [OK] Denoising finished in {metrics.denoise_time_s:.2f}s")
