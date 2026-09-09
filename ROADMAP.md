@@ -401,7 +401,8 @@ projections vs FP16) on the frozen F3 async scheduler with FP16 compute. NF4/F4 
 | **F6-B Overlapped** | Async FP16 (30 steps)| **436.92 s (14.56 s/step)** | **523.68 s (8.73 min)** | 2,698.0 MB | 🟢 PASS | 🟢 PASS |
 | **F6-C Quantized** | Async INT8 (30 steps)| 451.32 s (15.04 s/step) | 538.67 s (8.98 min) | 2,962.5 MB | 🟢 PASS | 🟢 PASS |
 | **F6-D Adaptive** | Adaptive Engine (30 steps)| 443.21 s (14.77 s/step) | 530.00 s (8.83 min) | 3,244.6 MB | 🟢 PASS | 🟢 PASS |
-| **F6-E Dynamic** | Adaptive + Presión (30 steps)| 446.31 s (14.88 s/step) | 525.95 s (8.77 min) | 5,182.8 MB (inducido)| 🟢 PASS (Adapt.) | 🟢 PASS |
+| **F6-E Calibrado**| Adapt + 500MB (30 steps)  | **431.51 s (14.38 s/step)** | **516.94 s (8.62 min)** | 4,588.5 MB | 🟢 PASS | 🟢 PASS |
+| **F6-E Estrés**   | Adapt + 1200MB (30 steps) | 446.31 s (14.88 s/step) | 525.95 s (8.77 min) | 5,182.8 MB (inducido)| 🟡 PASS (Dinámico) | 🟢 PASS |
 
 Full report: [`docs/F6_MULTIDIMENSIONAL_BENCHMARK_REPORT_01.md`](docs/F6_MULTIDIMENSIONAL_BENCHMARK_REPORT_01.md).
 

@@ -246,34 +246,46 @@ Evalúa la robustez dinámica del motor adaptativo de Phase F4 sometido a pertur
   2. *Evento 2 (Paso 21):* `regime: normal`, `profile: performance`.
 * **Estabilidad del Bucle:** 100% libre de ciclos histeréticos indeseados.
 
-#### Huella de Memoria y Resistencia a OOM:
+#### Huella de Memoria y Resistencia a OOM (Corrida de Estrés +1,200 MB):
 * **Pico Físico NVML (VRAM Real a 50 ms):** **5,182.8 MB** (utilizando el 84.4% de los 6,144 MB de la RTX 3050 Laptop).
   * *Comportamiento de Hardware:* Cero fallos de asignación (`CUDA Out of Memory`), el runtime absorbió la perturbación de +1,200 MB con éxito.
-  * *Observación de Umbral:* La inyección artificial de +1,200 MB elevó la memoria física temporalmente por encima del límite arbitrario del Hard Gate (4,800 MB). Dado que el umbral de disparo del motor es de 200 MB (`PRESSURE_HIGH_MB`), una perturbación calibrada de +500 MB a +600 MB dispara idéntica transición adaptativa manteniendo la VRAM por debajo de 4,000 MB.
-* **PyTorch Allocator Peak:** 2,397.4 MB
-* **PyTorch Reserved Peak:** 4,144.0 MB
-* **Host RAM RSS del Proceso:** 2,085.9 MB
-* **Estabilidad Numérica:** 0 NaNs / 0 Infs (`False`)
-* **Veredicto F6-E:** 🟢 **PASS** en Dimensiones Funcional, Rendimiento, Calidad y Adaptativa.
+  * *Clasificación:* Prueba de resiliencia y estabilidad dinámica; no certificante de Hard Gate debido a la magnitud excesiva de la carga artificial.
+* **PyTorch Allocator Peak:** 2,397.4 MB | **Reserved Peak:** 4,144.0 MB | **Host RSS:** 2,085.9 MB.
+* **Veredicto F6-E Estrés:** 🟢 **PASS** en Adaptabilidad, Funcional, Calidad y Rendimiento; 🟡 No certificante de Hard Gate.
+
+### 8.4 Verificación de Hard Gate: Corrida F6-E Calibrada (+500 MB)
+Siguiendo la recomendación metodológica del Consejero Técnico Externo, se ejecutó una corrida calibrada con una perturbación de **+500 MB** ($2,5\times$ el umbral de activación de 200 MB) para certificar el cumplimiento del Hard Gate ($\le 4.800\text{ MB}$) bajo perturbación:
+* **Comando de Ejecución:**
+  ```powershell
+  .venv\Scripts\python.exe f6_end_to_end_benchmark.py --mode adaptive --steps 30 --frames 33 --pressure-test --pressure-mb 500 --output logs/f6_condition_e_calibrated.json
+  ```
+* **Archivo de Telemetría JSON:** [`logs/f6_condition_e_calibrated.json`](../logs/f6_condition_e_calibrated.json)
+* **Archivo de Video Exportado:** [`logs/f6_832x480_33f_adaptive_20260908_214751.mp4`](../logs/f6_832x480_33f_adaptive_20260908_214751.mp4) (756,148 bytes)
+* **Pico Físico NVML (VRAM Real a 50 ms):** **4,588.5 MB** (Hard Gate $\le 4,800.0\text{ MB}$: 🟢 **PASS**, **+211.5 MB de holgura**).
+* **Tiempo Total End-to-End:** **516.94 s (8.62 min)** (Récord absoluto de velocidad end-to-end de Phase F6).
+* **Denoising DiT:** 431.51 s (**14.38 s/paso promedio**).
+* **Conmutaciones Adaptativas:** Exactamente 2 (`normal` $\to$ `pressure` en paso 11, `pressure` $\to$ `normal` en paso 21). 0 oscilaciones.
+* **Veredicto F6-E Calibrado:** 🟢 **CERTIFICADO PASS EN LOS 5 EJES INCLUYENDO HARD GATE DE MEMORIA**.
 
 ---
 
-## 9. Tabla Comparativa Multidimensional Consolidada (Pentalogía Canónica Completa)
+## 9. Tabla Comparativa Multidimensional Consolidada (Matriz Canónica Completa)
 
-| Eje de Evaluación | F6-A (Sync FP16) | F6-B (Async FP16) | F6-C (Async INT8) | F6-D (Adaptive Nominal) | F6-E (Adaptive + Presión) | Target / Gate |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Mecanismo de Streaming** | Secuencial síncrono | Doble stream FP16 | Doble stream INT8 | Orquestador Dinámico | Dinámico + Histeresis | — |
-| **Perturbación Externa** | 0 MB (Nominal) | 0 MB (Nominal) | 0 MB (Nominal) | 0 MB (Nominal) | **+1,200 MB (Pasos 11–20)**| Resistencia OOM |
-| **Tiempo DiT (30 pasos)** | 456.98 s | **436.92 s (-20.1 s)**| 451.32 s (-5.66 s)| 443.21 s (-13.77 s) | 446.31 s (-10.67 s) | — |
-| **Cadencia (s/paso)** | 15.23 s | **14.56 s (-0.67 s)** | 15.04 s (-0.19 s) | 14.77 s (-0.46 s) | 14.88 s (14.1s $\to$ 16.0s $\to$ 14.5s) | $\le 15.0\text{ s}$ |
-| **Tiempo Total End-to-End**| 559.93 s (9.33 min) | **523.68 s (8.73 min)**| 538.67 s (8.98 min)| 530.00 s (8.83 min) | 525.95 s (8.77 min) | $< 600.0\text{ s}$ |
-| **Pico VRAM Físico (NVML)**| **2,624.3 MB** | 2,698.0 MB | 2,962.5 MB | 3,244.6 MB | 5,182.8 MB (Carga inducida)| $\le 4,800.0\text{ MB}$ |
-| **VAE Decode (33 frames)** | 28.92 s | 31.11 s | 29.87 s | 29.81 s | **28.63 s** | $\approx 27.0\text{ s}$ |
-| **Host RAM RSS** | **744.9 MB** | 1,516.6 MB | 3,805.5 MB (Alerta F6-01) | 881.4 MB | 2,085.9 MB | $\le 24\text{ GB}$ |
-| **Replan / Transiciones** | N/A | N/A | N/A | 0 (Estable AOT) | **2 (Exactos, 0 oscilaciones)**| Sin oscilación |
-| **Estabilidad Numérica** | 0 NaNs | 0 NaNs | 0 NaNs | 0 NaNs | 0 NaNs | 0 NaNs |
-| **Video MP4 Generado** | [`logs/..._sync_...mp4`](../logs/f6_832x480_33f_sync_20260908_202057.mp4) | [`logs/..._async_fp16_...mp4`](../logs/f6_832x480_33f_async_fp16_20260908_203148.mp4) | [`logs/..._async_int8_...mp4`](../logs/f6_832x480_33f_async_int8_20260908_204210.mp4) | [`logs/..._adaptive_...mp4`](../logs/f6_832x480_33f_adaptive_20260908_205600.mp4) | [`logs/..._adaptive_...mp4`](../logs/f6_832x480_33f_adaptive_20260908_212045.mp4) | MP4 Válido |
-| **Veredicto General** | 🟢 **PASS** | 🟢 **PASS** | 🟢 **PASS** | 🟢 **PASS** | 🟢 **PASS (Adaptativo)** | 🟢 **PASS** |
+| Eje de Evaluación | F6-A (Sync FP16) | F6-B (Async FP16) | F6-C (Async INT8) | F6-D (Adaptive Nominal) | F6-E Calibrado (+500MB) | F6-E Estrés (+1200MB) | Target / Gate |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Mecanismo de Streaming** | Secuencial síncrono | Doble stream FP16 | Doble stream INT8 | Orquestador Dinámico | Dinámico + Histeresis | Dinámico + Histeresis | — |
+| **Perturbación Externa** | 0 MB (Nominal) | 0 MB (Nominal) | 0 MB (Nominal) | 0 MB (Nominal) | **+500 MB (Pasos 11–20)** | **+1,200 MB (Pasos 11–20)**| Resistencia OOM |
+| **Tiempo DiT (30 pasos)** | 456.98 s | 436.92 s | 451.32 s | 443.21 s | **431.51 s (-25.5 s)** | 446.31 s | — |
+| **Cadencia (s/paso)** | 15.23 s | 14.56 s | 15.04 s | 14.77 s | **14.38 s/paso** | 14.88 s/paso | $\le 15.0\text{ s}$ |
+| **Tiempo Total End-to-End**| 559.93 s (9.33 min) | 523.68 s (8.73 min) | 538.67 s (8.98 min) | 530.00 s (8.83 min) | **516.94 s (8.62 min)** | 525.95 s (8.77 min) | $< 600.0\text{ s}$ |
+| **Pico VRAM Físico (NVML)**| **2,624.3 MB** | 2,698.0 MB | 2,962.5 MB | 3,244.6 MB | **4,588.5 MB** | 5,182.8 MB (Resiliencia) | $\le 4,800.0\text{ MB}$ |
+| **Holgura vs Hard Gate** | **+2,175.7 MB** | +2,102.0 MB | +1,837.5 MB | +1,555.4 MB | **+211.5 MB** | -382.8 MB (Sobrecarga) | $> 0\text{ MB}$ |
+| **VAE Decode (33 frames)** | 28.92 s | 31.11 s | 29.87 s | 29.81 s | **28.81 s** | 28.63 s | $\approx 27.0\text{ s}$ |
+| **Host RAM RSS** | **744.9 MB** | 1,516.6 MB | 3,805.5 MB (Alerta) | 881.4 MB | **852.2 MB** | 2,085.9 MB | $\le 24\text{ GB}$ |
+| **Replan / Transiciones** | N/A | N/A | N/A | 0 (Estable AOT) | **2 (Exactos, 0 oscil.)** | **2 (Exactos, 0 oscil.)** | Sin oscilación |
+| **Estabilidad Numérica** | 0 NaNs | 0 NaNs | 0 NaNs | 0 NaNs | 0 NaNs | 0 NaNs | 0 NaNs |
+| **Video MP4 Generado** | [`logs/..._sync_...mp4`](../logs/f6_832x480_33f_sync_20260908_202057.mp4) | [`logs/..._async_fp16_...mp4`](../logs/f6_832x480_33f_async_fp16_20260908_203148.mp4) | [`logs/..._async_int8_...mp4`](../logs/f6_832x480_33f_async_int8_20260908_204210.mp4) | [`logs/..._adaptive_...mp4`](../logs/f6_832x480_33f_adaptive_20260908_205600.mp4) | [`logs/..._adaptive_...mp4`](../logs/f6_832x480_33f_adaptive_20260908_214751.mp4) | [`logs/..._adaptive_...mp4`](../logs/f6_832x480_33f_adaptive_20260908_212045.mp4) | MP4 Válido |
+| **Veredicto General** | 🟢 **PASS** | 🟢 **PASS** | 🟢 **PASS** | 🟢 **PASS** | 🟢 **PASS (Gate Met)** | 🟡 **PASS Dinámico** | 🟢 **PASS** |
 
 ---
 
