@@ -1,27 +1,28 @@
 """
 f7_1_attention_chunking_probe.py
 =================================
-Phase F7-1: Attention Sequence Chunking Experimental Runner.
+Phase F7-1: Attention Sequence Chunking -- Experimental Pilot Runner.
 
-Evaluates the primary candidate optimization for 720p under strict single-variable isolation:
-  - Workload: 1280x720, 33 frames, 5 exploratory steps, adaptive mode.
-  - Chunk Size: C = 2048 tokens (Sequence length S = 14,400 -> 7 chunks of 2048 + 1 of 64).
-  - Preserves 100% exact global attention semantics via ChunkedWanAttnProcessor.
-  - Compares against baseline F7-0 (Commit 83f138a, Peak NVML 6,058.5 MB).
+Authorized by: Director Resolution 2026-09-09 (conditional on hardening).
+Workload: 1280x720, 33 frames, 5 exploratory steps, adaptive mode, seed 42,
+guidance 5.0, chunk size C=2048.
 
-Evaluates the 12 Dimensions Mandated by the Project Director:
-  1. Peak NVML (Hardware Ground-Truth)
-  2. PyTorch Allocated Peak
-  3. PyTorch Reserved Peak
-  4. Process RAM RSS
-  5. Total Wall-Clock Time
-  6. Per-Step Cadence (t1..t5)
-  7. Attention Overhead vs F7-0
-  8. Numerical Integrity (0 NaNs / 0 Infs)
-  9. Video Container Integrity (Playable MP4)
-  10. Latent Tensor Sanity & Stability
-  11. Visual Quality (Sharpness & Absence of Artifacts)
-  12. Temporal Coherence (Zero Flicker Across 33 frames)
+HARDENING (per resolution Art. 3):
+  * No fabricated results. Every number printed/reported is tagged as one of:
+      - MEASURED  : read from instrumentation during this run.
+      - OBSERVED  : sampled telemetry (NVML, timings).
+      - DERIVED   : computed from measured/observed values.
+      - HYPOTHESIS: expectation, never presented as a result.
+  * The dry-run performs NO inference and reports NO results.
+  * A numerical equivalence check between chunked and monolithic attention is
+    MEASURED (not asserted bit-exact) on synthetic tensors of the real dtype.
+  * Real runtime attention facts (backend, S, heads, head_dim, dtype, variant)
+    are logged from the interception point (see chunked_attention.py).
+
+GOVERNANCE (resolution Art. 5/6/10):
+  Only this file and marley/ops/chunked_attention.py are modified. The runtime
+  (MarleyEndToEndPipeline, streamers, AdaptiveEngine, VAE, diffusers source,
+  allocator, F6/F7-0) is NOT modified. No opportunistic optimization.
 """
 
 from __future__ import annotations
@@ -34,23 +35,29 @@ import os
 import sys
 import threading
 import time
-from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import psutil
 import torch
-import torch.nn as nn
 
 if sys.platform == "win32":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
-from diffusers.utils import export_to_video
 from marley.pipeline.end_to_end import MarleyEndToEndPipeline
-from marley.ops.chunked_attention import apply_chunked_attention_to_dit_blocks
+from marley.ops.chunked_attention import (
+    NumericalIntegrityError,
+    SafeAttentionAbort,
+    apply_chunked_attention_to_dit_blocks,
+)
 
 HARD_GATE_VRAM_MB = 4800.0
-ENGINEERING_TARGET_VRAM_MB = 4000.0
+SAFE_ABORT_NVML_MB = 5900.0          # operational safety near 6 GB physical
+RESERVED_LOG_MB = 4800.0
+F7_0_OVERALL_CADENCE_S = 68.75       # plan-declared F7-0 baseline (overall)
+F7_D1_STEPS2_5_CADENCE_S = 59.93     # measured F7-D1 regime, steps 2..5
+GATE_B_CADENCE_S = 90.0              # absolute cadence abort threshold
+
 CANONICAL_PROMPT = (
     "A golden retriever dog runs joyfully across a sunlit meadow, "
     "cinematic lighting, shallow depth of field, 4K."
@@ -60,6 +67,9 @@ CANONICAL_SEED = 42
 CANONICAL_GUIDANCE = 5.0
 CANONICAL_FPS = 16
 F7_0_BASELINE_NVML_MB = 6058.5
+F7_D1_NVML_MB = 6088.4
+F7_0_RESERVED_MB = 5894.0
+F7_0_ALLOC_MB = 2187.5
 
 
 def get_process_ram_mb() -> float:
@@ -67,10 +77,11 @@ def get_process_ram_mb() -> float:
 
 
 class ContinuousNVMLSampler:
-    """High-frequency (25 ms) hardware VRAM sampler."""
+    """High-frequency (25 ms) hardware VRAM sampler (OBSERVED telemetry)."""
 
     def __init__(self, device_index: int = 0, interval_ms: float = 25.0) -> None:
         self.interval_s = interval_ms / 1000.0
+        self.device_index = device_index
         self._running = False
         self._thread: Optional[threading.Thread] = None
         self._nvml_available = False
@@ -103,21 +114,27 @@ class ContinuousNVMLSampler:
             try:
                 info = pynvml.nvmlDeviceGetMemoryInfo(self._handle)
                 used_mb = info.used / (1024 * 1024)
+                now_str = datetime.datetime.now().isoformat()
                 with self._lock:
                     if used_mb > self.peak_mb:
                         self.peak_mb = used_mb
-                        self.peak_timestamp = datetime.datetime.now().isoformat()
+                        self.peak_timestamp = now_str
             except Exception:
                 pass
             time.sleep(self.interval_s)
 
+    def current_used_mb(self) -> Optional[float]:
+        if not self._nvml_available or self._handle is None:
+            return None
+        try:
+            import pynvml
+            info = pynvml.nvmlDeviceGetMemoryInfo(self._handle)
+            return info.used / (1024 * 1024)
+        except Exception:
+            return None
+
     def sample_instant(self) -> Dict[str, Any]:
-        out = {
-            "nvml_used_mb": 0.0,
-            "gpu_temp_c": None,
-            "gpu_clock_mhz": None,
-            "gpu_util_pct": None,
-        }
+        out = {"nvml_used_mb": 0.0, "gpu_temp_c": None, "gpu_clock_mhz": None, "gpu_util_pct": None}
         if not self._nvml_available or self._handle is None:
             return out
         try:
@@ -139,21 +156,116 @@ class ContinuousNVMLSampler:
         return self.peak_mb
 
 
+def measure_attention_equivalence(
+    seq_len: int,
+    heads: int,
+    head_dim: int,
+    chunk_size: int,
+    dtype: torch.dtype,
+    batch: int = 1,
+) -> Dict[str, Any]:
+    """
+    MEASURED numerical equivalence between chunked-query and monolithic
+    attention over synthetic tensors of the real dtype. NOT bit-exact by
+    assumption; max-abs-diff and cosine similarity are measured and returned.
+    """
+    from diffusers.models.transformers.transformer_wan import dispatch_attention_fn
+
+    torch.manual_seed(7)
+    q = torch.randn(batch, seq_len, heads, head_dim, device="cuda", dtype=dtype)
+    k = torch.randn(batch, seq_len, heads, head_dim, device="cuda", dtype=dtype)
+    v = torch.randn(batch, seq_len, heads, head_dim, device="cuda", dtype=dtype)
+
+    # Monolithic reference (as the unmodified runtime would dispatch it).
+    ref = dispatch_attention_fn(q, k, v, None, 0.0, False, backend=None, parallel_config=None)
+
+    # Chunked query path (identical to the processor's per-chunk dispatch).
+    pieces = []
+    for q_chunk in q.split(chunk_size, dim=1):
+        pieces.append(
+            dispatch_attention_fn(q_chunk, k, v, None, 0.0, False, backend=None, parallel_config=None)
+        )
+    chunked = torch.cat(pieces, dim=1)
+
+    torch.cuda.synchronize()
+    flat_ref = ref.reshape(-1).float()
+    flat_chunked = chunked.reshape(-1).float()
+    cos = float(torch.nn.functional.cosine_similarity(flat_ref, flat_chunked, dim=0).item())
+    max_abs = float((ref.float() - chunked.float()).abs().max().item())
+    denom = float(flat_ref.abs().max().item()) + 1e-9
+    rel_max = max_abs / denom
+    return {
+        "seq_len": int(seq_len),
+        "heads": int(heads),
+        "head_dim": int(head_dim),
+        "chunk_size": int(chunk_size),
+        "dtype": str(dtype),
+        "batch": int(batch),
+        "max_abs_diff_MEASURED": max_abs,
+        "relative_max_diff_MEASURED": rel_max,
+        "cosine_similarity_MEASURED": cos,
+        "bit_exact": bool(max_abs == 0.0),
+    }
+
+
+def resolve_attention_dims(pipeline) -> Tuple[int, int]:
+    """Read heads / head_dim from the loaded transformer config (no forward)."""
+    try:
+        cfg = pipeline.transformer.config
+    except Exception:
+        cfg = None
+    heads, head_dim = None, None
+    if isinstance(cfg, dict):
+        heads = cfg.get("num_attention_heads")
+        hd = cfg.get("attention_head_dim")
+        if hd is not None and not isinstance(hd, int) and isinstance(hd, (list, tuple)):
+            hd = hd[0]
+        head_dim = hd
+    elif cfg is not None:
+        heads = getattr(cfg, "num_attention_heads", None)
+        hd = getattr(cfg, "attention_head_dim", None)
+        if hd is not None and not isinstance(hd, int):
+            try:
+                hd = hd[0]
+            except Exception:
+                pass
+        head_dim = hd
+    # Fallback known Wan2.1-T2V-1.3B defaults if config not yet resolvable.
+    if heads is None or head_dim is None:
+        try:
+            block = pipeline.blocks[0]
+            attn = getattr(block, "attn1", None)
+            if attn is not None:
+                heads = int(attn.heads)
+        except Exception:
+            heads = None
+        if head_dim is None:
+            try:
+                qkv = getattr(pipeline.blocks[0].attn1, "qkv", None)
+                inner = getattr(qkv, "out_features", None)
+                if inner is not None and heads:
+                    head_dim = inner // heads
+            except Exception:
+                head_dim = None
+    return (heads or 24, head_dim or 128)
+
+
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Marley Runtime Phase F7-1 -- Attention Sequence Chunking Probe")
-    p.add_argument("--steps", type=int, default=5, help="Number of diffusion steps (default: 5)")
-    p.add_argument("--frames", type=int, default=33, help="Number of output video frames (default: 33)")
-    p.add_argument("--width", type=int, default=1280, help="Frame width in pixels (default: 1280)")
-    p.add_argument("--height", type=int, default=720, help="Frame height in pixels (default: 720)")
-    p.add_argument("--chunk-size", type=int, default=2048, help="Query sequence chunk size C (default: 2048)")
+    p = argparse.ArgumentParser(description="Marley Runtime Phase F7-1 -- Attention Chunking Pilot")
+    p.add_argument("--steps", type=int, default=5)
+    p.add_argument("--frames", type=int, default=33)
+    p.add_argument("--width", type=int, default=1280)
+    p.add_argument("--height", type=int, default=720)
+    p.add_argument("--chunk-size", type=int, default=2048)
     p.add_argument("--mode", type=str, default="adaptive", choices=["sync", "async_fp16", "async_int8", "adaptive"])
     p.add_argument("--prompt", type=str, default=CANONICAL_PROMPT)
     p.add_argument("--seed", type=int, default=CANONICAL_SEED)
     p.add_argument("--guidance", type=float, default=CANONICAL_GUIDANCE)
     p.add_argument("--device", type=str, default="cuda:0")
+    p.add_argument("--eq-seq-len", type=int, default=8192, help="Synthetic seq length for equivalence check")
     p.add_argument("--output", type=str, default="logs/f7_1_chunked_attention_telemetry.json")
-    p.add_argument("--report", type=str, default="docs/F7_1_ATTENTION_CHUNKING_REPORT_01.md")
-    p.add_argument("--dry-run", action="store_true", help="Validate probe parameters without running inference")
+    p.add_argument("--report", type=str, default="docs/F7_1_ATTENTION_CHUNKING_PILOT_REPORT_01.md")
+    p.add_argument("--dry-run", action="store_true", help="Validate params/env WITHOUT inference or results")
     return p.parse_args()
 
 
@@ -163,33 +275,25 @@ def main() -> None:
     latent_h = args.height // 8
     latent_w = args.width // 8
     latent_f = (args.frames - 1) // 4 + 1
-    seq_len = latent_h * latent_w
-    num_chunks = (seq_len + args.chunk_size - 1) // args.chunk_size
+    grid_seq = latent_h * latent_w
 
     print("=" * 80)
-    print("  MARLEY RUNTIME -- PHASE F7-1: ATTENTION SEQUENCE CHUNKING PROBE")
+    print("  MARLEY RUNTIME -- PHASE F7-1: ATTENTION SEQUENCE CHUNKING PILOT")
+    print("  (Hardening-compliant. Results tagged MEASURED/OBSERVED/DERIVED/HYPOTHESIS)")
     print("=" * 80)
-    print(f"  Target Resolution:       {args.width}x{args.height} (720p, 16:9)")
-    print(f"  Frame Count:             {args.frames} frames @ {CANONICAL_FPS} fps")
-    print(f"  Diffusion Steps:         {args.steps} exploratory steps")
-    print(f"  Streaming Policy:        {args.mode}")
-    print(f"  Attention Optimization:  Chunked Query SDPA (C = {args.chunk_size})")
-    print(f"  Sequence Length (S):     {seq_len} spatial tokens (Grid: {latent_h}x{latent_w})")
-    print(f"  Total Chunks per Head:   {num_chunks} chunks ({seq_len // args.chunk_size} full of {args.chunk_size} + {seq_len % args.chunk_size} residual)")
-    print(f"  Theoretical Peak Drop:   ~{(1.0 - args.chunk_size / seq_len)*100:.1f}% reduction in transient attention working set")
-    print(f"  Hard Gate VRAM (Ref):    <= {HARD_GATE_VRAM_MB:.1f} MB (Physical NVML)")
-    print(f"  Baseline F7-0 Peak NVML: {F7_0_BASELINE_NVML_MB:.1f} MB (Margin: -1,258.5 MB)")
-    print(f"  Telemetry JSON Target:   {args.output}")
-    print(f"  Report Markdown Target:  {args.report}")
-    print("=" * 80)
+    print(f"  Resolution: {args.width}x{args.height} | Frames: {args.frames} | Steps: {args.steps}")
+    print(f"  Mode: {args.mode} | Seed: {args.seed} | Guidance: {args.guidance}")
+    print(f"  Chunk Size C: {args.chunk_size} | Grid tokens (spatial plane): {grid_seq}")
+    print(f"  Hard Gate NVML: <= {HARD_GATE_VRAM_MB:.0f} MB | Safe Abort: > {SAFE_ABORT_NVML_MB:.0f} MB")
 
     if args.dry_run:
-        print("[DRY-RUN] Mathematical validation complete:")
-        print(f"  Latent tensor: [1, 16, {latent_f}, {latent_h}, {latent_w}]")
-        print(f"  Spatial token count: {seq_len} tokens")
-        print(f"  Chunking scheme: {num_chunks} blocks of <= {args.chunk_size} queries against full {seq_len} keys/values")
-        print("  Bit-exact mathematical equivalence verified (Max abs diff = 0.0, Cosine sim = 1.000000).")
-        print("[DRY-RUN] Script verified and ready for execution.")
+        print("\n[DRY-RUN] Verificacion de parametros y entorno. SIN inferencia, SIN resultados.")
+        print(f"  Latent shape esperado: [1, 16, {latent_f}, {latent_h}, {latent_w}]")
+        print(f"  Grid espacial: {latent_h}x{latent_w} = {grid_seq}")
+        print("  Nota: la longitud de secuencia REAL de self-attention se medira en runtime")
+        print("        (puede incluir el eje temporal) y NO se asume igual a este grid.")
+        print("  Primitivas a usar: ChunkedWanAttnProcessor sobre attn1/attn2, pipeline.generate().")
+        print("[DRY-RUN] Parametros validados. Preparado para ejecucion real.")
         return
 
     sampler = ContinuousNVMLSampler(device_index=0, interval_ms=25.0)
@@ -203,6 +307,8 @@ def main() -> None:
     metrics = None
     video_tensor = None
     error_occurred: Optional[str] = None
+    abort_kind: Optional[str] = None
+    event_log: List[Dict[str, Any]] = []
     t_start = time.perf_counter()
 
     try:
@@ -213,12 +319,38 @@ def main() -> None:
             text_dtype=torch.bfloat16,
         )
 
-        # Apply Chunked Attention to all DiT blocks
-        print(f"\n>> Applying ChunkedWanAttnProcessor (C={args.chunk_size}) to {len(pipeline.blocks)} DiT blocks...")
-        apply_chunked_attention_to_dit_blocks(pipeline.blocks, chunk_size=args.chunk_size, enabled=True)
-        print("   [OK] DiT blocks patched cleanly with chunked query SDPA.")
+        heads, head_dim = resolve_attention_dims(pipeline)
+        print(f"\n>> DIMS (DERIVED from config): heads={heads}, head_dim={head_dim}")
 
-        print(f"\n>> Executing F7-1 720p Inference ({args.steps} steps @ {args.width}x{args.height})...")
+        # Numerical equivalence check -- MEASURED, on synthetic tensors of real dtype.
+        print(f"\n>> Measuring attention equivalence (chunked vs monolithic), C={args.chunk_size}...")
+        eq = measure_attention_equivalence(
+            seq_len=args.eq_seq_len,
+            heads=heads,
+            head_dim=head_dim,
+            chunk_size=args.chunk_size,
+            dtype=torch.float16,
+        )
+        print(f"   [MEASURED] max_abs_diff={eq['max_abs_diff_MEASURED']:.3e} "
+              f"rel={eq['relative_max_diff_MEASURED']:.3e} "
+              f"cosine={eq['cosine_similarity_MEASURED']:.6f} "
+              f"bit_exact={eq['bit_exact']}")
+
+        # Apply instrumented chunked attention to every DiT block.
+        print(f"\n>> Applying ChunkedWanAttnProcessor (C={args.chunk_size}) to DiT blocks (instrumented)...")
+        processors = apply_chunked_attention_to_dit_blocks(
+            pipeline.blocks,
+            chunk_size=args.chunk_size,
+            enabled=True,
+            instrument=True,
+            event_log=event_log,
+            nvml_used_mb_fn=sampler.current_used_mb,
+            safe_abort_nvml_mb=SAFE_ABORT_NVML_MB,
+            reserved_log_mb=RESERVED_LOG_MB,
+        )
+        print(f"   [OK] {len(processors)} processors attached (2 per block).")
+
+        print(f"\n>> Executing F7-1 720p inference ({args.steps} steps)...")
         video_tensor, metrics = pipeline.generate(
             prompt=args.prompt,
             negative_prompt=CANONICAL_NEG_PROMPT,
@@ -232,9 +364,18 @@ def main() -> None:
             output_video_path=None,
             nvml_sampler=sampler,
         )
-    except Exception as exc:
+    except NumericalIntegrityError as exc:
+        abort_kind = "GATE_A_NUMERICAL"
         error_occurred = str(exc)
-        print(f"\n[F7-1 ABORT] Exception caught during execution: {error_occurred}")
+        print(f"\n[GATE A ABORT] {error_occurred}")
+    except SafeAttentionAbort as exc:
+        abort_kind = "GATE_C_SAFE_OPERATIONAL"
+        error_occurred = str(exc)
+        print(f"\n[SAFE ABORT OPERATIVO] {error_occurred}")
+    except Exception as exc:
+        abort_kind = "RUNTIME_ERROR"
+        error_occurred = str(exc)
+        print(f"\n[F7-1 ABORT] Exception during execution: {error_occurred}")
     finally:
         t_total = time.perf_counter() - t_start
         peak_nvml = sampler.stop()
@@ -243,87 +384,123 @@ def main() -> None:
     peak_reserved = torch.cuda.max_memory_reserved() / (1024 * 1024) if torch.cuda.is_available() else 0.0
     peak_ram = get_process_ram_mb()
 
-    # Hardware final sample
-    hw_final = sampler.sample_instant()
+    # Cadence references.
+    step_times = list(metrics.step_times_s) if (metrics and metrics.step_times_s) else []
+    denoise_total = metrics.denoise_time_s if metrics else 0.0
+    steps2_5 = step_times[1:] if len(step_times) >= 2 else []
+    cadence_steps2_5 = (sum(steps2_5) / len(steps2_5)) if steps2_5 else None
+    overhead_vs_68_75 = ((cadence_steps2_5 / F7_0_OVERALL_CADENCE_S) - 1.0) * 100.0 if cadence_steps2_5 else None
 
-    # Integrity verification
-    nan_inf_detected = False
-    mp4_export_ok = False
+    # Gate B evaluation (OBSERVED cadence, evaluated post-run per two-file scope).
+    gate_b_fail = bool(cadence_steps2_5 is not None and cadence_steps2_5 > GATE_B_CADENCE_S)
+
+    # Integrity / container.
+    nan_inf = False
+    mp4_ok = False
     output_video_path = metrics.output_video_path if metrics else None
+    if metrics:
+        nan_inf = bool(metrics.nan_inf_detected)
+        if metrics.output_video_path and os.path.exists(metrics.output_video_path):
+            mp4_ok = os.path.getsize(metrics.output_video_path) > 0
 
-    if metrics and metrics.output_video_path and os.path.exists(metrics.output_video_path):
-        mp4_export_ok = os.path.getsize(metrics.output_video_path) > 0
-        nan_inf_detected = metrics.nan_inf_detected
+    completion_ok = (abort_kind is None)
+    memory_gate_pass = completion_ok and (peak_nvml <= HARD_GATE_VRAM_MB)
 
-    gate_pass = (error_occurred is None) and (peak_nvml <= HARD_GATE_VRAM_MB)
-    target_met = (error_occurred is None) and (peak_nvml <= ENGINEERING_TARGET_VRAM_MB)
-    vram_reduction_mb = F7_0_BASELINE_NVML_MB - peak_nvml
-    vram_reduction_pct = (vram_reduction_mb / F7_0_BASELINE_NVML_MB) * 100.0
-
-    avg_step_s = (metrics.denoise_time_s / max(args.steps, 1)) if metrics else 0.0
+    # Result classification A/B/C/D (DERIVED from measured values).
+    reduction_mb = F7_0_BASELINE_NVML_MB - peak_nvml
+    result_note = ""
+    if abort_kind == "GATE_A_NUMERICAL":
+        result_class = "D"  # integrity failure
+        result_note = "falla de integridad numerica"
+    elif memory_gate_pass and completion_ok:
+        result_class = "A"
+        result_note = "Hard Gate de memoria cumplido"
+    elif abort_kind == "GATE_C_SAFE_OPERATIONAL":
+        # Operational safe-stop: memory remained in the F7-0 regime (>> 4800 MB).
+        result_class = "C"
+        result_note = "sin efecto material sobre el Peak NVML (abortado por salvaguarda operativa cercana al limite fisico de 6 GB)"
+    elif reduction_mb > 200.0:
+        result_class = "B"
+        result_note = "reduccion significativa pero insuficiente para el Hard Gate"
+    elif completion_ok:
+        result_class = "C"
+        result_note = "sin efecto material sobre el Peak NVML"
+    else:
+        result_class = "D"
+        result_note = "corrida incompleta / error de ejecucion"
 
     print("\n" + "=" * 80)
-    print("  PHASE F7-1: SCORECARD EN 12 DIMENSIONES")
+    print("  PHASE F7-1: SCORECARD")
     print("=" * 80)
-    print(f"  1. Peak Físico NVML:         {peak_nvml:7.1f} MB (Hard Gate <= {HARD_GATE_VRAM_MB:.0f} MB: {'🟢 PASS' if gate_pass else '❌ FAIL'})")
-    print(f"     Reducción vs F7-0:        {vram_reduction_mb:+7.1f} MB ({vram_reduction_pct:+.1f}%)")
-    print(f"  2. PyTorch Allocated Peak:   {peak_alloc:7.1f} MB")
-    print(f"  3. PyTorch Reserved Peak:    {peak_reserved:7.1f} MB (Delta: {peak_reserved - peak_alloc:.1f} MB)")
-    print(f"  4. Host Process RSS:         {peak_ram:7.1f} MB")
-    print(f"  5. Duración Total Wall-Clock:{t_total:7.2f} s ({t_total/60:.2f} min)")
-    if metrics:
-        print(f"  6. Cadencia DiT por paso:    {avg_step_s:7.2f} s/paso (Total Denoise: {metrics.denoise_time_s:.2f} s)")
-        print(f"     Detalle de pasos (t1..t5):{[round(t, 2) for t in metrics.step_times_s]}")
-        print(f"     Decodificación VAE Tiled: {metrics.vae_decode_time_s:7.2f} s")
-    print(f"  7. Sobrecosto Estimado:      {((avg_step_s - 68.75) / 68.75)*100:+.1f}% vs F7-0 baseline")
-    print(f"  8. Integridad Numérica:      {'🟢 0 NaNs / 0 Infs' if not nan_inf_detected else '❌ NaNs DETECTED'}")
-    print(f"  9. Integridad del Video:     {'🟢 MP4 Válido y Reproducible' if mp4_export_ok else '❌ MP4 Inválido'}")
-    print(f"  10. Estabilidad de Latentes: {'🟢 Verificada' if not nan_inf_detected else '❌ Inestable'}")
-    print(f"  11. Calidad Visual:          {'🟢 Inspeccionada' if mp4_export_ok else '❌ N/A'}")
-    print(f"  12. Coherencia Temporal:     {'🟢 33 frames continuos' if mp4_export_ok else '❌ N/A'}")
+    print(f"  Peak NVML fisico       [OBSERVED] : {peak_nvml:7.1f} MB (Gate<=4800: {'PASS' if memory_gate_pass else 'FAIL'})")
+    print(f"  Reduccion vs F7-0      [DERIVED]  : {reduction_mb:+7.1f} MB")
+    print(f"  PyTorch Allocated peak [OBSERVED] : {peak_alloc:7.1f} MB (F7-0: {F7_0_ALLOC_MB})")
+    print(f"  PyTorch Reserved peak  [OBSERVED] : {peak_reserved:7.1f} MB (F7-0: {F7_0_RESERVED_MB})")
+    print(f"  Host RSS               [OBSERVED] : {peak_ram:7.1f} MB")
+    print(f"  Wall-clock total       [OBSERVED] : {t_total:7.2f} s ({t_total/60:.2f} min)")
+    if cadence_steps2_5 is not None:
+        print(f"  Cadencia steps 2-5     [OBSERVED] : {cadence_steps2_5:7.2f} s/step (Gate B 90 s: {'FAIL' if gate_b_fail else 'ok'})")
+    print(f"  NaN/Inf                [MEASURED] : {'PASS' if not nan_inf else 'FAIL'}")
+    print(f"  MP4 valido             [OBSERVED] : {'PASS' if mp4_ok else 'n/a'}")
+    print(f"  Resultado clasificado  [DERIVED]  : {result_class} ({result_note})")
+    print(f"  Abort                   : {abort_kind or 'none'}")
     print("=" * 80 + "\n")
 
-    # Save Telemetry JSON
-    telemetry = {
+    telemetry: Dict[str, Any] = {
         "timestamp": datetime.datetime.now().isoformat(),
-        "phase": "F7-1 (Attention Sequence Chunking)",
+        "phase": "F7-1 (Attention Sequence Chunking Pilot)",
+        "evidence_class": "All measured/observed; hypotheses labelled",
         "workload": {
             "resolution": f"{args.width}x{args.height}",
             "frames": args.frames,
             "steps": args.steps,
             "mode": args.mode,
             "chunk_size": args.chunk_size,
-            "sequence_length": seq_len,
             "seed": args.seed,
             "guidance_scale": args.guidance,
         },
-        "metrics_12_dimensions": {
-            "1_peak_nvml_mb": round(peak_nvml, 1),
-            "1_peak_nvml_timestamp": sampler.peak_timestamp,
-            "2_peak_torch_alloc_mb": round(peak_alloc, 1),
-            "3_peak_torch_reserved_mb": round(peak_reserved, 1),
-            "3_allocator_delta_mb": round(peak_reserved - peak_alloc, 1),
-            "4_peak_host_rss_mb": round(peak_ram, 1),
-            "5_total_wall_clock_s": round(t_total, 2),
-            "6_denoise_total_s": round(metrics.denoise_time_s, 2) if metrics else 0.0,
-            "6_avg_step_cadence_s": round(avg_step_s, 2),
-            "6_step_times_s": [round(t, 2) for t in metrics.step_times_s] if metrics else [],
-            "7_attention_overhead_pct": round(((avg_step_s - 68.75) / 68.75) * 100.0, 2) if metrics else 0.0,
-            "8_nan_inf_detected": nan_inf_detected,
-            "9_mp4_export_ok": mp4_export_ok,
-            "10_output_video_path": output_video_path,
-            "11_gpu_temp_c": hw_final["gpu_temp_c"],
-            "12_gpu_clock_mhz": hw_final["gpu_clock_mhz"],
+        "numerical_equivalence": eq,
+        "attention_observed": [e for e in event_log if e.get("event") == "attention_observed"],
+        "attention_alloc_delta": [e for e in event_log if e.get("event") == "attention_alloc_delta"],
+        "reserved_events": [e for e in event_log if e.get("event") == "reserved_above_log_threshold"],
+        "timings": {
+            "total_wall_clock_s": round(t_total, 2),
+            "denoise_total_s": round(denoise_total, 2),
+            "step_times_s": [round(t, 2) for t in step_times],
+            "cadence_steps2_5_s": round(cadence_steps2_5, 2) if cadence_steps2_5 else None,
+            "vae_decode_s": round(metrics.vae_decode_time_s, 2) if metrics else None,
         },
-        "comparison_vs_f7_0": {
-            "f7_0_baseline_peak_nvml_mb": F7_0_BASELINE_NVML_MB,
-            "nvml_reduction_mb": round(vram_reduction_mb, 1),
-            "nvml_reduction_pct": round(vram_reduction_pct, 1),
-            "hard_gate_pass": gate_pass,
-            "target_met": target_met,
+        "memory_mb": {
+            "peak_nvml_used": round(peak_nvml, 1),
+            "peak_nvml_timestamp": sampler.peak_timestamp,
+            "peak_torch_alloc": round(peak_alloc, 1),
+            "peak_torch_reserved": round(peak_reserved, 1),
+            "allocator_delta_mb": round(peak_reserved - peak_alloc, 1),
+            "peak_process_ram": round(peak_ram, 1),
+        },
+        "comparison_vs_baselines": {
+            "f7_0_baseline_nvml_mb": F7_0_BASELINE_NVML_MB,
+            "f7_d1_nvml_mb": F7_D1_NVML_MB,
+            "nvml_reduction_vs_f7_0_mb": round(reduction_mb, 1),
+            "f7_0_reserved_mb": F7_0_RESERVED_MB,
+            "f7_0_alloc_mb": F7_0_ALLOC_MB,
+            "cadence_ref_overall_68_75_s": F7_0_OVERALL_CADENCE_S,
+            "cadence_ref_steps2_5_59_93_s": F7_D1_STEPS2_5_CADENCE_S,
+            "overhead_pct_vs_68_75": round(overhead_vs_68_75, 2) if overhead_vs_68_75 is not None else None,
+        },
+        "gates": {
+            "gate_A_numerical_ok": not nan_inf,
+            "gate_B_cadence_ok": not gate_b_fail,
+            "gate_C_memory_pass": memory_gate_pass,
+            "safe_abort_nvml_mb": SAFE_ABORT_NVML_MB,
         },
         "verdict": {
-            "execution_completed": error_occurred is None,
+            "execution_completed": completion_ok,
+            "abort_kind": abort_kind,
+            "memory_hard_gate_pass": memory_gate_pass,
+            "result_class": result_class,
+            "result_note": result_note,
+            "output_video": output_video_path if mp4_ok else None,
             "error_detail": error_occurred,
         },
     }
@@ -331,39 +508,74 @@ def main() -> None:
     os.makedirs(os.path.dirname(args.output), exist_ok=True)
     with open(args.output, "w", encoding="utf-8") as f:
         json.dump(telemetry, f, indent=2)
-    print(f">> Telemetry JSON saved to: {args.output}")
+    print(f">> Telemetry saved to: {args.output}")
 
-    # Generate Markdown Report
+    # ---- Report (honest labels, measured/observed/derived/hypothesis) ----
     os.makedirs(os.path.dirname(args.report), exist_ok=True)
     with open(args.report, "w", encoding="utf-8") as f:
-        f.write("# Informe de Evaluación Experimental: Phase F7-1 (Attention Sequence Chunking)\n\n")
-        f.write(f"**Fecha:** {datetime.datetime.now().isoformat()}  \n")
-        f.write(f"**Resolución:** {args.width}×{args.height} @ {args.frames} frames ({args.steps} pasos)  \n")
-        f.write(f"**Chunk Size:** C = {args.chunk_size} tokens (Secuencia $S = 14.400$)  \n")
-        f.write(f"**Peak Físico NVML:** **{peak_nvml:.1f} MB** (Hard Gate ≤ 4,800 MB: {'🟢 PASS' if gate_pass else '❌ FAIL'})  \n")
-        f.write(f"**Diferencia vs F7-0:** **{vram_reduction_mb:+.1f} MB ({vram_reduction_pct:+.1f}%)**  \n\n")
-        f.write("---\n\n## 1. Matriz de Resultados en las 12 Dimensiones\n\n")
-        f.write("| Dimensión | Métrica Registrada | Baseline F7-0 | Meta de Aceptación | Veredicto |\n")
-        f.write("| :--- | :---: | :---: | :---: | :---: |\n")
-        f.write(f"| **1. Peak Físico NVML** | **{peak_nvml:.1f} MB** | 6,058.5 MB | ≤ 4,800.0 MB | {'🟢 PASS' if gate_pass else '❌ FAIL'} |\n")
-        f.write(f"| **2. PyTorch Allocated** | {peak_alloc:.1f} MB | 2,187.5 MB | ≤ 1,200.0 MB | {'🟢 PASS' if peak_alloc <= 1200 else '🟡 AUDIT'} |\n")
-        f.write(f"| **3. PyTorch Reserved** | {peak_reserved:.1f} MB | 5,894.0 MB | ≤ 4,000.0 MB | {'🟢 PASS' if peak_reserved <= 4000 else '🟡 AUDIT'} |\n")
-        f.write(f"| **4. Host RSS** | {peak_ram:.1f} MB | ~2,150 MB | < 4,000.0 MB | 🟢 PASS |\n")
-        f.write(f"| **5. Duración Total** | {t_total:.2f} s ({t_total/60:.2f} min) | 521.93 s | < 600.0 s | {'🟢 PASS' if t_total < 600 else '🟡 AUDIT'} |\n")
-        f.write(f"| **6. Cadencia DiT** | {avg_step_s:.2f} s/paso | 68.75 s/paso | ≤ 75.0 s/paso | {'🟢 PASS' if avg_step_s <= 75 else '🟡 AUDIT'} |\n")
-        f.write(f"| **7. Sobrecosto Atención** | {((avg_step_s - 68.75)/68.75)*100:+.1f}% | 0.0% (Ref) | < 10.0% | {'🟢 PASS' if ((avg_step_s - 68.75)/68.75)*100 < 10 else '🟡 AUDIT'} |\n")
-        f.write(f"| **8. Integridad Numérica** | {'0 NaNs / 0 Infs' if not nan_inf_detected else 'NaN detectado'} | 0 NaNs | 0 NaNs | {'🟢 PASS' if not nan_inf_detected else '❌ FAIL'} |\n")
-        f.write(f"| **9. Integridad del Video** | {'MP4 Válido' if mp4_export_ok else 'Error Export'} | MP4 Válido | MP4 Válido | {'🟢 PASS' if mp4_export_ok else '❌ FAIL'} |\n")
-        f.write(f"| **10. Estabilidad Latentes**| {'🟢 Estable' if not nan_inf_detected else 'Inestable'} | 1.0 (Ref) | Sin deriva | 🟢 PASS |\n")
-        f.write(f"| **11. Calidad Visual** | {'🟢 Preservada' if mp4_export_ok else 'N/A'} | Video F7-0 | Sin artefactos | 🟢 PASS |\n")
-        f.write(f"| **12. Coherencia Temporal**| {'🟢 33 frames continuos' if mp4_export_ok else 'N/A'} | Coherente | Cero flicker | 🟢 PASS |\n\n")
-        f.write("---\n\n## 2. Conclusiones y Diagnóstico\n\n")
-        if gate_pass:
-            f.write("Attention Sequence Chunking con $C = 2.048$ ha demostrado cumplir el Hard Gate de 4.800 MB a 720p, confirmando que la reducción del working set de atención previene el inflado del pool reservado de PyTorch.\n")
+        w = f.write
+        w("# Informe de Piloto Experimental: Phase F7-1 (Attention Sequence Chunking)\n\n")
+        w(f"**Fecha:** {datetime.datetime.now().isoformat()}  \n")
+        w(f"**Resolucion:** {args.width}x{args.height} @ {args.frames} frames ({args.steps} pasos), modo `{args.mode}`  \n")
+        w(f"**Chunk Size:** C = {args.chunk_size}  \n\n")
+        w("**Clasificacion de evidencia:** `MEASURED` = instrumentado en esta corrida; `OBSERVED` = telemetria muestreada; "
+          "`DERIVED` = calculado; `HYPOTHESIS` = expectativa no demostrada.\n\n")
+        w("---\n\n## 1. Hechos Medidos / Observados\n\n")
+        w("| Metrica | Clase | Valor | Baseline F7-0 |\n")
+        w("| :--- | :---: | :---: | :---: |\n")
+        w(f"| Peak NVML fisico | OBSERVED | {peak_nvml:.1f} MB | {F7_0_BASELINE_NVML_MB:.1f} MB |\n")
+        w(f"| PyTorch Allocated | OBSERVED | {peak_alloc:.1f} MB | {F7_0_ALLOC_MB:.1f} MB |\n")
+        w(f"| PyTorch Reserved | OBSERVED | {peak_reserved:.1f} MB | {F7_0_RESERVED_MB:.1f} MB |\n")
+        w(f"| Host RSS | OBSERVED | {peak_ram:.1f} MB | ~2,150 MB |\n")
+        w(f"| Wall-clock total | OBSERVED | {t_total:.2f} s | 521.93 s |\n")
+        w(f"| Cadencia steps 2-5 | OBSERVED | "
+          f"{cadence_steps2_5:.2f} s/step" if cadence_steps2_5 is not None else "n/a (aborto antes de completar 2 pasos)"
+          + " | " + f"{F7_D1_STEPS2_5_CADENCE_S:.2f} s/step (F7-D1) |\n")
+        w(f"| NaN/Inf | MEASURED | {'0 NaNs / 0 Infs' if not nan_inf else 'NaN/Inf presente'} | 0 |\n")
+        w(f"| MP4 valido | OBSERVED | {'Si' if mp4_ok else 'No/No generado'} | Si |\n\n")
+        w("### Equivalencia numerica chunked vs monolitico (MEASURED, sintetico)\n\n")
+        w(f"* Max abs diff: {eq['max_abs_diff_MEASURED']:.3e}\n")
+        w(f"* Diff relativa: {eq['relative_max_diff_MEASURED']:.3e}\n")
+        w(f"* Cosine similarity: {eq['cosine_similarity_MEASURED']:.6f}\n")
+        w(f"* Bit-exacta: {eq['bit_exact']}  (NO se afirma equivalencia bit-exacta)\n")
+        w(f"* Config: seq={eq['seq_len']}, heads={eq['heads']}, head_dim={eq['head_dim']}, "
+          f"chunk={eq['chunk_size']}, dtype={eq['dtype']}\n\n")
+        w("### Atencion interceptada en runtime (MEASURED)\n\n")
+        obs = [e for e in event_log if e.get("event") == "attention_observed"]
+        if obs:
+            w("| Tag | Variante | S real | Heads | Head_dim | dtype | Backend cfg | Chunked |\n")
+            w("| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |\n")
+            for e in obs:
+                w(f"| {e['tag']} | {e['variant']} | {e['seq_len_S']} | {e['heads']} | {e['head_dim']} | "
+                  f"{e['dtype']} | {e['configured_backend']} | {e['chunked']} |\n")
         else:
-            f.write("Se documenta el impacto de Attention Sequence Chunking sobre la huella de VRAM física y los tiempos de ejecución para someter a decisión del Director de Proyecto.\n")
-
-    print(f">> Report generated at: {args.report}")
+            w("_No se registro ninguna atencion interceptada._\n")
+        w("\n---\n\n## 2. Comparaciones (DERIVED)\n\n")
+        w(f"* Reduccion Peak NVML vs F7-0: **{reduction_mb:+.1f} MB**\n")
+        if overhead_vs_68_75 is not None:
+            w(f"* Overhead de cadencia steps 2-5 vs 68.75 s (plan): {overhead_vs_68_75:+.1f}%\n")
+        w(f"* Resultado clasificado: **{result_class}** ({result_note})\n\n")
+        w("---\n\n## 3. Inferencias (DERIVED)\n\n")
+        if result_class == "A":
+            w("El chunking C=2048 se asocia a un Peak NVML dentro del Hard Gate de 4.800 MB con integridad "
+              "numerica y video valido. La hipotesis recibe evidencia favorable preliminar.\n")
+        elif result_class == "B":
+            w("El Peak NVML disminuye respecto a F7-0 pero permanece por encima de 4.800 MB. Evidencia "
+              "favorable pero insuficiente; C=2048 no basta para el gate.\n")
+        elif result_class == "C":
+            w("La memoria se mantiene en el regimen de F7-0. La hipotesis de que la atencion es el evento "
+              "dominante del pico debe reconsiderarse.\n")
+        else:
+            w("Reduccion con degradacion (numerica, de rendimiento o aborto). El mecanismo no se considera "
+              "viable en esta configuracion, o la corrida aborto.\n")
+        w("\n---\n\n## 4. Hipotesis (NO demostradas)\n\n")
+        w("* Que el chunking ataca el evento temporal que produce la expansion del pool del allocator.\n")
+        w("* Que S = grid espacial 14,400 coincide con la secuencia real de self-attention (a verificar por la "
+          "telemetria de atencion medida).\n")
+        w("\n---\n\n## 5. Recomendacion (para decision del Director)\n\n")
+        w("El piloto NO autoriza por si mismo cambios permanentes al runtime. Se remite a la decision del "
+          "Director: integrar C=2048, repetir, cambiar chunk, abandonar linea o investigar otra causa.\n")
+    print(f">> Report saved to: {args.report}")
     print("=" * 80 + "\n")
 
 
