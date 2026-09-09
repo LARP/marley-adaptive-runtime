@@ -1,0 +1,48 @@
+{
+  "timestamp": "2026-09-09T00:50:44.064597",
+  "phase": "F7-0 (720p Memory Feasibility Probe)",
+  "workload": {
+    "resolution": "1280x720",
+    "frames": 33,
+    "steps": 5,
+    "mode": "adaptive",
+    "seed": 42,
+    "guidance_scale": 5.0,
+    "latent_shape": [
+      9,
+      16,
+      90,
+      160
+    ],
+    "frozen_commit": "c6e4bfb"
+  },
+  "timings_s": {
+    "prompt_encoding": 61.51,
+    "dit_prep": 0.24,
+    "denoising_total": 343.77,
+    "denoising_per_step_avg": 68.75,
+    "vae_decode": 69.13,
+    "video_export": 0.94,
+    "total_wall_clock": 521.93
+  },
+  "memory_mb": {
+    "peak_nvml_used": 6058.5,
+    "peak_torch_alloc": 2187.5,
+    "peak_torch_reserved": 5894.0,
+    "peak_process_ram": 2151.8
+  },
+  "hardware_telemetry": {
+    "gpu_temperature_c": 80,
+    "gpu_clock_mhz": 547
+  },
+  "verdict": {
+    "execution_completed": true,
+    "gate_pass_4800mb": false,
+    "target_pass_4000mb": false,
+    "nan_pass": true,
+    "mp4_pass": true,
+    "preliminary_viability": false,
+    "output_video": "logs/f6_1280x720_33f_adaptive_20260909_005042.mp4",
+    "error_detail": null
+  }
+}

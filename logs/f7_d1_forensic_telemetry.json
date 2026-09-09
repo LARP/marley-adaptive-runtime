@@ -1,0 +1,174 @@
+{
+  "timestamp": "2026-09-09T01:43:17.769120",
+  "phase": "F7-D1 (Forensic Memory Profiling)",
+  "workload": {
+    "resolution": "1280x720",
+    "frames": 33,
+    "steps": 5,
+    "mode": "adaptive",
+    "seed": 42,
+    "guidance_scale": 5.0,
+    "latent_shape": [
+      1,
+      16,
+      9,
+      90,
+      160
+    ],
+    "baseline_f7_0_commit": "83f138a"
+  },
+  "timings_s": {
+    "total_wall_clock": 1806.3,
+    "phases": {
+      "prompt_encoding": {
+        "duration_s": 87.44,
+        "nvml_start_mb": 718.12,
+        "nvml_end_mb": 751.7,
+        "torch_alloc_mb": 54.19,
+        "torch_reserved_mb": 70.0,
+        "host_rss_mb": 14996.89
+      },
+      "dit_prep": {
+        "duration_s": 0.07,
+        "nvml_end_mb": 751.7,
+        "torch_alloc_mb": 62.11,
+        "torch_reserved_mb": 70.0,
+        "latent_shape": [
+          1,
+          16,
+          9,
+          90,
+          160
+        ]
+      },
+      "denoising": {
+        "total_duration_s": 339.19,
+        "avg_step_s": 67.84
+      },
+      "vae_decode": {
+        "duration_s": 1328.2,
+        "nvml_start_mb": 5938.83,
+        "nvml_end_mb": 5963.6,
+        "torch_alloc_mb": 1023.01,
+        "torch_reserved_mb": 6716.0,
+        "video_shape": [
+          1,
+          3,
+          33,
+          720,
+          1280
+        ],
+        "nan_inf_detected": false
+      }
+    }
+  },
+  "per_step_telemetry": [
+    {
+      "step_idx": 1,
+      "timestamp": "2026-09-09T01:17:03.886588",
+      "duration_s": 99.44,
+      "nvml_instant_mb": 5952.24,
+      "nvml_peak_so_far_mb": 6001.77,
+      "torch_alloc_mb": 592.78,
+      "torch_reserved_mb": 5778.0,
+      "allocator_pool_free_mb": 5185.22,
+      "host_rss_mb": 693.14,
+      "gpu_temp_c": 86,
+      "gpu_clock_mhz": 2010,
+      "gpu_util_pct": 68
+    },
+    {
+      "step_idx": 2,
+      "timestamp": "2026-09-09T01:18:02.693061",
+      "duration_s": 58.8,
+      "nvml_instant_mb": 5934.11,
+      "nvml_peak_so_far_mb": 6001.77,
+      "torch_alloc_mb": 600.46,
+      "torch_reserved_mb": 5780.0,
+      "allocator_pool_free_mb": 5179.54,
+      "host_rss_mb": 2041.56,
+      "gpu_temp_c": 87,
+      "gpu_clock_mhz": 1582,
+      "gpu_util_pct": 86
+    },
+    {
+      "step_idx": 3,
+      "timestamp": "2026-09-09T01:19:02.348895",
+      "duration_s": 59.65,
+      "nvml_instant_mb": 5948.95,
+      "nvml_peak_so_far_mb": 6001.77,
+      "torch_alloc_mb": 601.55,
+      "torch_reserved_mb": 5780.0,
+      "allocator_pool_free_mb": 5178.45,
+      "host_rss_mb": 2081.27,
+      "gpu_temp_c": 86,
+      "gpu_clock_mhz": 1717,
+      "gpu_util_pct": 100
+    },
+    {
+      "step_idx": 4,
+      "timestamp": "2026-09-09T01:20:02.981702",
+      "duration_s": 60.63,
+      "nvml_instant_mb": 5942.86,
+      "nvml_peak_so_far_mb": 6001.77,
+      "torch_alloc_mb": 601.33,
+      "torch_reserved_mb": 5780.0,
+      "allocator_pool_free_mb": 5178.67,
+      "host_rss_mb": 2087.09,
+      "gpu_temp_c": 86,
+      "gpu_clock_mhz": 1597,
+      "gpu_util_pct": 100
+    },
+    {
+      "step_idx": 5,
+      "timestamp": "2026-09-09T01:21:03.628708",
+      "duration_s": 60.65,
+      "nvml_instant_mb": 5938.83,
+      "nvml_peak_so_far_mb": 6001.77,
+      "torch_alloc_mb": 600.69,
+      "torch_reserved_mb": 5780.0,
+      "allocator_pool_free_mb": 5179.31,
+      "host_rss_mb": 2092.79,
+      "gpu_temp_c": 86,
+      "gpu_clock_mhz": 1492,
+      "gpu_util_pct": 100
+    }
+  ],
+  "memory_mb": {
+    "peak_nvml_used": 6088.4,
+    "peak_nvml_timestamp": "2026-09-09T01:39:45.566730",
+    "peak_torch_alloc": 2180.6,
+    "peak_torch_reserved": 6716.0,
+    "allocator_delta_mb": 4535.4,
+    "peak_process_ram": 784.0
+  },
+  "allocator_stats": {
+    "allocated_bytes_current": 629865472,
+    "allocated_bytes_peak": 2286474240,
+    "reserved_bytes_current": 6060769280,
+    "reserved_bytes_peak": 6060769280,
+    "active_bytes_current": 629865472,
+    "active_bytes_peak": 2286474240,
+    "inactive_split_bytes_current": 575996928,
+    "inactive_split_bytes_peak": 1064207360,
+    "num_alloc_retries": 0,
+    "num_ooms": 0,
+    "segment_alloc_count": 55,
+    "segment_freed_count": 0,
+    "segment_current_count": 55
+  },
+  "hardware_telemetry": {
+    "final_gpu_temperature_c": 81,
+    "final_gpu_clock_mhz": 1920,
+    "final_gpu_util_pct": 71
+  },
+  "verdict": {
+    "execution_completed": true,
+    "peak_nvml_mb": 6088.4,
+    "hard_gate_4800mb_met": false,
+    "nan_pass": true,
+    "mp4_pass": true,
+    "output_video": "logs/f7_d1_1280x720_33f_20260909_014313.mp4",
+    "error_detail": null
+  }
+}

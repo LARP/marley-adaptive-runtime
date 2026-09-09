@@ -1,0 +1,1532 @@
+{
+  "timestamp": "2026-09-09T03:33:40.204059",
+  "phase": "F7-D3 (cond->uncond seam release, causal)",
+  "evidence_class": "All measured/observed; derived deltas computed",
+  "workload": {
+    "resolution": "1280x720",
+    "frames": 33,
+    "steps_executed": 1,
+    "mode": "adaptive",
+    "seed": 42,
+    "guidance_scale": 5.0
+  },
+  "single_step_s": 57.61,
+  "seam": {
+    "pre_release": {
+      "label": "pre_release",
+      "nvml_mb": 4230.64,
+      "alloc_mb": 436.71,
+      "reserved_mb": 3426.0,
+      "free_pool_mb": 2989.29,
+      "seg_current": 41,
+      "seg_allocated": 41,
+      "seg_freed": 0,
+      "ram_mb": 246.52
+    },
+    "post_release": {
+      "label": "post_release",
+      "nvml_mb": 1546.64,
+      "alloc_mb": 436.71,
+      "reserved_mb": 742.0,
+      "free_pool_mb": 305.29,
+      "seg_current": 23,
+      "seg_allocated": 41,
+      "seg_freed": 18,
+      "ram_mb": 246.96
+    },
+    "release_ms": 148.1
+  },
+  "per_block_records": [
+    {
+      "block": 0,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 634.93,
+      "reserved_mb": 790.0,
+      "free_pool_mb": 155.07,
+      "seg_current": 27,
+      "seg_allocated": 27,
+      "seg_freed": 0
+    },
+    {
+      "block": 0,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 1,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 1,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 2,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 2,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 3,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 3,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 4,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 4,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 5,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 5,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 6,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 6,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 7,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 7,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 8,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 8,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 9,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 9,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 10,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 10,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 11,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 11,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 12,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 12,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 13,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 13,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 14,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 14,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 15,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 15,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 16,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 16,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 17,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 17,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 18,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 18,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 19,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 19,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 20,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 20,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 21,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 21,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 22,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 22,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 23,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 23,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 24,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 24,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 25,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 25,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 26,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 26,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 27,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 27,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 28,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 28,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 29,
+      "pass": "cond",
+      "phase": "pre",
+      "alloc_mb": 643.06,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2402.94,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 29,
+      "pass": "cond",
+      "phase": "post",
+      "alloc_mb": 737.98,
+      "reserved_mb": 3046.0,
+      "free_pool_mb": 2308.02,
+      "seg_current": 39,
+      "seg_allocated": 39,
+      "seg_freed": 0
+    },
+    {
+      "block": 0,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 647.01,
+      "reserved_mb": 940.0,
+      "free_pool_mb": 292.99,
+      "seg_current": 26,
+      "seg_allocated": 44,
+      "seg_freed": 18
+    },
+    {
+      "block": 0,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 1,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 1,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 2,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 2,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 3,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 3,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 4,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 4,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 5,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 5,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 6,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 6,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 7,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 7,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 8,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 8,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 9,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 9,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 10,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 10,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 11,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 11,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 12,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 12,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 13,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 13,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 14,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 14,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 15,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 15,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 16,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 16,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 17,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 17,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 18,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 18,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 19,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 19,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 20,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 20,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 21,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 21,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 22,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 22,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 23,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 23,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 24,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 24,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 25,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 25,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 26,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 26,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 27,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 27,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 28,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 28,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 29,
+      "pass": "uncond",
+      "phase": "pre",
+      "alloc_mb": 655.14,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2540.86,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    },
+    {
+      "block": 29,
+      "pass": "uncond",
+      "phase": "post",
+      "alloc_mb": 750.06,
+      "reserved_mb": 3196.0,
+      "free_pool_mb": 2445.94,
+      "seg_current": 38,
+      "seg_allocated": 56,
+      "seg_freed": 18
+    }
+  ],
+  "uncond_reserved_series": [
+    {
+      "block": 0,
+      "pre_mb": 940.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 1,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 2,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 3,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 4,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 5,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 6,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 7,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 8,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 9,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 10,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 11,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 12,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 13,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 14,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 15,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 16,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 17,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 18,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 19,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 20,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 21,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 22,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 23,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 24,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 25,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 26,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 27,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 28,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    },
+    {
+      "block": 29,
+      "pre_mb": 3196.0,
+      "post_mb": 3196.0
+    }
+  ],
+  "reserved_after_uncond_block0_mb": 3196.0,
+  "regrowth_mb": 150.0,
+  "memory_peaks_mb": {
+    "peak_nvml_used": 4403.5,
+    "peak_torch_alloc": 2048.1,
+    "peak_torch_reserved": 3576.0,
+    "peak_process_ram": 333.4
+  },
+  "comparison": {
+    "d2c_no_release_peak_nvml_mb": 6006.2,
+    "d2c_no_release_peak_reserved_mb": 5682.0,
+    "f7_0_baseline_nvml_mb": 6058.5
+  },
+  "result_class": "FAVORABLE (peak <= 4800)",
+  "verdict": {
+    "execution_completed": true,
+    "hard_gate_4800mb_met": true,
+    "error_detail": null
+  }
+}

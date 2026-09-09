@@ -1,0 +1,102 @@
+{
+  "timestamp": "2026-09-09T02:57:58.532167",
+  "phase": "F7-D2 (Allocator Causal Release Probe)",
+  "evidence_class": "All measured/observed; interpretation labelled DERIVED",
+  "workload": {
+    "resolution": "1280x720",
+    "frames": 33,
+    "steps_executed": 1,
+    "mode": "adaptive",
+    "seed": 42,
+    "guidance_scale": 5.0,
+    "release_reps": 2
+  },
+  "phases_s": {
+    "prompt_encoding_s": 51.99,
+    "dit_prep_s": 0.06,
+    "latent_shape": [
+      1,
+      16,
+      9,
+      90,
+      160
+    ],
+    "single_step_s": 89.55
+  },
+  "boundary_snapshots": {
+    "retained": {
+      "label": "retained",
+      "timestamp": "2026-09-09T02:57:58.143757",
+      "nvml_used_mb": 1240.5,
+      "torch_alloc_mb": 102.3,
+      "torch_reserved_mb": 546.0,
+      "allocator_delta_mb": 443.7,
+      "segment_current": 7,
+      "segment_allocated": 54,
+      "segment_freed": 47,
+      "host_rss_mb": 381.95,
+      "gpu_temp_c": 82,
+      "gpu_clock_mhz": 1912,
+      "gpu_util_pct": 6
+    },
+    "released_rep1": {
+      "label": "released_rep1",
+      "timestamp": "2026-09-09T02:57:58.264132",
+      "nvml_used_mb": 1240.87,
+      "torch_alloc_mb": 102.3,
+      "torch_reserved_mb": 546.0,
+      "allocator_delta_mb": 443.7,
+      "segment_current": 7,
+      "segment_allocated": 54,
+      "segment_freed": 47,
+      "host_rss_mb": 382.02,
+      "gpu_temp_c": 82,
+      "gpu_clock_mhz": 1912,
+      "gpu_util_pct": 6
+    },
+    "released_rep2": {
+      "label": "released_rep2",
+      "timestamp": "2026-09-09T02:57:58.373256",
+      "nvml_used_mb": 1241.06,
+      "torch_alloc_mb": 102.3,
+      "torch_reserved_mb": 546.0,
+      "allocator_delta_mb": 443.7,
+      "segment_current": 7,
+      "segment_allocated": 54,
+      "segment_freed": 47,
+      "host_rss_mb": 382.04,
+      "gpu_temp_c": 82,
+      "gpu_clock_mhz": 1912,
+      "gpu_util_pct": 6
+    }
+  },
+  "derived_deltas": {
+    "delta_reserved_mb": 0.0,
+    "delta_nvml_mb": -0.37,
+    "segments_freed_between": 0,
+    "nvml_released_reproducibility_range_mb": [
+      1240.87,
+      1241.06
+    ]
+  },
+  "interpretation": "Case D candidate (pool not releasable at this boundary)",
+  "memory_peaks_mb": {
+    "peak_nvml_used": 6078.5,
+    "peak_nvml_timestamp": "2026-09-09T02:57:51.414973",
+    "peak_torch_alloc": 2147.9,
+    "peak_torch_reserved": 5778.0,
+    "peak_process_ram": 391.2
+  },
+  "comparison_vs_baselines": {
+    "f7_0_baseline_nvml_mb": 6058.5,
+    "f7_d1_nvml_mb": 6088.4,
+    "f7_0_reserved_mb": 5894.0,
+    "f7_0_alloc_mb": 2187.5
+  },
+  "verdict": {
+    "execution_completed": true,
+    "abort_kind": "SAFE_ABORT_OPERATIONAL",
+    "hard_gate_4800mb_reference": false,
+    "error_detail": null
+  }
+}
