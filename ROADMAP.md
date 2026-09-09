@@ -1,9 +1,9 @@
 # Marley Runtime (`marley-runtime`) — Roadmap v5
 
-**Release Date:** 2026-09-08  
-**Status:** Active — F1.5, F1.7, **F3 (CERTIFIED PASS)**, **F3+INT8 (PASS)**, **F4 (CORE VALIDATED)** & **F5 (RETIRED — Resolved by Tiling at 33f)** · Phase F6 (480p/33f End-to-End) NEXT  
+**Release Date:** 2026-09-09  
+**Status:** Active — F1.5, F1.7, **F3 (CERTIFIED PASS)**, **F3+INT8 (PASS)**, **F4 (CORE VALIDATED)**, **F5 (RETIRED)** & **F6 (CERTIFIED PASS & FROZEN)** · **Phase F7 (720p Strategy) ACTIVE**  
 **Target Repository:** [`LARP/marley-runtime`](https://github.com/LARP/marley-runtime)  
-**Primary Objective:** Investigate and deploy adaptive memory management policies for Wan2.1-T2V-1.3B constrained to ~4.8 GB effective physical VRAM (NVIDIA GeForce RTX 3050 6GB Laptop, Windows WDDM), prioritizing 480p resolution (with 720p as secondary/stretch milestone).
+**Primary Objective:** Investigate and deploy adaptive memory management policies for Wan2.1-T2V-1.3B constrained to ~4.8 GB effective physical VRAM (NVIDIA GeForce RTX 3050 6GB Laptop, Windows WDDM), transitioning to 720p exploration following 480p/33f multidimensional certification.
 
 > **Phase F0 completed 2026-09-08T06:04:40Z.** First real Wan2.1-T2V-1.3B video generated at 480p/16f/FP16. Peak NVML: 5,451 MB (gate exceeded by 651 MB in VAE decode). VAE confirmed as primary bottleneck — Phase F5 trigger pre-activated. Report: [`results/TEST_F0_baseline_ref.md`](results/TEST_F0_baseline_ref.md).
 
@@ -100,14 +100,16 @@ flowchart TD
     F17 --> F4["F4: Adaptive Memory Decision Engine (CORE) 🟢"]
     F3 --> F3I8["F3+INT8: Transfer-Volume Isolation 🟢"] --> F4
     F4 -.->|"Resolved in F0.5/F5-A"| F5["F5: Temporal VAE Stitcher (RETIRED) 🟢"]
-    F4 --> F6["F6: Multidimensional Benchmarks ⚪"]
+    F4 --> F6["F6: Multidimensional Benchmarks 🟢"]
     F5 --> F6
+    F6 --> F7["F7: 720p Strategy (Memory Feasibility Probe) 🟡"]
 
     classDef pass fill:#1b4332,stroke:#40916c,stroke-width:2px,color:#d8f3dc;
     classDef inprog fill:#5c4d00,stroke:#d4af37,stroke-width:2px,color:#fff3b0;
     classDef bypass fill:#4a1525,stroke:#9b2226,stroke-width:1px,color:#f8d7da;
     class F0,F05,F06,F1,F15,F17,F3 pass;
-    class F3I8,F4,F5 pass;
+    class F3I8,F4,F5,F6 pass;
+    class F7 inprog;
     class F2 bypass;
 ```
 
@@ -433,7 +435,8 @@ Full report: [`docs/F6_MULTIDIMENSIONAL_BENCHMARK_REPORT_01.md`](docs/F6_MULTIDI
 | **F3+INT8** | Transfer-Volume Isolation | F3 certified PASS | Same gates as F3; fidelity cos $< 0.99$ | Retain FP16 baseline | 🟢 **PASS**<br>Async-vs-Sync **+13.2%** · overlap 98.1% · **2,076 MB** (−508) · payload −49.9% · [`Report`](results/TEST_F3_INT8_benchmark.md) |
 | **F4** | Adaptive Decision Engine | Unconditional (Core) | ≥5% Optimization Target is a *target*, not a validity gate (validated vs Safety/Adaptive Gates per v3) | Deterministic static policy (Async FP16 or Async INT8 / Performance) | 🟢 **CORE VALIDATED**<br>[`TEST_F4_adaptive_benchmark.md`](results/TEST_F4_adaptive_benchmark.md) (Safety 2,882 MB/0 NaN · Adaptive PASS · D vs best B −3.40% no-pressure · overhead 0.16 ms) |
 | **F5** | Temporal VAE Stitcher | VAE is confirmed bottleneck at 33f | Saves $< 20\%$ VRAM or introduces seam artifacts | Tiled spatial-temporal decoding (Test J) | 🟢 **RETIRED (Resolved by Tiling)**<br>Probe F5-A certified: **2,109 MB peak NVML** (Gate ≤ 4,800), **26.99 s decode** (Target ≤ 150 s), 0 NaNs at 33f. Stitcher unnecessary. [`TEST_F5`](results/TEST_F5_vae_probe_33f.md) |
-| **F6** | Verification Benchmarks | Completion of prior phases | Wall-clock time $> 30\text{ min}$ without explanation | Document operational boundaries | 🟢 **CERTIFIED PASS**<br>F6-0 to F6-E verified across 5 dimensions · 523.7s total wall-clock · 2,624–3,244 MB peak nominal · [`Certification`](docs/F6_FINAL_CERTIFICATION_REPORT_01.md) |
+| **F6** | Verification Benchmarks | Completion of prior phases | Wall-clock time $> 30\text{ min}$ without explanation | Document operational boundaries | 🟢 **CERTIFIED PASS & FROZEN**<br>F6-0 to F6-E verified across 5 dimensions · Multirun 4x3 certified (12/12 individual pass) · [`Certification`](docs/F6_FINAL_CERTIFICATION_REPORT_01.md) · [`Report`](docs/F6_REPRODUCIBILITY_VARIABILITY_REPORT_01.md) |
+| **F7** | 720p Strategy (Memory Probe) | F6 certified & frozen | Peak NVML $> 4,800.0\text{ MB}$ or OOM on 720p 5-step probe | Calibrate VAE spatial tiling, DiT block eviction or INT8 policy | 🟡 **ACTIVE / PROBE IN PROGRESS**<br>1280x720 @ 33f (5 steps) memory feasibility probe |
 
 ---
 

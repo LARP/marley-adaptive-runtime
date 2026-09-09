@@ -54,30 +54,33 @@
 
 ---
 
-## 3. Telemetría de Hardware y Estabilidad Térmica (NVML)
+## 3. Telemetría de Hardware y Control de Condiciones Térmicas (NVML)
 
-| Modo | Temp. Basal Pre (°C) | Temp. Final Post (°C) | Clock GPU Post (MHz) | Estabilidad Térmica |
+| Modo | Temp. Basal Pre (°C) | Temp. Final Post (°C) | Clock GPU Post (MHz) | Control Térmico |
 | :--- | :---: | :---: | :---: | :--- |
-| **sync** | 58 °C | 76.33 °C | 210 MHz | Control de Cooldown (60s) aplicado |
-| **async_fp16** | 62.67 °C | 75 °C | 220 MHz | Control de Cooldown (60s) aplicado |
-| **async_int8** | 62.33 °C | 75.33 °C | 210 MHz | Control de Cooldown (60s) aplicado |
-| **adaptive** | 61.33 °C | 74.33 °C | 210 MHz | Control de Cooldown (60s) aplicado |
+| **sync** | 58 °C | 76.33 °C | 210 MHz | Pausa experimental de 60s aplicada para amortiguar acumulación térmica |
+| **async_fp16** | 62.67 °C | 75 °C | 220 MHz | Pausa experimental de 60s aplicada para amortiguar acumulación térmica |
+| **async_int8** | 62.33 °C | 75.33 °C | 210 MHz | Pausa experimental de 60s aplicada para amortiguar acumulación térmica |
+| **adaptive** | 61.33 °C | 74.33 °C | 210 MHz | Pausa experimental de 60s aplicada para amortiguar acumulación térmica |
+
+*Nota metodológica:* El cooldown de 60 segundos constituye una medida de control experimental y mitigación de acumulación térmica, no una garantía de isotermia absoluta entre ejecuciones.
 
 ---
 
-## 4. Comparativa Relativa entre Arquitecturas
+## 4. Comparativa Relativa entre Arquitecturas y Análisis de Variabilidad
 
-- **Async FP16 frente a Sync (Baseline):** -3.02% en latencia total (515.57s vs 531.65s).
-- **Async INT8 frente a Async FP16:** -0.65% de overhead computacional en CPU/host (512.21s vs 515.57s).
-- **Adaptive frente a Async FP16:** +2.23% en régimen nominal (527.07s vs 515.57s). Confirma que Adaptive mantiene paridad operativa con el mejor modo estático, añadiendo capacidad dinámica de adaptación ante perturbaciones de memoria.
+- **Async FP16 frente a Sync (Baseline):** **-3.02%** en latencia total media (515.57s vs 531.65s), confirmando la ventaja del solapamiento PCIe/compute.
+- **Async INT8 frente a Async FP16:** **-0.65%** en wall-clock medio durante esta campaña (512.21s vs 515.57s). La diferencia es pequeña (-3.36s) y, con $n=3$ por condición ($n-1 = 2$ grados de libertad), no debe interpretarse como evidencia de una ventaja de rendimiento estadísticamente estable. El resultado confirma que INT8 no introdujo una penalización significativa de wall-clock bajo las condiciones de esta campaña, manteniéndose Async FP16 como baseline estático de referencia.
+- **Adaptive frente a Async FP16:** **+2.23%** en régimen nominal (527.07s vs 515.57s). Adaptive no se valida por superar necesariamente al mejor modo estático, sino por mantener un coste nominal razonable mientras proporciona capacidad de adaptación dinámica ante contingencias o perturbaciones de memoria.
+- **Observación sobre la Variabilidad de Adaptive:** Adaptive presentó la mayor variabilidad relativa de wall-clock de la campaña ($CV=4.56\%$, frente a 1.94%–3.03% de los modos estáticos). Aunque todas las ejecuciones cumplieron holgadamente los hard gates, esta dispersión queda registrada como observación para F7 para monitorizar si vuelve a manifestarse bajo mayores demandas de memoria o resolución.
 
 ---
 
-## 5. Dictamen Final de Reproducibilidad y Hard Gates
+## 5. Dictamen Final de Reproducibilidad y Transición a F7
 
 > [!IMPORTANT]
 > **CUMPLIMIENTO INDIVIDUAL DEL 100% DE LOS HARD GATES:**  
-> - **Peak NVML:** El 100% de las corridas individuales cumplió estrictamente $\le 4,800.0\text{ MB}$ de VRAM física.  
+> - **Peak NVML:** El 100% de las corridas individuales cumplió estrictamente $\le 4,800.0\text{ MB}$ de VRAM física (Rango global observado: [2,719.0 – 4,129.5] MB).  
 > - **Integridad Numérica:** 0 NaNs / Infs en el 100% de las repeticiones individuales.  
-> - **Integridad de Salida:** 100% de los videos MP4 generados válidos y reproducibles.  
-> - **Margen de Seguridad para 720p:** La dispersión observada $[\min, \max]$ proporciona la base empírica indispensable para el diseño del presupuesto de memoria de la futura fase 720p.
+> - **Integridad de Salida:** 100% de las ejecuciones generaron un archivo MP4 válido y correctamente decodificable.  
+> - **Línea Base para 720p:** Los resultados de F6 proporcionan una referencia empírica para establecer el presupuesto inicial de F7. No obstante, la viabilidad de 720p no debe extrapolarse matemáticamente a partir de los resultados de 480p y deberá determinarse mediante medición directa en hardware.
