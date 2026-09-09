@@ -1,0 +1,40 @@
+{
+  "phase": "F1.7",
+  "date": "2026-09-08T14:58:25.741385+00:00",
+  "status": "SUCCESS",
+  "kill_gate_target_pct": 20.0,
+  "overall_verdict": "PASS",
+  "text_encoder_umt5": {
+    "parameters": 6731059200,
+    "fp16_mb": 14758.48,
+    "int8_mb": 7379.24,
+    "int8_savings_mb": 7379.24,
+    "int8_savings_pct": 50.0,
+    "nf4_mb": 3689.62,
+    "nf4_savings_mb": 11068.86,
+    "nf4_savings_pct": 75.0,
+    "int8_cosine_similarity": 1.000017,
+    "int8_rmse": 0.011062,
+    "int8_max_abs_error": 0.019158,
+    "int8_nans": false,
+    "nf4_cosine_similarity": 0.980313,
+    "nf4_rmse": 0.200679,
+    "nf4_max_abs_error": 0.347581,
+    "nf4_nans": false
+  },
+  "dit_transformer": {
+    "num_blocks": 30,
+    "fp16_block_mb": 88.6,
+    "fp16_total_mb": 2658.0,
+    "int8_block_mb": 45.89,
+    "int8_total_mb": 1376.7,
+    "int8_block_savings_mb": 42.71,
+    "int8_block_savings_pct": 48.2,
+    "int8_total_savings_mb": 1281.3,
+    "cumulative_pcie_savings_per_pass_mb": 2562.6
+  },
+  "roadmap_dispatch": {
+    "phase_f3_impact": "DiT 8-bit blocks shrink streaming payload from 88.6 MB to 45.9 MB (-48.2%), reducing PCIe H2D transfer time per block by ~48% under WDDM and further expanding safety margin.",
+    "phase_f4_impact": "Adaptive engine can dynamically select FP16 vs INT8 precision per layer based on live VRAM pressure and PCIe bus saturation."
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "global_nvml_peak_mb": 3169.3,
+  "attributed_total_nvml_peak_mb": 6573.4,
+  "components": [
+    {
+      "name": "text_encoder[0]",
+      "kind": "text_encoder",
+      "forward_calls": 2,
+      "total_time_s": 88.766,
+      "max_time_s": 80.36,
+      "weights_mb": 14758.48,
+      "num_params": 6731059200,
+      "alloc_delta_peak_mb": 12.12,
+      "reserved_delta_peak_mb": 60.0,
+      "nvml_peak_attributed_mb": 3169.3
+    },
+    {
+      "name": "transformer(diT_blocks)",
+      "kind": "diT_group",
+      "forward_calls": 4,
+      "total_time_s": 16.125,
+      "max_time_s": 9.891,
+      "weights_mb": 2712.49,
+      "num_params": 1418996800,
+      "alloc_delta_peak_mb": 0.38,
+      "reserved_delta_peak_mb": 22.0,
+      "nvml_peak_attributed_mb": 1454.1
+    },
+    {
+      "name": "vae",
+      "kind": "vae",
+      "forward_calls": 3810,
+      "total_time_s": 10.498,
+      "max_time_s": 0.235,
+      "weights_mb": 242.03,
+      "num_params": 126892531,
+      "alloc_delta_peak_mb": 96.0,
+      "reserved_delta_peak_mb": 336.0,
+      "nvml_peak_attributed_mb": 1949.9
+    }
+  ],
+  "config": {
+    "phase": "F1",
+    "model": "Wan-AI/Wan2.1-T2V-1.3B-Diffusers",
+    "res": "480p",
+    "resolution_px": "832x480",
+    "frames": 5,
+    "dtype": "fp16",
+    "vae_dtype": "bf16",
+    "vae_tiling": true,
+    "offload": "cpu",
+    "steps": 2,
+    "group_blocks": false,
+    "total_inference_time_s": 116.97,
+    "total_static_weights_mb": 17712.99,
+    "static_rows": [
+      {
+        "name": "text_encoder[0]",
+        "kind": "text_encoder",
+        "mb": 14758.48
+      },
+      {
+        "name": "transformer(diT_blocks)",
+        "kind": "diT_group",
+        "mb": 2712.49
+      },
+      {
+        "name": "vae",
+        "kind": "vae",
+        "mb": 242.03
+      }
+    ]
+  },
+  "torch_peak": {
+    "max_allocated_mb": 2021.1,
+    "max_reserved_mb": 2066.0
+  },
+  "device": "NVIDIA GeForce RTX 3050 6GB Laptop GPU",
+  "status": "SUCCESS"
+}

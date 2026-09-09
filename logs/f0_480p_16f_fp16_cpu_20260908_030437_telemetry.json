@@ -1,0 +1,15 @@
+{
+  "phase": "F0",
+  "model": "Wan-AI/Wan2.1-T2V-1.3B-Diffusers",
+  "res": "480p",
+  "resolution_px": "832x480",
+  "frames": 16,
+  "dtype": "fp16",
+  "offload": "cpu",
+  "inference_time_s": 619.78,
+  "peak_torch_allocated_mb": 8123.0,
+  "peak_nvml_used_mb": 5450.7,
+  "vram_gate_4800mb_ok": false,
+  "output_video": "D:\\Gemini_Admin_Tool\\marley_720p\\logs\\f0_480p_16f_fp16_cpu_20260908_030437.mp4",
+  "status": "SUCCESS"
+}

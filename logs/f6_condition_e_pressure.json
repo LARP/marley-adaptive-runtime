@@ -1,0 +1,57 @@
+{
+  "timestamp": "2026-09-08T21:20:45.835331",
+  "stage": "F6-E Dynamic Pressure Benchmark (adaptive, 30 steps, +1200MB)",
+  "mode": "adaptive",
+  "smoke_test": false,
+  "workload": {
+    "resolution": "832x480",
+    "frames": 33,
+    "steps": 30,
+    "guidance_scale": 5.0,
+    "seed": 42,
+    "prompt": "A golden retriever dog runs joyfully across a sunlit meadow, cinematic lighting, shallow depth of field, 4K."
+  },
+  "timings_s": {
+    "prompt_encoding": 40.58,
+    "dit_prep": 0.15,
+    "denoising_total": 446.31,
+    "denoising_per_step_avg": 14.88,
+    "vae_decode": 28.63,
+    "video_export": 0.63,
+    "total_wall_clock": 525.95
+  },
+  "memory_mb": {
+    "peak_nvml_used": 5182.8,
+    "peak_torch_alloc": 2397.4,
+    "peak_torch_reserved": 4144.0,
+    "peak_process_ram": 2085.9
+  },
+  "adaptive_telemetry": {
+    "pressure_test_active": true,
+    "pressure_injected_mb": 1200.0,
+    "replan_count": 2,
+    "replan_events": [
+      {
+        "window": 0,
+        "profile": "memory_safe",
+        "regime": "pressure",
+        "ema_used_mb": 1995.5210937499996
+      },
+      {
+        "window": 0,
+        "profile": "performance",
+        "regime": "normal",
+        "ema_used_mb": 4176.182915782005
+      }
+    ],
+    "adaptation_pass": true
+  },
+  "verdict": {
+    "functional_pass": true,
+    "memory_gate_pass": false,
+    "target_vram_met": false,
+    "perf_target_met": true,
+    "nan_inf_detected": false,
+    "output_video": "logs/f6_832x480_33f_adaptive_20260908_212045.mp4"
+  }
+}

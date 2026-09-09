@@ -1,0 +1,84 @@
+{
+  "device": "NVIDIA GeForce RTX 3050 6GB Laptop GPU",
+  "vram_total_mb": 6143.5,
+  "dtype": "torch.float16",
+  "num_blocks": 30,
+  "num_steps": 5,
+  "num_frames": 17,
+  "slot_vram_mb": 177.1572265625,
+  "activation_shapes": {
+    "hidden_states": [
+      1,
+      7800,
+      1536
+    ],
+    "encoder_hidden_states": [
+      1,
+      226,
+      1536
+    ],
+    "temb": [
+      1,
+      6,
+      1536
+    ],
+    "rotary_emb": [
+      [
+        1,
+        7800,
+        1,
+        128
+      ],
+      [
+        1,
+        7800,
+        1,
+        128
+      ]
+    ]
+  },
+  "f3a": {
+    "pass": true,
+    "reps": 2,
+    "avg_sync_ms": 17498.53639997309,
+    "avg_async_ms": 15392.281299980823,
+    "avg_overlap_pct": 100.0,
+    "consistency_std_ms": 165.50909013810303,
+    "nan_inf_detected": false
+  },
+  "f3b": {
+    "pass": true,
+    "condition_a": {
+      "total_denoise_ms": 17186.877900036052,
+      "h2d_transfer_ms": 1512.6581004587933,
+      "overlap_pct": 0.0,
+      "peak_vram_mb": 1705.703125,
+      "prefetch_latency_ms": 0.0,
+      "forced_syncs": 150,
+      "time_per_frame_ms": 1010.9928176491796,
+      "nan_inf": false
+    },
+    "condition_b": {
+      "total_denoise_ms": 15407.226599985734,
+      "h2d_transfer_ms": 1512.6581004587933,
+      "overlap_pct": 100.0,
+      "peak_vram_mb": 1693.6328125,
+      "prefetch_latency_ms": 0.0,
+      "forced_syncs": 5,
+      "time_per_frame_ms": 906.3074470579844,
+      "nan_inf": false
+    },
+    "speedup_pct": 10.354709624408196,
+    "speedup_interpretation": "\ud83d\udfe2 Success",
+    "overlap_interpretation": "\ud83d\udfe2 Excellent overlap",
+    "peak_vram_mb": 1705.703125,
+    "vram_rating": "\ud83d\udfe2 Excellent (\u2264 4,000 MB)"
+  },
+  "verdict": {
+    "f3a_pass": true,
+    "f3b_pass": true,
+    "overall_pass": true,
+    "phase": "F3",
+    "next_phase": "F3+INT8"
+  }
+}

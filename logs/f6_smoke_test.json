@@ -1,0 +1,37 @@
+{
+  "timestamp": "2026-09-08T20:09:48.848104",
+  "stage": "F6-0 (Integration Smoke Test)",
+  "mode": "async_fp16",
+  "smoke_test": true,
+  "workload": {
+    "resolution": "832x480",
+    "frames": 33,
+    "steps": 2,
+    "guidance_scale": 5.0,
+    "seed": 42,
+    "prompt": "A golden retriever dog runs joyfully across a sunlit meadow, cinematic lighting, shallow depth of field, 4K."
+  },
+  "timings_s": {
+    "prompt_encoding": 44.07,
+    "dit_prep": 0.17,
+    "denoising_total": 30.4,
+    "denoising_per_step_avg": 15.2,
+    "vae_decode": 29.21,
+    "video_export": 2.4,
+    "total_wall_clock": 113.93
+  },
+  "memory_mb": {
+    "peak_nvml_used": 2647.8,
+    "peak_torch_alloc": 1205.5,
+    "peak_torch_reserved": 1656.0,
+    "peak_process_ram": 6314.9
+  },
+  "verdict": {
+    "functional_pass": true,
+    "memory_gate_pass": true,
+    "target_vram_met": true,
+    "perf_target_met": true,
+    "nan_inf_detected": false,
+    "output_video": "logs/f6_832x480_33f_async_fp16_20260908_200946.mp4"
+  }
+}

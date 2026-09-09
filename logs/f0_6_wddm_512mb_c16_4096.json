@@ -1,0 +1,20 @@
+{
+  "phase": "F0.6",
+  "device": "NVIDIA GeForce RTX 3050 6GB Laptop GPU",
+  "cuda": "12.4",
+  "copy_mb": 512,
+  "chunk_mb": 16,
+  "n_chunks": 32,
+  "gemm_n": 4096,
+  "gemm_reps": 5,
+  "trials": 5,
+  "copy_alone_s": 0.0437,
+  "compute_alone_s": 0.0387,
+  "serial_sum_s": 0.0824,
+  "concurrent_s": 0.0434,
+  "overlap_saved_s": 0.0391,
+  "overlap_pct": 89.317,
+  "gate_10pct_ok": true,
+  "verdict": "Phase F3 ACTIVE",
+  "status": "SUCCESS"
+}

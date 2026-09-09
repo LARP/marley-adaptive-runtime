@@ -1,0 +1,64 @@
+{
+  "phase": "F4",
+  "device": "NVIDIA GeForce RTX 3050 6GB Laptop GPU",
+  "vram_total_mb": 6143.5,
+  "num_blocks": 30,
+  "num_steps": 5,
+  "num_frames": 17,
+  "num_reps": 1,
+  "window": 5,
+  "profile": "performance",
+  "warmup": true,
+  "gates": {
+    "hard_gate_vram_mb_limit": 4800.0,
+    "engineering_target_vram_mb": 4000.0,
+    "adaptive_gate_headroom_recovered_gb": 1.5,
+    "optimization_target_pct": 5.0
+  },
+  "pressure": {
+    "mode": "pressure",
+    "profile_sequence": [
+      "performance",
+      "memory_safe",
+      "memory_safe",
+      "performance",
+      "performance",
+      "performance",
+      "performance",
+      "performance"
+    ],
+    "decisions": [
+      "PolicyDecision(precision='int8', prefetch='aggressive', residency='keep')",
+      "PolicyDecision(precision='fp16', prefetch='conservative', residency='evict')",
+      "PolicyDecision(precision='fp16', prefetch='conservative', residency='evict')",
+      "PolicyDecision(precision='int8', prefetch='aggressive', residency='keep')",
+      "PolicyDecision(precision='int8', prefetch='aggressive', residency='keep')",
+      "PolicyDecision(precision='int8', prefetch='aggressive', residency='keep')",
+      "PolicyDecision(precision='int8', prefetch='aggressive', residency='keep')",
+      "PolicyDecision(precision='int8', prefetch='aggressive', residency='keep')"
+    ],
+    "replan_events": [
+      {
+        "window": 1,
+        "profile": "memory_safe",
+        "regime": "pressure",
+        "ema_used_mb": 2780.0
+      },
+      {
+        "window": 3,
+        "profile": "performance",
+        "regime": "normal",
+        "ema_used_mb": 2751.1579999999994
+      }
+    ],
+    "replan_count": 2,
+    "switch_count": 2,
+    "decision_overhead_ms_total": 0.07489987183362246,
+    "entered_memory_safe": true,
+    "re_exited": true,
+    "oscillated": false,
+    "headroom_recovered_gb": 1.5,
+    "adaptive_gate_pass": true
+  },
+  "pass": true
+}

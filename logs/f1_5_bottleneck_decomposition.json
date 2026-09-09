@@ -1,0 +1,104 @@
+{
+  "phase": "F1.5",
+  "canonical_source": "f1_480p_17f_fp16_vae_bf16_cpu_30st_20260908_111345_telemetry.json",
+  "hard_gate_mb": 4800.0,
+  "physical_vram_mb": 6144.0,
+  "global_nvml_peak_mb": 3223.7,
+  "headroom_under_gate_mb": 1576.3,
+  "categories": {
+    "1_static_model_weights": {
+      "text_encoder_static_mb": 14758.48,
+      "dit_transformer_total_static_mb": 2658.0,
+      "dit_single_block_static_mb": 88.6,
+      "vae_static_mb": 242.03,
+      "total_static_weights_mb": 17658.51,
+      "active_gpu_residency_mb": 88.6
+    },
+    "2_dit_activations": {
+      "num_blocks": 30,
+      "dit_peak_nvml_attributed_mb": 1743.5,
+      "dit_min_nvml_attributed_mb": 1645.7,
+      "dit_mean_nvml_attributed_mb": 1684.25,
+      "dit_mean_alloc_delta_mb": 22.95,
+      "dit_isolated_activation_est_mb": 554.9,
+      "residency_uniformity": "HIGH (1.65 - 1.74 GB, delta < 98 MB across all 30 blocks)"
+    },
+    "3_vae_activations": {
+      "vae_weights_mb": 242.03,
+      "vae_peak_nvml_attributed_mb": 2112.1,
+      "vae_isolated_activation_est_mb": 770.07,
+      "nature": "ACTIVATION-DOMINATED (2,112 MB residency on 242 MB weights)"
+    },
+    "4_allocator_fragmentation": {
+      "torch_allocated_peak_mb": 2021.1,
+      "torch_reserved_peak_mb": 2066.0,
+      "fragmentation_mb": 44.9,
+      "fragmentation_pct_of_alloc": 2.22,
+      "fragmentation_pct_of_gate": 0.94,
+      "f2_trigger_threshold_mb": 720.0,
+      "exceeds_threshold": false
+    },
+    "5_host_to_device_prefetch_buffers": {
+      "single_block_prefetch_buffer_mb": 88.6,
+      "available_gate_headroom_mb": 1576.3,
+      "headroom_consumed_pct": 5.62,
+      "remaining_safety_headroom_mb": 1487.7,
+      "safe_for_f3": true
+    }
+  },
+  "trigger_evaluation": {
+    "F2_static_slab_allocator": {
+      "condition": "Allocator fragmentation > 15% (720 MB)",
+      "measured_frag_mb": 44.9,
+      "measured_frag_pct_of_gate": 0.94,
+      "verdict": "TRIGGER REJECTED (Bypass Phase F2)",
+      "action": "BYPASS / CANCEL Phase F2 (Avoid zero-benefit custom allocator)"
+    },
+    "F3_budgeted_async_scheduler": {
+      "condition": "F0.6 overlap >= 10% AND prefetch safe within 4.8 GB gate",
+      "measured_overlap": "79.9% - 96.3% (F0.6 PASS)",
+      "prefetch_buffer_mb": 88.6,
+      "safety_headroom_remaining_mb": 1487.7,
+      "verdict": "TRIGGER APPROVED (Greenlight Phase F3)",
+      "action": "PROCEED TO EXECUTION OF PHASE F3"
+    },
+    "F1_7_selective_quantization": {
+      "condition": "Net physical VRAM reduction >= 20% on prioritized target",
+      "primary_target": "Text Encoder T5-XXL (14.7 GB disk/RAM footprint) + Attention Projections",
+      "verdict": "PRIORITIZED FOR TEXT ENCODER & DIT WEIGHTS",
+      "action": "PRIORITIZED for text encoder CPU/PCIe footprint & DiT projections"
+    },
+    "F5_temporal_vae_stitcher": {
+      "condition": "VAE identified as primary uncontained OOM bottleneck",
+      "status_in_test_j": "2,902 MB peak (tiled BF16)",
+      "verdict": "STANDBY / DEFERRED (Resolved by Phase F0.5 Test J Tiling)",
+      "action": "STANDBY / DEFERRED (Standard tiling already solved bottleneck)"
+    }
+  },
+  "prioritized_dispatch_order": [
+    {
+      "priority": 1,
+      "phase": "F3: Budgeted Asynchronous Scheduler",
+      "rationale": "High measured overlap (80-96%) + 1.57 GB free headroom enables overlapping PCIe streaming with compute to slash inference time from 455s.",
+      "status": "APPROVED FOR DEVELOPMENT"
+    },
+    {
+      "priority": 2,
+      "phase": "F1.7: Selective Quantization",
+      "rationale": "Text encoder (14.7 GB) and DiT linear projections (2.65 GB) are prime candidates to reduce host RAM footprint and PCIe transfer volume.",
+      "status": "APPROVED IN PARALLEL"
+    },
+    {
+      "priority": 3,
+      "phase": "F4: Adaptive Memory Decision Engine (CORE)",
+      "rationale": "Uses calibrated telemetry profiles from F1/F1.5 and async streaming from F3 to manage block residency dynamically.",
+      "status": "CORE INTEGRATION TARGET"
+    },
+    {
+      "priority": 4,
+      "phase": "F2: Static Slab Allocator",
+      "rationale": "PyTorch caching allocator fragmentation is only 44.9 MB (<1% of budget). Replacing allocator yields negligible memory savings.",
+      "status": "DISCARDED / BYPASSED"
+    }
+  ]
+}

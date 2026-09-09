@@ -1,0 +1,50 @@
+{
+  "timestamp": "2026-09-08T19:39:41.215841",
+  "device": "NVIDIA GeForce RTX 3050 6GB Laptop GPU",
+  "total_vram_mb": 6143.5,
+  "workload": {
+    "model_id": "Wan-AI/Wan2.1-T2V-1.3B-Diffusers",
+    "dtype": "torch.bfloat16",
+    "resolution": "832x480",
+    "frames": 33,
+    "latent_shape": [
+      1,
+      16,
+      9,
+      60,
+      104
+    ],
+    "spatial_tiling": "256x256",
+    "temporal_caching": "causal"
+  },
+  "metrics": {
+    "decode_time_s": 26.99,
+    "peak_nvml_used_mb": 2109.0,
+    "peak_torch_allocated_mb": 1056.9,
+    "peak_torch_reserved_mb": 1374.0,
+    "peak_process_ram_mb": 1402.6,
+    "init_process_ram_mb": 563.9,
+    "nan_count": 0,
+    "inf_count": 0,
+    "output_shape": [
+      1,
+      3,
+      33,
+      480,
+      832
+    ],
+    "decode_success": true,
+    "error": null
+  },
+  "gates": {
+    "hard_gate_vram_4800mb": "PASS",
+    "engineering_target_vram_4000mb": "MET",
+    "latency_target_150s": "MET",
+    "integrity_gate_0_nans": "PASS",
+    "overall_hard_gate": "PASS"
+  },
+  "decision": {
+    "status_code": "RETIRE_F5",
+    "recommendation": "RETIRE F5-C (Resolved by Existing Tiled VAE) -> Advance to F6"
+  }
+}
