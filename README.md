@@ -20,6 +20,9 @@
 [![Phase F3+INT8: PASS](https://img.shields.io/badge/Phase%20F3%2BINT8-PASS%20(+13.2%25)-22c55e.svg)](results/TEST_F3_INT8_benchmark.md)
 [![Phase F4: CORE VALIDATED](https://img.shields.io/badge/Phase%20F4-CORE%20VALIDATED-8b5cf6.svg)](results/TEST_F4_adaptive_benchmark.md)
 [![Phase F5: RETIRED](https://img.shields.io/badge/Phase%20F5-RETIRED%20(2.1GB%20%40%2033f)-22c55e.svg)](results/TEST_F5_vae_probe_33f.md)
+[![Phase F6: CERTIFIED PASS & FROZEN](https://img.shields.io/badge/Phase%20F6-CERTIFIED%20%26%20FROZEN-22c55e.svg)](docs/F6_REPRODUCIBILITY_VARIABILITY_REPORT_01.md)
+[![Phase F7-0: GATE FAIL](https://img.shields.io/badge/Phase%20F7--0-GATE%20FAIL%20(6.05GB)-ef4444.svg)](docs/F7_0_FEASIBILITY_PROBE_REPORT_01.md)
+[![Phase F7-D1: PROFILING ACTIVE](https://img.shields.io/badge/Phase%20F7--D1-PROFILING%20ACTIVE-f59e0b.svg)](docs/F7_D1_FORENSIC_SPEC_01.md)
 
 *In loving memory of Marley 🐾*
 
@@ -75,7 +78,9 @@ Memory is tracked across **three distinct layers** to prevent WDDM virtualizatio
 | **F3+INT8** | Transfer-Volume Isolation | 🟢 **PASS** | INT8 linear proj + FP16 compute, scheduler frozen: Async-vs-Sync **+13.2%**, payload −49.9%, overlap 98.1%, peak **2,076 MB**, cos ≥ 0.9999 · [`Report`](results/TEST_F3_INT8_benchmark.md) · F3 FP16 baseline frozen |
 | **F4** | Adaptive Decision Engine | 🟢 **CORE VALIDATED** | Same-session A/B/C/D (30×3): Safety PASS (2,882 MB, 0 NaN), Adaptive Gate PASS (no oscillation), overhead 0.16 ms. D vs best static B **−3.40%** (no-pressure, perf cert pending) · [`Report`](results/TEST_F4_adaptive_benchmark.md) · [`Contract`](docs/F4_TEST_SPEC_01.md) |
 | **F5** | Temporal VAE Stitcher | 🟢 **RETIRED** | Probe F5-A certified: 33f VAE decodes in **26.99s @ 2,109 MB** (Hard Gate ≤ 4,800 PASS); stitcher unnecessary, resolved by native tiling · [`TEST_F5`](results/TEST_F5_vae_probe_33f.md) |
-| **F6** | Validation Benchmarks | ⚪ Final | Multi-dimensional benchmarks at 480p/33f and 720p stretch |
+| **F6** | Multidimensional Benchmarks | 🟢 **CERTIFIED & FROZEN** | 480p/33f/30s Multirun 4×3 certified ($n=3, df=2$): **12/12 runs PASS $\le 4,800$ MB**, cadencia ~14.25 s/p, 0 NaNs. CERRADA y CONGELADA (`c6e4bfb`) · [`Report`](docs/F6_REPRODUCIBILITY_VARIABILITY_REPORT_01.md) |
+| **F7-0** | 720p Memory Feasibility Probe | ❌ **GATE FAIL / 🟢 PASS** | 1280×720 @ 33f (5 steps): Peak NVML **6,058.5 MB** (+1,258.5 MB over gate), 0 NaNs, MP4 OK. Executability demonstrated, baseline frozen (`83f138a`) · [`Report`](docs/F7_0_FEASIBILITY_PROBE_REPORT_01.md) |
+| **F7-D1**| Forensic Memory Profiling | 🟡 **ACTIVE / PROFILING** | Autorizada por el Director. Diagnóstico no-invasivo de la retención de 3.7 GB (`Reserved` vs `Allocated`) y degradación temporal sin optimización · [`Spec`](docs/F7_D1_FORENSIC_SPEC_01.md) |
 
 ---
 
@@ -323,6 +328,48 @@ Because the existing tiled VAE path (`bfloat16` + $256 \times 256$ spatial tilin
 > The VAE is no longer considered a project bottleneck; 100% of technical risk is now shifted to the **DiT denoising loop (30 steps)** at 33 frames.
 
 Full report: [`results/TEST_F5_vae_probe_33f.md`](results/TEST_F5_vae_probe_33f.md) · Telemetry: [`logs/f5_vae_probe_33f.json`](logs/f5_vae_probe_33f.json) · Probe: [`f5_vae_probe_33f.py`](f5_vae_probe_33f.py) · Closure Resolution: [`docs/F5_CLOSURE_RESOLUTION_01.md`](docs/F5_CLOSURE_RESOLUTION_01.md).
+
+---
+
+## 🏆 Phase F6 — Multidimensional Benchmarks & Multirun 4×3 (🟢 CERTIFIED PASS & FROZEN)
+
+Phase F6 evaluated the end-to-end pipeline across 5 dimensions at **480p ($832 \times 480$), 33 frames, 30 denoising steps**.
+
+Following the single-run benchmarks (F6-0 through F6-E), the project executed the formal **Campaña Multirun Core 4×3 de Reproducibilidad y Variabilidad** ($n=3$, $df=2$, 12 corridas independientes contrabalanceadas en 3 rondas con 60s de enfriamiento térmico entre ejecuciones).
+
+### Resumen Estadístico Multirun Core 4×3
+
+| Streaming Policy | Wall-Clock (Media μ) | DiT Denoise (Media μ) | Cadencia (Media μ) | Peak NVML (Media μ) | CV% Latencia | CV% VRAM | Rango Peak NVML [Min–Max] | Gate Individual |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Sync FP16** | 531.65 s | 450.94 s | 15.03 s/p | 2,777.4 MB | 3.03% | 3.54% | [2,719.5 – 2,890.8] MB | 🟢 100% PASS |
+| **Async FP16** | 515.57 s | 429.66 s | 14.32 s/p | 2,768.3 MB | 2.64% | 3.08% | [2,719.0 – 2,866.8] MB | 🟢 100% PASS |
+| **Async INT8** | **512.21 s** | 433.24 s | 14.44 s/p | **2,741.4 MB** | **1.94%** | **0.17%** | [2,738.5 – 2,746.7] MB | 🟢 100% PASS |
+| **Adaptive** | 527.07 s | **427.63 s** | **14.25 s/p** | 4,047.8 MB | 4.56% | 1.75% | [4,007.0 – 4,129.5] MB | 🟢 100% PASS |
+
+- **Criterio Individual Estricto:** 12 de 12 corridas (100%) superaron el Hard Gate físico $\le 4,800.0\text{ MB}$ y el objetivo de tiempo $< 600\text{ s}$.
+- **Integridad Numérica:** 0 NaNs / 0 Infs en el 100% de las repeticiones; todos los videos MP4 generados fueron decodificables.
+- **Dictamen:** Phase F6 certificada formalmente, **CERRADA Y CONGELADA** bajo el commit `c6e4bfb`.
+- **Reportes:** [`docs/F6_REPRODUCIBILITY_VARIABILITY_REPORT_01.md`](docs/F6_REPRODUCIBILITY_VARIABILITY_REPORT_01.md) · [`docs/F6_FINAL_CERTIFICATION_REPORT_01.md`](docs/F6_FINAL_CERTIFICATION_REPORT_01.md) · Telemetría: [`logs/multirun/f6_statistical_summary.json`](logs/multirun/f6_statistical_summary.json).
+
+---
+
+## 🔍 Phase F7 — 720p Strategy & Forensic Memory Profiling
+
+### F7-0: 720p Memory Feasibility Probe (Baseline Inmutable)
+- **Workload:** 1280×720 (720p, 16:9), 33 frames, 5 pasos exploratorios, modo `adaptive`.
+- **Área Latente Espacial:** $90 \times 160 = 14,400$ ($2.31\times$ frente a 480p).
+- **Resultados Medidos:**
+  - **Peak Físico NVML:** **6,058.5 MB** frente al Hard Gate $\le 4,800.0\text{ MB}$ (**❌ FAIL**, exceso de $+1,258.5\text{ MB}$ / $+26.2\%$).
+  - **PyTorch Allocated:** 2,187.5 MB | **PyTorch Reserved:** 5,894.0 MB ($\Delta = 3,706.5\text{ MB}$).
+  - **Cadencia DiT:** 68.75 s/paso (frente a 14.25 s/paso en F6). VAE Tiled decode: 69.13 s.
+  - **Integridad:** 0 NaNs / 0 Infs (**🟢 PASS**), video MP4 decodificable (**🟢 PASS**).
+- **Conclusión:** Ejecutabilidad computacional de 720p demostrada; viabilidad física $\le 4,800\text{ MB}$ no cumplida. Baseline F7-0 **congelado e inmutable** ([`docs/F7_0_FEASIBILITY_PROBE_REPORT_01.md`](docs/F7_0_FEASIBILITY_PROBE_REPORT_01.md)).
+
+### F7-D1: Forensic Memory Profiling (🟢 AUTORIZADA — EN PROGRESO)
+- **Autorización Formal:** Resolución del Director de Proyecto (2026-09-09) bajo dictamen favorable del Consejero Técnico.
+- **Gobernanza:** **Cero optimizaciones en runtime** (prohibición expresa de alterar tiles VAE, cuantización, `empty_cache()` preventivos o planificador).
+- **Objetivo:** Responder P1–P5 (localización del pico, causa del diferencial `Reserved` vs `Allocated` de 3,7 GB, segmentación de memoria y correlación temporal de cadencia) y evaluar hipótesis H1–H4.
+- **Especificación:** [`docs/F7_D1_FORENSIC_SPEC_01.md`](docs/F7_D1_FORENSIC_SPEC_01.md) · Script: [`f7_d1_forensic_profiling.py`](f7_d1_forensic_profiling.py).
 
 ---
 
