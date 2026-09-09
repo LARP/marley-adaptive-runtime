@@ -172,6 +172,7 @@ class ForensicMarleyPipeline(MarleyEndToEndPipeline):
             "adaptive_events": [],
             "allocator_stats_post_denoise": {},
         }
+        self.forensic_data = forensic_data
 
         # -------------------------------------------------------------
         # Phase 1: Prompt Encoding
@@ -425,12 +426,20 @@ class ForensicMarleyPipeline(MarleyEndToEndPipeline):
         t0 = time.perf_counter()
         m_vae_start = monitor.sample_instant()
 
-        latents_for_vae = latents.to(self.vae_dtype)
-        latents_for_vae = latents_for_vae / self.vae.config.scaling_factor
+        latents_vae = latents.to(self.vae_dtype)
+        latents_mean = (
+            torch.tensor(self.vae.config.latents_mean)
+            .view(1, self.vae.config.z_dim, 1, 1, 1)
+            .to(latents_vae.device, latents_vae.dtype)
+        )
+        latents_std = 1.0 / torch.tensor(self.vae.config.latents_std).view(1, self.vae.config.z_dim, 1, 1, 1).to(
+            latents_vae.device, latents_vae.dtype
+        )
+        latents_vae = latents_vae / latents_std + latents_mean
 
         self.vae.to(device)
         with torch.no_grad():
-            video = self.vae.decode(latents_for_vae).sample
+            video = self.vae.decode(latents_vae, return_dict=False)[0]
 
         torch.cuda.synchronize(device)
         t_vae = time.perf_counter() - t0
@@ -546,6 +555,8 @@ def main() -> None:
     finally:
         t_total = time.perf_counter() - t_start
         peak_nvml = monitor.stop()
+        if forensic_data is None and pipeline is not None and hasattr(pipeline, "forensic_data"):
+            forensic_data = pipeline.forensic_data
 
     peak_alloc = torch.cuda.max_memory_allocated() / (1024 * 1024) if torch.cuda.is_available() else 0.0
     peak_reserved = torch.cuda.max_memory_reserved() / (1024 * 1024) if torch.cuda.is_available() else 0.0

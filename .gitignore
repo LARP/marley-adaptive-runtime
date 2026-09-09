@@ -228,7 +228,9 @@ AGENTS.md
 logs/*.mp4
 logs/*.json
 logs/*.log
+logs/*.pickle
 benchmarks/*.mp4
 benchmarks/*.json
 results/*.mp4
+
 
