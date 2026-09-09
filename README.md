@@ -22,7 +22,8 @@
 [![Phase F5: RETIRED](https://img.shields.io/badge/Phase%20F5-RETIRED%20(2.1GB%20%40%2033f)-22c55e.svg)](results/TEST_F5_vae_probe_33f.md)
 [![Phase F6: CERTIFIED PASS & FROZEN](https://img.shields.io/badge/Phase%20F6-CERTIFIED%20%26%20FROZEN-22c55e.svg)](docs/F6_REPRODUCIBILITY_VARIABILITY_REPORT_01.md)
 [![Phase F7-0: GATE FAIL](https://img.shields.io/badge/Phase%20F7--0-GATE%20FAIL%20(6.05GB)-ef4444.svg)](docs/F7_0_FEASIBILITY_PROBE_REPORT_01.md)
-[![Phase F7-D1: PROFILING ACTIVE](https://img.shields.io/badge/Phase%20F7--D1-PROFILING%20ACTIVE-f59e0b.svg)](docs/F7_D1_FORENSIC_SPEC_01.md)
+[![Phase F7-D4: FAVORABLE](https://img.shields.io/badge/Phase%20F7--D4-FAVORABLE%20(4.71GB)-22c55e.svg)](docs/F7_D4_MULTISTEP_VALIDATION_REPORT_01.md)
+[![Phase F7-D5: PENDING](https://img.shields.io/badge/Phase%20F7--D5-PENDING%20(30%20Steps)-f59e0b.svg)](ROADMAP.md)
 
 *In loving memory of Marley 🐾*
 
@@ -79,8 +80,13 @@ Memory is tracked across **three distinct layers** to prevent WDDM virtualizatio
 | **F4** | Adaptive Decision Engine | 🟢 **CORE VALIDATED** | Same-session A/B/C/D (30×3): Safety PASS (2,882 MB, 0 NaN), Adaptive Gate PASS (no oscillation), overhead 0.16 ms. D vs best static B **−3.40%** (no-pressure, perf cert pending) · [`Report`](results/TEST_F4_adaptive_benchmark.md) · [`Contract`](docs/F4_TEST_SPEC_01.md) |
 | **F5** | Temporal VAE Stitcher | 🟢 **RETIRED** | Probe F5-A certified: 33f VAE decodes in **26.99s @ 2,109 MB** (Hard Gate ≤ 4,800 PASS); stitcher unnecessary, resolved by native tiling · [`TEST_F5`](results/TEST_F5_vae_probe_33f.md) |
 | **F6** | Multidimensional Benchmarks | 🟢 **CERTIFIED & FROZEN** | 480p/33f/30s Multirun 4×3 certified ($n=3, df=2$): **12/12 runs PASS $\le 4,800$ MB**, cadencia ~14.25 s/p, 0 NaNs. CERRADA y CONGELADA (`c6e4bfb`) · [`Report`](docs/F6_REPRODUCIBILITY_VARIABILITY_REPORT_01.md) |
-| **F7-0** | 720p Memory Feasibility Probe | ❌ **GATE FAIL / 🟢 PASS** | 1280×720 @ 33f (5 steps): Peak NVML **6,058.5 MB** (+1,258.5 MB over gate), 0 NaNs, MP4 OK. Executability demonstrated, baseline frozen (`83f138a`) · [`Report`](docs/F7_0_FEASIBILITY_PROBE_REPORT_01.md) |
-| **F7-D1**| Forensic Memory Profiling | 🟡 **ACTIVE / PROFILING** | Autorizada por el Director. Diagnóstico no-invasivo de la retención de 3.7 GB (`Reserved` vs `Allocated`) y degradación temporal sin optimización · [`Spec`](docs/F7_D1_FORENSIC_SPEC_01.md) |
+| **F7-0** | 720p Feasibility Probe | ❌ **GATE FAIL / 🟢 PASS** | 1280×720 @ 33f (5 steps): Peak NVML **6,058.5 MB** (+1,258.5 MB over gate), 0 NaNs, MP4 OK. Frozen (`83f138a`) · [`Report`](docs/F7_0_FEASIBILITY_PROBE_REPORT_01.md) |
+| **F7-1** | Attention Chunking Pilot | ❌ **RESULT C (BYPASSED)** | Peak NVML **5,968.4 MB** ($C=2048$). No reduce pico dominante; atención descartada como cuello de botella · [`Report`](docs/F7_1_ATTENTION_CHUNKING_PILOT_REPORT_01.md) |
+| **F7-D1**| Forensic Memory Profiling | 🟢 **COMPLETE** | Diagnóstico causal: Tensores vivos son solo **~2.15 GB**; el exceso es **~5.18 GB de `FreePool` inactivo** retenido por el allocator · [`Spec`](docs/F7_D1_FORENSIC_SPEC_01.md) |
+| **F7-D2**| Allocator Causal Probes | 🟢 **COMPLETE** | Trazado a 8ms demostró no-reutilización de segmentos entre pases cond y uncond · [`Package`](docs/F7_ALLOCATOR_REVIEW_PACKAGE_FOR_CONSULTANT_01.md) |
+| **F7-D3**| Seam Release Causal Probe | 🟢 **FAVORABLE** | `empty_cache()` focalizado en costura cond→uncond baja pico NVML a **4,403.5 MB** (1 paso) · [`Report`](docs/F7_D3_COND_UNCOND_SEAM_RELEASE_REPORT_01.md) |
+| **F7-D4**| Reduced Multi-Step Validation | 🟢 **FAVORABLE** | 10 pasos con costura cond→uncond: **Peak NVML 4,708.9 MB ($\le 4,800$ MB PASS)**, cadencia 59.89 s/p, 0 NaNs · [`Report`](docs/F7_D4_MULTISTEP_VALIDATION_REPORT_01.md) |
+| **F7-D5**| Full 30-Step E2E Validation | 🟡 **PENDING (Próximo Hito)** | Validación de 30 pasos continuos a 720p/33f ($\le 4,800$ MB target) e integración condicional en `marley/core/pipeline.py` · [`Roadmap`](ROADMAP.md) |
 
 ---
 
@@ -365,11 +371,35 @@ Following the single-run benchmarks (F6-0 through F6-E), the project executed th
   - **Integridad:** 0 NaNs / 0 Infs (**🟢 PASS**), video MP4 decodificable (**🟢 PASS**).
 - **Conclusión:** Ejecutabilidad computacional de 720p demostrada; viabilidad física $\le 4,800\text{ MB}$ no cumplida. Baseline F7-0 **congelado e inmutable** ([`docs/F7_0_FEASIBILITY_PROBE_REPORT_01.md`](docs/F7_0_FEASIBILITY_PROBE_REPORT_01.md)).
 
-### F7-D1: Forensic Memory Profiling (🟢 AUTORIZADA — EN PROGRESO)
-- **Autorización Formal:** Resolución del Director de Proyecto (2026-09-09) bajo dictamen favorable del Consejero Técnico.
-- **Gobernanza:** **Cero optimizaciones en runtime** (prohibición expresa de alterar tiles VAE, cuantización, `empty_cache()` preventivos o planificador).
-- **Objetivo:** Responder P1–P5 (localización del pico, causa del diferencial `Reserved` vs `Allocated` de 3,7 GB, segmentación de memoria y correlación temporal de cadencia) y evaluar hipótesis H1–H4.
-- **Especificación:** [`docs/F7_D1_FORENSIC_SPEC_01.md`](docs/F7_D1_FORENSIC_SPEC_01.md) · Script: [`f7_d1_forensic_profiling.py`](f7_d1_forensic_profiling.py).
+### F7-1: Attention Sequence Chunking Pilot (❌ RESULT C — BYPASSED)
+- **Hipótesis:** La atención densa a $14,400$ latentes es el detonante de la sobre-reserva.
+- **Resultado:** Chunking $C=2048$ arrojó un pico NVML de **5,968.4 MB** (reducción marginal de ~90 MB).
+- **Conclusión:** La atención no constituye el cuello de botella dominante. Subfase cerrada sin alterar el runtime ([`docs/F7_1_ATTENTION_CHUNKING_PILOT_REPORT_01.md`](docs/F7_1_ATTENTION_CHUNKING_PILOT_REPORT_01.md)).
+
+### F7-D1: Forensic Memory Profiling (🟢 COMPLETE)
+- **Desglose de Memoria:** Tensores vivos reales (`Allocated`) alcanzan solo **~2.15 GB**. El exceso físico a ~6.0 GB está dominado por **~5.18 GB de `FreePool` inactivo (`Reserved` = 5,778 MB)** retenido por el PyTorch Caching Allocator y anclado físicamente por WDDM.
+- **Especificación & Reporte:** [`docs/F7_D1_FORENSIC_SPEC_01.md`](docs/F7_D1_FORENSIC_SPEC_01.md).
+
+### F7-D2 / F7-D2b / F7-D2c: Allocator Causal & Live Boundary Probes (🟢 COMPLETE)
+- **Hallazgo Causal:** Trazado a resolución de ~8 ms determinó que durante el segundo pase DiT (`uncond_blocks_30`), PyTorch no reutiliza los bloques de memoria liberados por `cond_blocks_30`, duplicando la reserva a ~5.8 GB.
+- **Reportes:** [`docs/F7_ALLOCATOR_REVIEW_PACKAGE_FOR_CONSULTANT_01.md`](docs/F7_ALLOCATOR_REVIEW_PACKAGE_FOR_CONSULTANT_01.md) · [`docs/F7_DIRECTOR_COUNTER_RESPONSE_02.md`](docs/F7_DIRECTOR_COUNTER_RESPONSE_02.md).
+
+### F7-D3: Cond→Uncond Seam Release Causal Probe (🟢 FAVORABLE)
+- **Intervención:** Liberación focalizada (`empty_cache()`) exclusivamente en la frontera sincrónica entre el pase condicional e incondicional (`cond → uncond`).
+- **Resultado (1 paso):** Pico NVML se redujo de 6,006.2 MB a **4,403.5 MB** (🟢 **PASS** con +396.5 MB de holgura). Duración del flush: solo 148 ms.
+- **Reporte:** [`docs/F7_D3_COND_UNCOND_SEAM_RELEASE_REPORT_01.md`](docs/F7_D3_COND_UNCOND_SEAM_RELEASE_REPORT_01.md).
+
+### F7-D4: Reduced Multi-Step Seam-Release Validation (🟢 FAVORABLE)
+- **Workload:** 10 pasos de difusión continuos a 720p/33f con liberación en costura `cond → uncond`.
+- **Resultado:**
+  - **Peak Físico NVML:** **4,708.9 MB** ($\le 4,800.0\text{ MB}$ Hard Gate **PASS**).
+  - **Peak Reserved:** 3,776.0 MB (acumulación neta de solo 248 MB del paso 1 al 10; pool completamente acotado).
+  - **Cadencia:** 59.89 s/paso (598.91 s en denoise). VAE decode: 69.57 s. 0 NaNs/Infs, MP4 generado correctamente.
+- **Reporte:** [`docs/F7_D4_MULTISTEP_VALIDATION_REPORT_01.md`](docs/F7_D4_MULTISTEP_VALIDATION_REPORT_01.md).
+
+### F7-D5: Full 30-Step E2E Validation & Integration (🟡 PRÓXIMO HITO)
+- **Workload:** 1280×720 @ 33 frames, 30 diffusion steps completos, modo `adaptive` con costura `cond → uncond`.
+- **Objetivos:** Confirmar estabilidad continua de VRAM ($\le 4,800.0\text{ MB}$), tiempo total de ejecución estimado de ~32 a 35 minutos, e integrar condicionalmente la liberación en [`marley/core/pipeline.py`](marley/core/pipeline.py) para resoluciones $> 480\text{p}$.
 
 ---
 
