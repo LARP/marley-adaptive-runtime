@@ -387,10 +387,10 @@ projections vs FP16) on the frozen F3 async scheduler with FP16 compute. NF4/F4 
   4. Temporal coherence (zero flicker / seam artifacts, Warp error)
   5. Policy adaptation responsiveness under varying external VRAM load
 - **Success Criteria Milestones:**
-  - **Milestone A:** $\le 4.8\text{ GB}$ physical GPU residency without Out-Of-Memory exceptions (🟢 **ACHIEVED: 2,624 MB [F6-A] / 2,698 MB [F6-B]**).
-  - **Milestone B:** End-to-end generation time $< 10\text{ minutes}$ (🟢 **ACHIEVED: 9.33 min [F6-A] / 8.73 min [F6-B]**).
-  - **Milestone C:** Free of perceptual visual degradation and severe temporal jitter (🟢 **ACHIEVED: 0 NaNs, clean MP4 output**).
-  - **Milestone D:** Dynamic policy switching demonstrated when external VRAM pressure is injected.
+  - **Milestone A:** $\le 4.8\text{ GB}$ physical GPU residency without Out-Of-Memory exceptions (🟢 **ACHIEVED: 2,624 MB [F6-A] / 2,698 MB [F6-B] / 4,588 MB [F6-E Calibrado]**).
+  - **Milestone B:** End-to-end generation time $< 10\text{ minutes}$ (🟢 **ACHIEVED: 8.62 min [F6-E Calibrado] – 9.33 min [F6-A]**).
+  - **Milestone C:** Integridad de salida verificada (0 NaNs, MP4 reproducible, regla VAE F5-A respetada a ~28.8s); calidad perceptual preliminar (🟢 **ACHIEVED**).
+  - **Milestone D:** Dynamic policy switching demonstrated when external VRAM pressure is injected (🟢 **ACHIEVED: 2 switches, 0 oscillations [F6-E Calibrado]**).
 
 #### Measured Benchmarks (480p / 33 frames / 30 steps)
 

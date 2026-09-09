@@ -51,6 +51,10 @@ El runtime **Marley** ha demostrado de manera concluyente y empíricamente verif
 
 ### Dimensión 2: Memoria y Residencia Física (Memory Dimension) · 🟢 CERTIFICADO PASS
 * **Criterio:** Hard Gate $\le 4,800.0\text{ MB}$ físico (NVML muestreado a 50 ms); Engineering Target $\le 4,000.0\text{ MB}$.
+* **Zonas Operativas Formalizadas (per Dictamen del Consejero):**
+  * **$\le 4.000\text{ MB}$:** *Zona de Operación Preferente / Objetivo de Ingeniería.*
+  * **$4.000\text{–}4.800\text{ MB}$:** *Zona de Presión y Adaptación Dinámica.*
+  * **$> 4.800\text{ MB}$:** *Condición Fuera de Presupuesto Certificado.*
 * **Resultados Obtenidos:**
   * F6-A (Sync): **2,624.3 MB** (Holgura: +2,175.7 MB vs Gate | +1,375.7 MB vs Target) 🟢
   * F6-B (Async FP16): **2,698.0 MB** (Holgura: +2,102.0 MB vs Gate | +1,302.0 MB vs Target) 🟢
@@ -71,12 +75,14 @@ El runtime **Marley** ha demostrado de manera concluyente y empíricamente verif
   * F6-E Stress (+1,200 MB): **525.95 s (8.77 min)** | DiT: 446.31 s (14.88 s/paso) 🟢
 * **Veredicto:** 🟢 **TARGET DE 10 MINUTOS MET EN EL 100% DE LAS CORRIDAS**.
 
-### Dimensión 4: Calidad y Coherencia Perceptual (Quality Dimension) · 🟢 CERTIFICADO PASS
-* **Criterio:** Coherencia de forma tensorial `[1, 3, 33, 480, 832]`, preservación de regla F5-A (VAE decode $\approx 27\text{ s}$, VRAM $\le 2,109\text{ MB}$), rango $[-1.0, 1.0]$ sin clipping patológico ni NaNs.
+### Dimensión 4: Integridad de Salida (Output Integrity) · 🟢 CERTIFICADO PASS / Calidad Perceptual: 🟡 PRELIMINAR
+* **Criterio:** Integridad estructural de salida (shape `[1, 3, 33, 480, 832]`, valores finitos sin NaNs/Infs, MP4 generado y reproducible), preservación de regla de no regresión F5-A (VAE decode $\approx 27\text{ s}$, VRAM $\le 2,109\text{ MB}$).
 * **Resultados Obtenidos:**
+  * Integridad estructural 100% verificada en 7 de 7 videos generados.
   * Tiempos de decodificación VAE estables: F6-A: 28.92 s, F6-B: 31.11 s, F6-C: 29.87 s, F6-D: 29.81 s, F6-E Stress: 28.63 s, F6-E Calibrado: 28.81 s.
-  * Tiling espacial $256 \times 256$ en `bfloat16` validado sin costuras visibles ni parpadeo temporal.
-* **Veredicto:** 🟢 **PASS FUNCIONAL Y AUSENCIA DE REGRESIÓN PERCEPTUAL EVIDENTE (REGLA F5-A PRESERVADA)**.
+  * Tiling espacial $256 \times 256$ en `bfloat16` validado sin regresión funcional.
+  * *Calidad Perceptual:* Clasificada como **🟡 PRELIMINAR** a la espera de evaluaciones comparativas formales (SSIM/PSNR vs FP32 de referencia) para evitar sobreafirmaciones subjetivas.
+* **Veredicto:** 🟢 **INTEGRIDAD DE SALIDA CERTIFICADA PASS / CALIDAD PERCEPTUAL PRELIMINAR**.
 
 ### Dimensión 5: Adaptabilidad y Resistencia Histerética (Adaptive Dimension) · 🟢 CERTIFICADO PASS
 * **Criterio:** Capacidad de transicionar entre perfiles `performance` y `memory_safe` ante variación de carga física dentro de la ventana de detección configurada, con permanencia mínima (`MIN_DWELL_WINDOWS >= 1`) y retorno asintótico libre de oscilaciones.
