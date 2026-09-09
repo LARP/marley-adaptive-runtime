@@ -404,6 +404,16 @@ projections vs FP16) on the frozen F3 async scheduler with FP16 compute. NF4/F4 
 | **F6-E Calibrado**| Adapt + 500MB (30 steps)  | **431.51 s (14.38 s/step)** | **516.94 s (8.62 min)** | 4,588.5 MB | 🟢 PASS | 🟢 PASS |
 | **F6-E Estrés**   | Adapt + 1200MB (30 steps) | 446.31 s (14.88 s/step) | 525.95 s (8.77 min) | 5,182.8 MB (inducido)| 🟡 PASS (Dinámico) | 🟢 PASS |
 
+#### Campaña Multirun Core 4×3 — Reproducibilidad y Variabilidad ($n=3$, $df=2$)
+*Completada 2026-09-09T00:06:28Z*. 12 corridas independientes contrabalanceadas en 3 rondas con 60s de cooldown experimental. Criterio individual estricto: **100% de las corridas cumplieron Peak NVML $\le 4,800.0\text{ MB}$ y tiempo $< 600\text{ s}$**. Reporte completo: [`docs/F6_REPRODUCIBILITY_VARIABILITY_REPORT_01.md`](docs/F6_REPRODUCIBILITY_VARIABILITY_REPORT_01.md) · Telemetría consolidada: [`logs/multirun/f6_statistical_summary.json`](logs/multirun/f6_statistical_summary.json).
+
+| Streaming Mode | Wall-Clock Media (μ) | DiT Denoise Media (μ) | Cadencia Media (μ) | Peak NVML Media (μ) | CV% Latencia | CV% VRAM | Rango Peak NVML [Min–Max] | Gate Individual |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Sync FP16** | 531.65 s | 450.94 s | 15.03 s/p | 2,777.4 MB | 3.03% | 3.54% | [2,719.5 – 2,890.8] MB | 🟢 100% PASS |
+| **Async FP16** | 515.57 s | 429.66 s | 14.32 s/p | 2,768.3 MB | 2.64% | 3.08% | [2,719.0 – 2,866.8] MB | 🟢 100% PASS |
+| **Async INT8** | **512.21 s** | 433.24 s | 14.44 s/p | **2,741.4 MB** | **1.94%** | **0.17%** | [2,738.5 – 2,746.7] MB | 🟢 100% PASS |
+| **Adaptive** | 527.07 s | **427.63 s** | **14.25 s/p** | 4,047.8 MB | 4.56% | 1.75% | [4,007.0 – 4,129.5] MB | 🟢 100% PASS |
+
 Full report: [`docs/F6_MULTIDIMENSIONAL_BENCHMARK_REPORT_01.md`](docs/F6_MULTIDIMENSIONAL_BENCHMARK_REPORT_01.md).
 
 ---

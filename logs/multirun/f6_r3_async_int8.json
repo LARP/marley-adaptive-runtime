@@ -1,0 +1,87 @@
+{
+  "timestamp": "2026-09-09T00:06:24.727625",
+  "stage": "F6 Full Benchmark (async_int8, 30 steps)",
+  "mode": "async_int8",
+  "smoke_test": false,
+  "workload": {
+    "resolution": "832x480",
+    "frames": 33,
+    "steps": 30,
+    "guidance_scale": 5.0,
+    "seed": 42,
+    "prompt": "A golden retriever dog runs joyfully across a sunlit meadow, cinematic lighting, shallow depth of field, 4K."
+  },
+  "timings_s": {
+    "prompt_encoding": 41.31,
+    "dit_prep": 0.15,
+    "denoising_total": 427.88,
+    "denoising_per_step_avg": 14.26,
+    "vae_decode": 28.1,
+    "video_export": 0.57,
+    "total_wall_clock": 504.62
+  },
+  "memory_mb": {
+    "peak_nvml_used": 2739.0,
+    "peak_torch_alloc": 1204.2,
+    "peak_torch_reserved": 1676.0,
+    "peak_process_ram": 12068.3
+  },
+  "adaptive_telemetry": {
+    "pressure_test_active": false,
+    "pressure_injected_mb": 0.0,
+    "replan_count": 0,
+    "replan_events": [],
+    "adaptation_pass": true
+  },
+  "verdict": {
+    "functional_pass": true,
+    "memory_gate_pass": true,
+    "target_vram_met": true,
+    "perf_target_met": true,
+    "nan_inf_detected": false,
+    "output_video": "logs/f6_832x480_33f_async_int8_20260909_000624.mp4"
+  },
+  "round": 3,
+  "campaign_mode": "async_int8",
+  "telemetry_pre_run": {
+    "temperature_c": 60,
+    "graphics_clock_mhz": 210,
+    "power_draw_w": 3.53,
+    "gpu_utilization_pct": 0,
+    "nvml_used_mb": 924.59
+  },
+  "telemetry_post_run": {
+    "temperature_c": 75,
+    "graphics_clock_mhz": 210,
+    "power_draw_w": 6.1,
+    "gpu_utilization_pct": 0,
+    "nvml_used_mb": 939.69
+  },
+  "metadata_documental": {
+    "campaign_name": "F6 \u2014 Campa\u00f1a Multirun de Reproducibilidad y Variabilidad de Ejecuci\u00f3n",
+    "git_commit_hash": "c8dace716c4c892ea4cafc1359f8efd64d26997c",
+    "git_branch": "main",
+    "environment": {
+      "python_version": "3.10.11",
+      "pytorch_version": "2.6.0+cu124",
+      "cuda_available": true,
+      "cuda_version": "12.4",
+      "hardware_device": "NVIDIA GeForce RTX 3050 6GB Laptop GPU",
+      "os": "Windows 11 (WDDM 3.1)"
+    },
+    "benchmark_config": {
+      "resolution": "832x480",
+      "frames": 33,
+      "steps": 30,
+      "prompt": "A golden retriever dog runs joyfully across a sunlit meadow, cinematic lighting, shallow depth of field, 4K.",
+      "negative_prompt": "blurry, low quality, watermark, deformed",
+      "seed": 42,
+      "guidance_scale": 5.0,
+      "fps": 16,
+      "scheduler": "FlowMatchEulerDiscreteScheduler",
+      "isolation_protocol": "Aislamiento del contexto de ejecuci\u00f3n y liberaci\u00f3n de los recursos asociados al proceso (subprocess)",
+      "thermal_control": "Pausa experimental de 60s entre corridas con telemetr\u00eda basal previa/posterior"
+    },
+    "campaign_start_time": "2026-09-08T22:04:19.537538"
+  }
+}
