@@ -1,7 +1,7 @@
 # Marley Runtime (`marley-runtime`) — Roadmap v5
 
 **Release Date:** 2026-09-09  
-**Status:** Active — F1.5, F1.7, **F3 (CERTIFIED PASS)**, **F3+INT8 (PASS)**, **F4 (CORE VALIDATED)**, **F5 (RETIRED)** & **F6 (CERTIFIED PASS & FROZEN)** · **Phase F7 (720p Strategy) ACTIVE**  
+**Status:** Active — F1.5, F1.7, **F3 (CERTIFIED PASS)**, **F3+INT8 (PASS)**, **F4 (CORE VALIDATED)**, **F5 (RETIRED)** & **F6 (CERTIFIED PASS & FROZEN)** · **Phase F7 (720p Strategy) ACTIVE (F7-D4 FAVORABLE · F7-D5 PENDING)**  
 **Target Repository:** [`LARP/marley-runtime`](https://github.com/LARP/marley-runtime)  
 **Primary Objective:** Investigate and deploy adaptive memory management policies for Wan2.1-T2V-1.3B constrained to ~4.8 GB effective physical VRAM (NVIDIA GeForce RTX 3050 6GB Laptop, Windows WDDM), transitioning to 720p exploration following 480p/33f multidimensional certification.
 
@@ -102,7 +102,7 @@ flowchart TD
     F4 -.->|"Resolved in F0.5/F5-A"| F5["F5: Temporal VAE Stitcher (RETIRED) 🟢"]
     F4 --> F6["F6: Multidimensional Benchmarks 🟢"]
     F5 --> F6
-    F6 --> F7["F7: 720p Strategy (Memory Feasibility Probe) 🟡"]
+    F6 --> F7["F7: 720p Strategy (F7-D4 Favorable / F7-D5 Pending) 🟡"]
 
     classDef pass fill:#1b4332,stroke:#40916c,stroke-width:2px,color:#d8f3dc;
     classDef inprog fill:#5c4d00,stroke:#d4af37,stroke-width:2px,color:#fff3b0;
@@ -432,13 +432,39 @@ Full report: [`docs/F6_MULTIDIMENSIONAL_BENCHMARK_REPORT_01.md`](docs/F6_MULTIDI
   - **Conclusión F7-0:** Ejecutabilidad computacional demostrada a 720p; viabilidad física $\le 4,800\text{ MB}$ NO cumplida. Baseline F7-0 **CERRADO, CONGELADO E INMUTABLE**.
   - Reporte oficial: [`docs/F7_0_FEASIBILITY_PROBE_REPORT_01.md`](docs/F7_0_FEASIBILITY_PROBE_REPORT_01.md) · Telemetría: [`logs/f7_probe_720p_5steps.json`](logs/f7_probe_720p_5steps.json).
 
-- **Formal Resolution — Director de Proyecto (2026-09-09):**
-  - **F6:** 🔒 CERRADA / CONGELADA.
-  - **F7-0:** ❌ Memory Gate FAIL / 🟢 Integrity PASS / 🔒 INMUTABLE.
-  - **F7-D1:** 🟢 **AUTORIZADA FORMALMENTE (Forensic Memory Profiling)**.
-  - **Optimización F7:** ⏸️ **PENDIENTE DE NUEVA AUTORIZACIÓN HUMANA** (Moratoria absoluta de cambios de tile, cuantización, `empty_cache()`, poda o alteraciones de streaming).
-  - **Objetivo F7-D1:** Responder P1–P5 (localización de pico, evento detonante de reserved, desglose de segmentos, residencia de streaming, correlación cadencia vs presión) y evaluar hipótesis H1–H4 sin optimizar el runtime.
-  - Especificación técnica: [`docs/F7_D1_FORENSIC_SPEC_01.md`](docs/F7_D1_FORENSIC_SPEC_01.md).
+- **Phase F7-1 — Attention Sequence Chunking Pilot (Completed 2026-09-09):**
+  - Evaluó chunking de secuencias de atención ($C=2048$) en runner aislado para mitigar el consumo DiT.
+  - **Peak Físico NVML:** **5,968.4 MB** (Gate $\le 4,800.0\text{ MB}$ ❌ FAIL). Reducción marginal de ~90 MB.
+  - **Veredicto:** **RESULT C (BYPASSED / REFUTED)** — La atención no constituye el cuello de botella físico dominante a 720p. Cerrado sin modificaciones al runtime.
+  - Reporte oficial: [`docs/F7_1_ATTENTION_CHUNKING_PILOT_REPORT_01.md`](docs/F7_1_ATTENTION_CHUNKING_PILOT_REPORT_01.md).
+
+- **Phase F7-D1 — Forensic Memory Profiling (Completed 2026-09-09):**
+  - Desglose forense instrumentado de tensores vivos vs reservas del allocator durante los pases DiT.
+  - **Hallazgo Crítico:** La memoria de tensores vivos (`Allocated`) es de solo **~2,15 GB**. El exceso físico a ~6,0 GB es dominado por **~5,18 GB de `FreePool` inactivo (`Reserved` = 5,778 MB)** retenido por el PyTorch Caching Allocator y no liberado al driver WDDM.
+  - Reporte oficial: [`docs/F7_D1_FORENSIC_PROFILING_REPORT_01.md`](docs/F7_D1_FORENSIC_SPEC_01.md).
+
+- **Phase F7-D2 / F7-D2b / F7-D2c — Allocator Causal & Live Boundary Probes (Completed 2026-09-09):**
+  - Muestreo a ~8 ms y trazado bloque a bloque: demostró que el pase `uncond_blocks_30` apila ~2,3 GB adicionales en vez de reutilizar los segmentos liberados por `cond_blocks_30`.
+  - El vaciado nativo post-denoise (`AdaptiveEngine.release()`) entrega la GPU limpia (~1,26 GB) al VAE, descartando que el VAE sufra por retención previa de memoria GPU.
+  - Reportes: [`docs/F7_ALLOCATOR_REVIEW_PACKAGE_FOR_CONSULTANT_01.md`](docs/F7_ALLOCATOR_REVIEW_PACKAGE_FOR_CONSULTANT_01.md), [`docs/F7_DIRECTOR_COUNTER_RESPONSE_02.md`](docs/F7_DIRECTOR_COUNTER_RESPONSE_02.md).
+
+- **Phase F7-D3 — Cond→Uncond Seam Release Causal Probe (Completed 2026-09-09):**
+  - Variable única evaluada: inserción de `empty_cache()` exclusivamente en la costura sincrónica `cond → uncond` en prueba causal de 1 paso.
+  - **Pico NVML:** Cayó drásticamente de 6,006.2 MB a **4,403.5 MB** (🟢 **FAVORABLE — Gate $\le 4,800.0\text{ MB}$ CUMPLIDO** con +396 MB de holgura).
+  - Peak Reserved: 3,576.0 MB; duración de la intervención: 148 ms.
+  - Reporte oficial: [`docs/F7_D3_COND_UNCOND_SEAM_RELEASE_REPORT_01.md`](docs/F7_D3_COND_UNCOND_SEAM_RELEASE_REPORT_01.md).
+
+- **Phase F7-D4 — Reduced Multi-Step Seam-Release Validation (Completed 2026-09-09):**
+  - Validación multi-paso (10 pasos de difusión continuos) en runner aislado aplicando la disciplina de costura `cond → uncond`.
+  - **Peak Físico NVML:** **4,708.9 MB** (🟢 **FAVORABLE — Gate $\le 4,800.0\text{ MB}$ PASS** con +91.1 MB de margen).
+  - **Peak Reserved:** 3,776.0 MB (estabilizado; acumulación neta de 248 MB del paso 1 al 10, sin divergencia).
+  - **Cadencia DiT:** 59.89 s/paso (598.91 s en denoise). VAE decode: 69.57 s. Integridad: 0 NaNs / 0 Infs, MP4 generado correctamente.
+  - Reporte oficial: [`docs/F7_D4_MULTISTEP_VALIDATION_REPORT_01.md`](docs/F7_D4_MULTISTEP_VALIDATION_REPORT_01.md).
+
+- **Phase F7-D5 — Full 30-Step End-to-End Validation & Production Integration (PRÓXIMO HITO):**
+  - **Workload:** 1280×720 @ 33 frames, 30 diffusion steps completos, modo `adaptive` con costura `cond → uncond`.
+  - **Objetivo Primario:** Confirmar que a 30 pasos continuos el Peak Físico NVML se mantenga estrictamente $\le 4,800.0\text{ MB}$ con cadencia nominal (~60 s/paso, tiempo total ~32–35 min) y 0 NaNs.
+  - **Criterio de Integración:** Si F7-D5 es FAVORABLE, autorizar la incorporación formal del mecanismo de liberación de costura en [`marley/core/pipeline.py`](marley/core/pipeline.py) condicionado a resoluciones $> 480\text{p}$, preservando la inmutabilidad y latencia del baseline 480p certificado en F6.
 
 ---
 
@@ -458,8 +484,13 @@ Full report: [`docs/F6_MULTIDIMENSIONAL_BENCHMARK_REPORT_01.md`](docs/F6_MULTIDI
 | **F4** | Adaptive Decision Engine | Unconditional (Core) | ≥5% Optimization Target is a *target*, not a validity gate (validated vs Safety/Adaptive Gates per v3) | Deterministic static policy (Async FP16 or Async INT8 / Performance) | 🟢 **CORE VALIDATED**<br>[`TEST_F4_adaptive_benchmark.md`](results/TEST_F4_adaptive_benchmark.md) (Safety 2,882 MB/0 NaN · Adaptive PASS · D vs best B −3.40% no-pressure · overhead 0.16 ms) |
 | **F5** | Temporal VAE Stitcher | VAE is confirmed bottleneck at 33f | Saves $< 20\%$ VRAM or introduces seam artifacts | Tiled spatial-temporal decoding (Test J) | 🟢 **RETIRED (Resolved by Tiling)**<br>Probe F5-A certified: **2,109 MB peak NVML** (Gate ≤ 4,800), **26.99 s decode** (Target ≤ 150 s), 0 NaNs at 33f. Stitcher unnecessary. [`TEST_F5`](results/TEST_F5_vae_probe_33f.md) |
 | **F6** | Verification Benchmarks | Completion of prior phases | Wall-clock time $> 30\text{ min}$ without explanation | Document operational boundaries | 🟢 **CERTIFIED PASS & FROZEN**<br>F6-0 to F6-E verified across 5 dimensions · Multirun 4x3 certified (12/12 individual pass) · [`Certification`](docs/F6_FINAL_CERTIFICATION_REPORT_01.md) · [`Report`](docs/F6_REPRODUCIBILITY_VARIABILITY_REPORT_01.md) |
-| **F7-0** | 720p Memory Feasibility Probe | F6 certified & frozen | Peak NVML $> 4,800.0\text{ MB}$ on 720p 5-step probe | Forensic memory profiling (F7-D1) | ❌ **FAIL (Peak 6,058.5 MB)**<br>Integrity PASS (0 NaNs, MP4 OK) · Frozen baseline · [`Report`](docs/F7_0_FEASIBILITY_PROBE_REPORT_01.md) |
-| **F7-D1**| Forensic Memory Profiling | F7-0 baseline failure | Observational failure or distortion of memory causality | Re-scope diagnostic instrumentation | 🟢 **AUTORIZADA POR DIRECTOR**<br>Forensic diagnostic without optimization · [`Spec`](docs/F7_D1_FORENSIC_SPEC_01.md) |
+| **F7-0** | 720p Feasibility Probe | F6 certified & frozen | Peak NVML $> 4,800.0\text{ MB}$ on 720p 5-step probe | Forensic memory profiling (F7-D1) | ❌ **FAIL (Peak 6,058.5 MB)**<br>Integrity PASS (0 NaNs, MP4 OK) · Frozen baseline · [`Report`](docs/F7_0_FEASIBILITY_PROBE_REPORT_01.md) |
+| **F7-1** | Attention Chunking Pilot | F7-0 baseline failure | Peak NVML $> 4,800.0\text{ MB}$ or severe latency | Retain standard SDPA / causal probe | ❌ **BYPASSED / RESULT C**<br>Peak 5,968.4 MB (No reduce pico dominante) · [`Report`](docs/F7_1_ATTENTION_CHUNKING_PILOT_REPORT_01.md) |
+| **F7-D1**| Forensic Memory Profiling | F7-0 / F7-1 failure | Observational failure or distortion of memory causality | Re-scope diagnostic instrumentation | 🟢 **COMPLETE**<br>Alloc real 2.15 GB vs Reserved 5.78 GB · [`Report`](docs/F7_D1_FORENSIC_SPEC_01.md) |
+| **F7-D2**| Allocator Causal Probes | F7-D1 diagnostics | Inability to isolate allocator free pool at seams | Retain standard caching allocator | 🟢 **COMPLETE**<br>FreePool transitorio domina el pico · [`Package`](docs/F7_ALLOCATOR_REVIEW_PACKAGE_FOR_CONSULTANT_01.md) |
+| **F7-D3**| Seam Release Causal Probe | F7-D2 verification | Peak NVML $> 4,800.0\text{ MB}$ or crash on seam | Revert seam flush | 🟢 **FAVORABLE**<br>Peak 4,403.5 MB (1-step PASS) · [`Report`](docs/F7_D3_COND_UNCOND_SEAM_RELEASE_REPORT_01.md) |
+| **F7-D4**| Reduced Multi-Step Validation | F7-D3 favorable | Peak NVML $> 4,800.0\text{ MB}$ on 10 steps | Re-scope multi-step memory bounds | 🟢 **FAVORABLE**<br>Peak 4,708.9 MB (10-step PASS) · [`Report`](docs/F7_D4_MULTISTEP_VALIDATION_REPORT_01.md) |
+| **F7-D5**| Full 30-Step E2E Validation | F7-D4 favorable | Peak NVML $> 4,800.0\text{ MB}$, OOM, or wall-clock $> 45\text{ min}$ | Confine 720p to experimental / low-res focus | 🟡 **PENDING (Próximo Hito)**<br>Target: 720p/33f/30 steps $\le 4,800\text{ MB}$, 0 NaNs, integration pipeline |
 
 ---
 
