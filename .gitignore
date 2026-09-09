@@ -225,9 +225,8 @@ GEMINI.md
 AGENTS.md
 
 # Marley Runtime — Generated outputs (heavy binaries, not versioned)
+# Telemetry evidence (logs/*.json, *.log) is intentionally tracked.
 logs/*.mp4
-logs/*.json
-logs/*.log
 logs/*.pickle
 benchmarks/*.mp4
 benchmarks/*.json
