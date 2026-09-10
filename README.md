@@ -24,7 +24,7 @@
 [![Phase F7-0: GATE FAIL](https://img.shields.io/badge/Phase%20F7--0-GATE%20FAIL%20(6.05GB)-ef4444.svg)](docs/F7_0_FEASIBILITY_PROBE_REPORT_01.md)
 [![Phase F7-D4: FAVORABLE](https://img.shields.io/badge/Phase%20F7--D4-FAVORABLE%20(4.71GB)-22c55e.svg)](docs/F7_D4_MULTISTEP_VALIDATION_REPORT_01.md)
 [![Phase F7-D5: NEGATIVE](https://img.shields.io/badge/Phase%20F7--D5-NEGATIVE%20(5.10GB)-ef4444.svg)](docs/F7_D5_FULL_30STEP_VALIDATION_REPORT_01.md)
-[![Phase F7-D6: NOT VALIDATED](https://img.shields.io/badge/Phase%20F7--D6-INSTRUMENT%20NOT%20VALIDATED-ef4444.svg)](docs/F7_D6_METRIC_ATTRIBUTION_REPORT_01.md)
+[![Phase F7-D6: VALIDATED](https://img.shields.io/badge/Phase%20F7--D6-INSTRUMENT%20VALIDATED-22c55e.svg)](docs/F7_D6_METRIC_ATTRIBUTION_REPORT_01.md)
 
 *In loving memory of Marley 🐾*
 
@@ -88,7 +88,7 @@ Memory is tracked across **three distinct layers** to prevent WDDM virtualizatio
 | **F7-D3**| Seam Release Causal Probe | 🟢 **FAVORABLE** | `empty_cache()` focalizado en costura cond→uncond baja pico NVML a **4,403.5 MB** (1 paso) · [`Report`](docs/F7_D3_COND_UNCOND_SEAM_RELEASE_REPORT_01.md) |
 | **F7-D4**| Reduced Multi-Step Validation | 🟢 **FAVORABLE** | 10 pasos con costura cond→uncond: **Peak NVML 4,708.9 MB ($\le 4,800$ MB PASS)**, cadencia 59.89 s/p, 0 NaNs · [`Report`](docs/F7_D4_MULTISTEP_VALIDATION_REPORT_01.md) |
 | **F7-D5**| Full 30-Step E2E Validation | 🔴 **PARTIAL/NEGATIVE** | 30 pasos continuos a 720p/33f con costura cond→uncond: **Peak NVML 5,096.1 MB ($\le 4,800$ MB FAIL)**, Reserved estabilizado 3,766 MB, 0 NaNs. Integración **NO autorizada** · [`Report`](docs/F7_D5_FULL_30STEP_VALIDATION_REPORT_01.md) |
-| **F7-D6**| NVML Metric Attribution Probe | 🔴 **INSTRUMENT NOT VALIDATED** (GO Corrected Probe) | Probe inicial ejecutado: Control A/B diff 15.6% (asimetría pre-contexto) y residencia post-workload persistente (+792 MB sobre S1). Resolución del Consejero: GO para probe corregido (Control A pre-pipeline con warm-up; S3 pasa a métrica fenomenológica; S3=120s; F7-D5 NEGATIVE; gate 4.8 GB intacta) · [`Report`](docs/F7_D6_METRIC_ATTRIBUTION_REPORT_01.md) · [`Resolución`](docs/F7_D6_CONSULTANT_RESOLUTION_01.md) |
+| **F7-D6**| NVML Metric Attribution Probe | 🟢 **INSTRUMENT VALIDATED** | Probe corregido ejecutado: Control A/B diff **2.34% ($\le 10\%$ PASS)** (512 vs 500 MB), S0 estable (spread 146.5 MB), S2 4,624.0 MB. S3 post-workload caracterizado como meseta plana estática (~1,481.6 MB, spread 29 MB; +438 MB sobre S1). F7-D5 permanece NEGATIVE; gate 4.8 GB intacta · [`Report`](docs/F7_D6_METRIC_ATTRIBUTION_REPORT_01.md) · [`Carta Resultados`](docs/F7_D6_RESULTS_LETTER_TO_CONSULTANT_02.md) |
 
 ---
 
@@ -419,13 +419,17 @@ Following the single-run benchmarks (F6-0 through F6-E), the project executed th
   - **S3 post-workload:** 1,887.2 MB (spread 349.8 MB) → **no retorna al baseline** (`|S3−S0|` = 904.2 MB). **S4 final:** 1,902.9 MB (spread 235.6 MB). `cudaMemGetInfo` coherente.
   - **Veredicto: 🔴 INSTRUMENT NOT VALIDATED** (Control A/B no reproducible >10%; residencia persistente S3/S4).
 - **Conclusión:** El idle baseline es muy estable, pero el instrumento **no quedó validado**: (a) discrepancia A/B atribuible al ordenamiento del protocolo (Control A pre-contexto) y (b) **residencia device-wide persistente/ondulante tras el workload** (~900 MB sobre S0). Esto **no habilita** el re-run de 30 pasos ni ninguna reclasificación. **F7-D5 permanece NEGATIVE; gate 4,800 MB intacta; sin integración de 720p.**
-- **Veredicto y Resolución Metodológica (2026-09-10):** El Consejero ratificó que la corrida previa permanece clasificada como 🔴 `INSTRUMENT NOT VALIDATED`, pero concedió **GO definitivo para una re-ejecución corregida e independiente (`F7-D6 Corrected Attribution Probe`)**, aprobando íntegramente las precisiones técnicas del Director:
-  1. *Separación metrológica en S3:* Se elimina $|S3 - S0| \le 200$ MB como kill criterion del instrumento; S3 y S4 pasan a ser métricas de caracterización fenomenológica de residencia del sistema/driver.
-  2. *Ubicación de Control A:* Se ejecuta tras `torch.cuda.init()` y un warm-up determinista de 10 MB, antes de instanciar el pipeline Wan2.1.
-  3. *NVML per-process:* Tratada como métrica auxiliar en Windows WDDM (si devuelve `N/A` o 0, se complementa con `psutil` sin invalidar la prueba).
-  4. *Ventanas temporales cuantitativas:* S0 = 60 s · S3 = 120 s · S4 = 60 s a 1 Hz continuo.
+- **Veredicto y Resolución Metodológica (2026-09-10):** El Consejero concedió GO definitivo para el probe corregido (`F7-D6 Corrected Attribution Probe`), aprobando la separación metrológica de S3, Control A pre-pipeline con warm-up de 10 MB, tratamiento auxiliar de NVML per-process y ventanas de 60s/120s/60s a 1 Hz.
+- **Resultado de la Ejecución Corregida (2026-09-10, EJECUTADO):**
+  - **S0 idle:** **962.2 MB**, spread **146.47 MB** ($\le 150\text{ MB PASS}$).
+  - **Control A / B:** **512.0 / 500.0 MB** → **diferencia relativa 2.34% ($\le 10\%$ PASS)**. Demuestra de forma concluyente que la discrepancia de 15.6% previa era un artefacto del protocolo.
+  - **S1 operacional:** 1,043.57 MB · **S2 workload peak:** 4,624.0 MB · **delta inducido (S2−S0): 3,661.8 MB**.
+  - **S3 post-workload (120 s @ 1 Hz):** media **1,481.64 MB**, spread **29.0 MB** (meseta estática horizontal plana; +438 MB sobre S1). Falsa la hipótesis de liberación diferida lenta.
+  - **S4 final (60 s @ 1 Hz):** media **1,511.74 MB**, spread **86.84 MB** ($\le 150\text{ MB PASS}$).
+  - **Allocator PyTorch:** Peak Reserved **3,606.0 MB** (estable y acotado); Peak Allocated **2,171.2 MB**.
+  - **Veredicto:** 🟢 **INSTRUMENT VALIDATED**.
   - *Gobernanza inalterada:* F7-D5 permanece `NEGATIVE` (5,096 MB); gate en 4,800 MB congelada; sin re-run de 30 pasos ni integración de 720p.
-- **Documentos:** [`Report`](docs/F7_D6_METRIC_ATTRIBUTION_REPORT_01.md) · [`Spec`](docs/F7_D6_METRIC_ATTRIBUTION_SPEC_01.md) · [`Change Log`](docs/F7_D6_IMPLEMENTATION_CHANGES_01.md) · [`Verdict`](docs/F7_D6_CONSULTANT_VERDICT_01.md) · [`Director Reply`](docs/F7_D6_DIRECTOR_REPLY_TO_VERDICT_01.md) · [`Resolution`](docs/F7_D6_CONSULTANT_RESOLUTION_01.md) · [`Telemetry`](logs/f7_d6_attribution_probe_telemetry.json) · Runner [`f7_d6_attribution_probe.py`](f7_d6_attribution_probe.py).
+- **Documentos:** [`Report`](docs/F7_D6_METRIC_ATTRIBUTION_REPORT_01.md) · [`Spec`](docs/F7_D6_METRIC_ATTRIBUTION_SPEC_01.md) · [`Verdict`](docs/F7_D6_CONSULTANT_VERDICT_01.md) · [`Director Reply`](docs/F7_D6_DIRECTOR_REPLY_TO_VERDICT_01.md) · [`Resolution`](docs/F7_D6_CONSULTANT_RESOLUTION_01.md) · [`Results Letter 02`](docs/F7_D6_RESULTS_LETTER_TO_CONSULTANT_02.md) · [`Telemetry`](logs/f7_d6_attribution_probe_telemetry.json) · Runner [`f7_d6_attribution_probe.py`](f7_d6_attribution_probe.py).
 
 ---
 

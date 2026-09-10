@@ -4,42 +4,28 @@ f7_d6_attribution_probe.py
 Phase F7-D6 (measurement metrology) -- Characterize how much of the device-wide NVML
 "used" reading is an idle/OS/WDDM baseline vs. a workload-induced increment.
 
-REVISED and AUTHORIZED per External Consultant (authorizations no.1-4, 2026-09-09).
+REVISED and AUTHORIZED per External Consultant:
+- Authorizations no.1-4 (2026-09-09)
+- Methodological Resolution (2026-09-10, F7_D6_CONSULTANT_RESOLUTION_01.md):
+  * S3 return-to-baseline decoupled from instrument validity -> phenomenological characterization.
+  * Control A executed post-CUDA init with deterministic warm-up (~10 MB), pre-pipeline.
+  * NVML per-process is auxiliary under Windows WDDM; complemented with psutil.
+  * Temporal windows: S0=60s, S3=120s, S4=60s @ 1 Hz continuous telemetry.
+
 This is a metrology experiment: it does NOT reclassify F7-D5 and does NOT change the
-4,800 MB gate. Execute only after the Director's go-ahead.
+4,800 MB gate. F7-D5 remains NEGATIVE; no 30-step rerun.
 
-Trigger: F7-D5 NEGATIVE (peak NVML device "used" 5,096.1 MB > 4,800 gate) although
-torch.reserved was stable ~3,766 MB across all 30 steps (no allocator divergence).
-Idle (no Marley process) device "used" ~= 1,071 MB.
-
-This probe measures in-session NVML milestones:
-  S0 = idle_baseline (device used, pre-context; sampled 30-60 s for stability)
-  S1 = ctx_baseline  (device used after pipeline init + empty_cache)
-  S2 = workload_peak (device used peak during a reduced 3-5 step DiT window)
-  S3 = post_run_floor(device used after release + empty_cache; verify S3 ~ S0)
-and derives:
-  ctx_overhead                              = S1 - S0
-  denoise_resident                          = S2 - S1
-  workload_induced_device_residency_delta   = S2 - S0   (device-wide growth, NOT proven ownership)
-
-Consultant directives incorporated:
-  - usedGpuMemory=None under WDDM means the counter is UNAVAILABLE, NOT 0 MB.
-  - S2-S0 is named "workload-induced device residency delta", not "process attributable peak".
-  - S0 (60 s), S3 (30 s) and S4 (30 s) are sampled with min/max/mean/median/std/spread.
-  - Control A (pre-workload) and Control B (post-workload) validate the instrument.
-  - Control A/B tolerance: relative difference <= 10%; guard: if Control A below
-    the signal floor max(3*S0_std, 150 MB) -> INCONCLUSIVE without evaluating the tolerance.
-  - cudaMemGetInfo coherence is qualitative/temporal, not numeric equality.
-  - Classification: INSTRUMENT VALIDATED / INCONCLUSIVE / INSTRUMENT NOT VALIDATED.
-  - Two-layer metric under study (A: device-wide raw; B: incremental workload residency).
-  - Falsification scenarios are reported and left open.
-
-Authorized protocol (Consultant no.4):
-  S0 idle 60 s -> Control A -> init CUDA/PyTorch/pipeline -> S1 operational baseline
-  -> Wan 3 DiT steps -> S3 30 s -> Control B -> S4 30 s.
-
-Runtime UNTOUCHED (subclass seam), same seam+step-start release discipline as F7-D5,
-VAE skipped. Evidence: MEASURED / OBSERVED / DERIVED / HYPOTHESIS.
+Authorized corrected protocol:
+  S0 idle 60 s
+  -> torch.cuda.init() + deterministic warm-up (~10 MB)
+  -> Control A (~500 MB)
+  -> load Wan2.1 pipeline
+  -> S1 operational baseline
+  -> Wan 3 DiT steps (VAE skipped)
+  -> empty_cache()
+  -> S3 120 s (trajectory characterization)
+  -> Control B (~500 MB)
+  -> S4 60 s (final observation).
 """
 
 from __future__ import annotations
@@ -84,6 +70,15 @@ D5_PEAK_RESERVED_MB = 3776.0
 
 def get_process_ram_mb() -> float:
     return psutil.Process(os.getpid()).memory_info().rss / (1024 * 1024)
+
+
+def get_process_host_memory_mb() -> Dict[str, float]:
+    p = psutil.Process(os.getpid())
+    mem = p.memory_info()
+    return {
+        "working_set_mb": round(mem.rss / (1024 * 1024), 2),
+        "commit_private_mb": round(mem.vms / (1024 * 1024), 2),
+    }
 
 
 class NVMLSampler:
@@ -169,11 +164,18 @@ def nvml_device_mb() -> float:
 
 
 def nvml_process_summary() -> Dict[str, Any]:
-    """Enumerate compute/graphics processes and summed attributable usedGpuMemory."""
+    """Enumerate compute/graphics processes and target PID attributable usedGpuMemory."""
     import pynvml
     pynvml.nvmlInit()
     h = pynvml.nvmlDeviceGetHandleByIndex(0)
-    out = {"compute_n": 0, "compute_attrib_mb": 0.0, "graphics_n": 0, "graphics_attrib_mb": 0.0}
+    my_pid = os.getpid()
+    out: Dict[str, Any] = {
+        "compute_n": 0, "compute_attrib_mb": 0.0,
+        "graphics_n": 0, "graphics_attrib_mb": 0.0,
+        "target_pid": my_pid,
+        "target_pid_found": False,
+        "target_pid_gpu_mem": None,
+    }
     for fld_n, fld_mb, fn in (
         ("compute_n", "compute_attrib_mb", pynvml.nvmlDeviceGetComputeRunningProcesses),
         ("graphics_n", "graphics_attrib_mb", pynvml.nvmlDeviceGetGraphicsRunningProcesses),
@@ -181,11 +183,18 @@ def nvml_process_summary() -> Dict[str, Any]:
         try:
             for p in fn(h):
                 out[fld_n] += 1
+                if p.pid == my_pid:
+                    out["target_pid_found"] = True
+                    out["target_pid_gpu_mem"] = (
+                        round(p.usedGpuMemory / (1024 * 1024), 2)
+                        if p.usedGpuMemory is not None else "UNAVAILABLE_WDDM"
+                    )
                 if p.usedGpuMemory:
                     out[fld_mb] += p.usedGpuMemory / (1024 * 1024)
         except Exception:
             pass
-    out["note"] = ("usedGpuMemory=None means the counter is UNAVAILABLE under WDDM, "
+    out["host_process_memory"] = get_process_host_memory_mb()
+    out["note"] = ("usedGpuMemory=None/UNAVAILABLE means the counter is UNAVAILABLE under WDDM, "
                    "NOT that the process uses 0 MB")
     return out
 
@@ -201,18 +210,28 @@ def cuda_mem_getinfo_mb() -> Optional[Dict[str, float]]:
         return None
 
 
-def sample_stability(seconds: float, interval_ms: float = 50.0) -> Dict[str, float]:
-    """Sample NVML device `used` for `seconds` and return min/max/mean/median/std (MB)."""
+def sample_stability(seconds: float, interval_ms: float = 1000.0, record_series: bool = True) -> Dict[str, Any]:
+    """Sample NVML device `used` for `seconds` at `interval_ms` (default 1 Hz per Consultant)
+    and return min/max/mean/median/std (MB) plus trajectory."""
     import statistics
     samples: List[float] = []
-    n = max(1, int(seconds * 1000 / interval_ms))
+    series: List[Dict[str, Any]] = []
+    n = max(1, int(seconds * 1000.0 / interval_ms))
+    t0 = time.perf_counter()
     for _ in range(n):
-        samples.append(nvml_device_mb())
+        mb = nvml_device_mb()
+        samples.append(mb)
+        if record_series:
+            series.append({
+                "t_s": round(time.perf_counter() - t0, 2),
+                "nvml_used_mb": mb,
+            })
         time.sleep(interval_ms / 1000.0)
     if not samples:
         return {"n": 0}
-    return {
+    res: Dict[str, Any] = {
         "n": len(samples),
+        "interval_s": interval_ms / 1000.0,
         "min_mb": round(min(samples), 2),
         "max_mb": round(max(samples), 2),
         "mean_mb": round(statistics.fmean(samples), 2),
@@ -220,6 +239,9 @@ def sample_stability(seconds: float, interval_ms: float = 50.0) -> Dict[str, flo
         "std_mb": round(statistics.pstdev(samples), 2),
         "spread_mb": round(max(samples) - min(samples), 2),
     }
+    if record_series:
+        res["trajectory"] = series
+    return res
 
 
 def run_control_workload(mb: float = 500.0, device: str = "cuda:0") -> Dict[str, Any]:
@@ -419,10 +441,10 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--device", type=str, default="cuda:0")
     p.add_argument("--s0-seconds", type=float, default=60.0,
                    help="Duration of the S0 idle-baseline stability sampling (Consultant: 60 s)")
-    p.add_argument("--s3-seconds", type=float, default=30.0,
-                   help="Duration of the S3 post-workload stability sampling (Consultant: 30 s)")
-    p.add_argument("--s4-seconds", type=float, default=30.0,
-                   help="Duration of the S4 final observation sampling (Consultant: 30 s)")
+    p.add_argument("--s3-seconds", type=float, default=120.0,
+                   help="Duration of the S3 post-workload stability sampling (Consultant Resolution: 120 s)")
+    p.add_argument("--s4-seconds", type=float, default=60.0,
+                   help="Duration of the S4 final observation sampling (Consultant Resolution: 60 s)")
     p.add_argument("--control-mb", type=float, default=500.0,
                    help="Size of the known CUDA control workload (alloc/compute/free)")
     p.add_argument("--skip-control", action="store_true",
@@ -434,13 +456,14 @@ def parse_args() -> argparse.Namespace:
 
 
 # ---------------------------------------------------------------------------
-# Classification -- 3 levels per Consultant authorization no.4 §7/§13
+# Classification -- 3 levels per Consultant Resolution (F7_D6_CONSULTANT_RESOLUTION_01.md)
 #   🟢 INSTRUMENT VALIDATED / 🟡 INCONCLUSIVE / 🔴 INSTRUMENT NOT VALIDATED
-# Operational criteria (NOT a gate redefinition):
+# Primary instrument validity criteria:
 #   S0 spread <= 150 MB; control A/B relative diff <= 10%;
 #   control A signal floor = max(3*S0_std, 150 MB);
 #   workload measurable floor = max(3*S0_std, 150 MB);
-#   |S3_mean - S0_mean| <= 200 MB and S3 spread <= 150 MB.
+#   cudaMemGetInfo qualitative coherence.
+# Note: S3/S4 return is decoupled from sensor validity -> phenomenological characterization.
 # ---------------------------------------------------------------------------
 
 def _diff_pct(a: float, b: float) -> Optional[float]:
@@ -484,15 +507,21 @@ def classify_authorized(s0_stats, s3_stats, s4_stats, control_a, control_b,
     cond["workload_increment_mb"] = round(work_inc, 1) if work_inc is not None else None
     cond["workload_measurable"] = bool(work_inc is not None and work_inc >= signal_floor)
 
-    # S3 returns toward S0
+    # S3 post-workload characterization (phenomenological per Consultant Resolution §2)
     s3_mean = s3_stats.get("mean_mb")
     s3_spread = s3_stats.get("spread_mb")
     cond["s3_mean_mb"] = s3_mean
     cond["s3_spread_mb"] = s3_spread
     s3_vs_s0 = (abs(s3_mean - s0_mb) if (s3_mean is not None and s0_mb is not None) else None)
     cond["s3_vs_s0_abs_mb"] = round(s3_vs_s0, 1) if s3_vs_s0 is not None else None
+    s3_vs_s1 = (round(s3_mean - s1_mb, 1) if (s3_mean is not None and s1_mb is not None) else None)
+    cond["s3_vs_s1_mb"] = s3_vs_s1
     cond["s3_stable"] = bool(s3_spread is not None and s3_spread <= 150.0)
     cond["s3_returns_to_baseline"] = bool(s3_vs_s0 is not None and s3_vs_s0 <= 200.0 and cond["s3_stable"])
+    cond["s3_phenomenon"] = (
+        "returns_to_baseline" if cond["s3_returns_to_baseline"]
+        else "persistent_device_residency"
+    )
 
     # cudaMemGetInfo coherence (qualitative/temporal): CUDA free should fall S1->S2 and
     # recover S2->S3, i.e. CUDA used should rise then fall, matching NVML direction.
@@ -504,7 +533,7 @@ def classify_authorized(s0_stats, s3_stats, s4_stats, control_a, control_b,
     nvml_rise = (s1_mb is not None and s2_mb is not None and s2_mb >= s1_mb)
     cond["cudaMemGetInfo_coherent"] = bool(cuda_rise and cuda_fall and nvml_rise)
 
-    # S4 final observation (confirmatory/informative, not a gate)
+    # S4 final observation (confirmatory/informative, phenomenological)
     s4_mean = s4_stats.get("mean_mb")
     s4_spread = s4_stats.get("spread_mb")
     cond["s4_mean_mb"] = s4_mean
@@ -515,7 +544,7 @@ def classify_authorized(s0_stats, s3_stats, s4_stats, control_a, control_b,
     cond["s4_vs_s0_abs_mb"] = (round(abs(s4_mean - s0_mb), 1)
                                if (s4_mean is not None and s0_mb is not None) else None)
 
-    # ---- 3-level verdict ----
+    # ---- 3-level verdict (Primary Instrument Validity per Resolution §2) ----
     if not cond["s0_stable"]:
         verdict = "INSTRUMENT NOT VALIDATED"
         reason = "S0 idle baseline unstable (spread > 150 MB)"
@@ -524,22 +553,17 @@ def classify_authorized(s0_stats, s3_stats, s4_stats, control_a, control_b,
         reason = "Control A signal below measurement floor; relative tolerance not evaluated"
     elif not cond["control_consistent"]:
         verdict = "INSTRUMENT NOT VALIDATED"
-        reason = "Control A/B not reproducible (relative difference > 10%)"
-    elif not cond["s3_returns_to_baseline"]:
-        verdict = "INCONCLUSIVE"
-        reason = "S3 did not return to baseline within criteria (persistent session residency)"
+        reason = f"Control A/B not reproducible (relative difference {cond.get('control_rel_diff_pct')}% > 10%)"
     elif not cond["workload_measurable"]:
         verdict = "INCONCLUSIVE"
         reason = "Wan workload increment not clearly measurable above the noise floor"
     elif not cond["cudaMemGetInfo_coherent"]:
         verdict = "INCONCLUSIVE"
         reason = "cudaMemGetInfo direction inconsistent with NVML"
-    elif not cond["s4_stable"]:
-        verdict = "INCONCLUSIVE"
-        reason = "S4 final observation not stable"
     else:
         verdict = "INSTRUMENT VALIDATED"
-        reason = "S0 stable; controls consistent; workload measurable; S3 returns; cudaMemGetInfo coherent; S4 stable"
+        reason = ("S0 stable; controls consistent (<=10%); workload measurable; "
+                  "cudaMemGetInfo coherent. S3/S4 characterized as system residency phenomenon.")
 
     cond["verdict"] = verdict
     cond["reason"] = reason
@@ -567,9 +591,9 @@ def main() -> None:
         print("[DRY-RUN] Validated. Awaiting execution authorization.")
         return
 
-    # ---- S0: idle baseline (60 s), pre-context ----
+    # ---- S0: idle baseline (60 s, 1 Hz), pre-context ----
     try:
-        s0_stats = sample_stability(seconds=args.s0_seconds, interval_ms=50.0)
+        s0_stats = sample_stability(seconds=args.s0_seconds, interval_ms=1000.0, record_series=True)
     except Exception as exc:
         s0_stats = {"error": str(exc)}
         print(f"[WARN] S0 stability sampling failed: {exc}")
@@ -578,9 +602,11 @@ def main() -> None:
     pre_procs = nvml_process_summary()
     print(f"\n  S0 idle_baseline (device used, pre-context) mean : {S0} MB "
           f"(min {s0_stats.get('min_mb')} / max {s0_stats.get('max_mb')} / median {s0_stats.get('median_mb')} / "
-          f"std {s0_stats.get('std_mb')} / spread {so_spread})")
+          f"std {s0_stats.get('std_mb')} / spread {so_spread} MB)")
     print(f"     processes: compute_n={pre_procs['compute_n']} attrib_mb={pre_procs['compute_attrib_mb']:.1f} | "
           f"graphics_n={pre_procs['graphics_n']} attrib_mb={pre_procs['graphics_attrib_mb']:.1f}")
+    print(f"     host memory: working_set={pre_procs.get('host_process_memory', {}).get('working_set_mb')} MB | "
+          f"commit_private={pre_procs.get('host_process_memory', {}).get('commit_private_mb')} MB")
     print("     note: usedGpuMemory=None means the counter is UNAVAILABLE under WDDM, NOT 0 MB")
 
     nvml = NVMLSampler(device_index=0, interval_ms=20.0, safe_abort_mb=SAFE_ABORT_NVML_MB)
@@ -588,14 +614,26 @@ def main() -> None:
     torch.cuda.reset_peak_memory_stats()
     torch.cuda.empty_cache()
 
-    # ---- Control A (BEFORE CUDA/pipeline init), per Consultant no.4 §2 ----
+    # ---- CUDA Context Init + Deterministic Warm-up (~10 MB), per Resolution §3 ----
+    print("  Initializing CUDA context + deterministic warm-up (~10 MB) ...")
+    torch.cuda.init()
+    _dummy = torch.empty((10 * 1024 * 1024 // 4,), dtype=torch.float32, device=args.device)
+    torch.cuda.synchronize(args.device)
+    del _dummy
+    gc.collect()
+    torch.cuda.empty_cache()
+    torch.cuda.synchronize(args.device)
+    print("  CUDA context initialized & warm-up freed.")
+
+    # ---- Control A (POST CUDA init, PRE pipeline load), per Resolution §3 ----
     control_a = None
     if not args.skip_control:
-        print(f"  [Control A] known CUDA control workload ~{args.control_mb:.0f} MB (pre-workload) ...")
+        print(f"  [Control A] known CUDA control workload ~{args.control_mb:.0f} MB (context initialized, pre-pipeline) ...")
         control_a = run_control_workload(mb=args.control_mb, device=args.device)
         print(f"  [Control A] pre={control_a.get('pre_mb')} during={control_a.get('during_mb')} "
               f"post={control_a.get('post_mb')} | delta_alloc={control_a.get('delta_alloc_mb')} "
               f"delta_return={control_a.get('delta_return_mb')}")
+        gc.collect(); torch.cuda.synchronize(args.device); torch.cuda.empty_cache(); torch.cuda.synchronize(args.device)
 
     pipeline = None
     probe = None
@@ -607,11 +645,11 @@ def main() -> None:
     meminfo_s1 = meminfo_s2 = meminfo_s3 = meminfo_s4 = None
     t_start = time.perf_counter()
     try:
-        # ---- init CUDA/PyTorch + pipeline ----
+        # ---- init PyTorch + pipeline ----
         pipeline = AttributionProbePipeline(
             device=args.device, dit_dtype=torch.float16,
             vae_dtype=torch.bfloat16, text_dtype=torch.bfloat16)
-        gc.collect(); torch.cuda.synchronize(); torch.cuda.empty_cache(); torch.cuda.synchronize()
+        gc.collect(); torch.cuda.synchronize(args.device); torch.cuda.empty_cache(); torch.cuda.synchronize(args.device)
         # ---- S1: operational baseline (system + CUDA/PyTorch + loaded pipeline) ----
         S1 = round(nvml_device_mb(), 2)
         meminfo_s1 = cuda_mem_getinfo_mb()
@@ -630,33 +668,34 @@ def main() -> None:
         t_total = time.perf_counter() - t_start
         S2 = nvml.stop()
 
-    # ---- S3: post-workload 30 s stability ----
+    # ---- S3: post-workload 120 s stability & trajectory sampling (1 Hz), per Resolution §5 ----
     if error_occurred is None:
         try:
-            gc.collect(); torch.cuda.synchronize(); torch.cuda.empty_cache(); torch.cuda.synchronize()
-            s3_stats = sample_stability(seconds=args.s3_seconds, interval_ms=50.0)
+            gc.collect(); torch.cuda.synchronize(args.device); torch.cuda.empty_cache(); torch.cuda.synchronize(args.device)
+            s3_stats = sample_stability(seconds=args.s3_seconds, interval_ms=1000.0, record_series=True)
             S3 = s3_stats.get("mean_mb")
             meminfo_s3 = cuda_mem_getinfo_mb()
-            print(f"  S3 post_workload ({args.s3_seconds:.0f} s) mean {S3} MB "
-                  f"(spread {s3_stats.get('spread_mb')}) | cudaMemGetInfo={meminfo_s3}")
+            print(f"  S3 post_workload ({args.s3_seconds:.0f} s, 1 Hz) mean {S3} MB "
+                  f"(spread {s3_stats.get('spread_mb')} MB) | cudaMemGetInfo={meminfo_s3}")
         except Exception as exc:
             print(f"[WARN] S3 sampling failed: {exc}")
 
-        # ---- Control B (after workload), per Consultant no.4 §8 ----
+        # ---- Control B (after workload), per Resolution §3/§6 ----
         if not args.skip_control:
             print(f"  [Control B] known CUDA control workload ~{args.control_mb:.0f} MB (post-workload) ...")
             control_b = run_control_workload(mb=args.control_mb, device=args.device)
             print(f"  [Control B] pre={control_b.get('pre_mb')} during={control_b.get('during_mb')} "
                   f"post={control_b.get('post_mb')} | delta_alloc={control_b.get('delta_alloc_mb')} "
                   f"delta_return={control_b.get('delta_return_mb')}")
+            gc.collect(); torch.cuda.synchronize(args.device); torch.cuda.empty_cache(); torch.cuda.synchronize(args.device)
 
-        # ---- S4: final 30 s observation (confirmatory/informative) ----
+        # ---- S4: final 60 s observation (1 Hz), per Resolution §5 ----
         try:
-            gc.collect(); torch.cuda.synchronize(); torch.cuda.empty_cache(); torch.cuda.synchronize()
-            s4_stats = sample_stability(seconds=args.s4_seconds, interval_ms=50.0)
+            gc.collect(); torch.cuda.synchronize(args.device); torch.cuda.empty_cache(); torch.cuda.synchronize(args.device)
+            s4_stats = sample_stability(seconds=args.s4_seconds, interval_ms=1000.0, record_series=True)
             meminfo_s4 = cuda_mem_getinfo_mb()
-            print(f"  S4 final_observation ({args.s4_seconds:.0f} s) mean {s4_stats.get('mean_mb')} MB "
-                  f"(spread {s4_stats.get('spread_mb')}) | cudaMemGetInfo={meminfo_s4}")
+            print(f"  S4 final_observation ({args.s4_seconds:.0f} s, 1 Hz) mean {s4_stats.get('mean_mb')} MB "
+                  f"(spread {s4_stats.get('spread_mb')} MB) | cudaMemGetInfo={meminfo_s4}")
         except Exception as exc:
             print(f"[WARN] S4 sampling failed: {exc}")
 
@@ -771,7 +810,7 @@ def main() -> None:
         w(f"- **workload-induced device residency delta (S2-S0): {workload_delta} MB** (NOT proven ownership)\n")
         w("\n### 1.2 Conditions\n\n")
         for k in ("s0_stable", "control_a_observable", "control_consistent", "workload_measurable",
-                  "s3_returns_to_baseline", "cudaMemGetInfo_coherent", "s4_stable"):
+                  "cudaMemGetInfo_coherent", "s3_returns_to_baseline", "s3_phenomenon", "s4_stable"):
             w(f"- {k}: {cond.get(k)}\n")
         w(f"- control A delta: {cond.get('control_a_delta_mb')} MB | control B delta: {cond.get('control_b_delta_mb')} MB "
           f"| rel diff: {cond.get('control_rel_diff_pct')} %\n")
