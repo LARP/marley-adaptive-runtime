@@ -26,6 +26,8 @@
 [![Phase F7-D6: VALIDATED](https://img.shields.io/badge/Phase%20F7--D6-INSTRUMENT%20VALIDATED-22c55e.svg)](docs/F7_D6_METRIC_ATTRIBUTION_REPORT_01.md)
 [![Phase F7: CLOSED FAIL](https://img.shields.io/badge/Phase%20F7-CLOSED%20FAIL%20(4.99GB)-ef4444.svg)](docs/F7_STAGE_B_FULL_VALIDATION_REPORT_01.md)
 [![Phase F8: NULL RESULT & DEFINITIVE CLOSURE](https://img.shields.io/badge/Phase%20F8-NULL%20RESULT%20%7C%20720p%20CLOSED-ef4444.svg)](docs/F8_SCREENING_AB_REPORT_01.md)
+[![Phase F9: GENERATED](https://img.shields.io/badge/Phase%20F9-GENERATED-8b5cf6.svg)](docs/F9_RUNTIME_MEMORY_RESEARCH_SANDBOX_CHARTER_01.md)
+[![Phase F9-0: PREREGISTERED / FROZEN](https://img.shields.io/badge/Phase%20F9--0-PREREGISTERED%20%2F%20FROZEN-8b5cf6.svg)](docs/F9_0_PREREGISTERED_MEMORY_PEAK_ATTRIBUTION_PROTOCOL_01.md)
 
 *In loving memory of Marley 🐾*
 
@@ -38,6 +40,8 @@
 **`marley-runtime`** is a specialized, experimental inference runtime designed to execute advanced video diffusion models (specifically **Wan2.1-T2V-1.3B**) under severe consumer hardware constraints: **~4.8 GB of effective physical VRAM** on an NVIDIA GeForce RTX 3050 6GB Laptop GPU running under Windows WDDM.
 
 Rather than relying purely on blunt sequential CPU offloading, `marley-runtime` investigates and measures **adaptive, block-level memory management policies** that dynamically balance PCIe transfer latency, activation recomputation, tensor lifetime management, and selective quantization.
+
+> **Status (2026-09-10):** 480p / 33 frames / 30 steps is the certified production baseline. The 720p line is closed as experimental after F7 (FAIL) and F8 (NULL RESULT). The project has advanced to **Phase F9 — Runtime Memory Research Sandbox**, whose entry gate **F9-0 (Memory Peak Attribution Diagnostic)** is preregistered/frozen and awaiting execution authorization.
 
 > [!NOTE]
 > The current architectural design and phased milestone strategy is governed by **[Roadmap v5](ROADMAP.md)**, reviewed and approved through a multi-agent consensus using **free-tier models** (ChatGPT, DeepSeek Pro, and Gemini Pro). Active execution is performed by **Antigravity Pro** (Gemini 2.5 Flash and Claude Sonnet 4.6), with formal strategic adoption of technical guidance from an external **Generative AI & ComfyUI Runtime Expert** (knowledge acquired through conversation with an AI agent).
@@ -92,6 +96,8 @@ Memory is tracked across **three distinct layers** to prevent WDDM virtualizatio
 | **F7-D6**| NVML Metric Attribution Probe | 🟢 **INSTRUMENT VALIDATED** | Probe corregido ejecutado: Control A/B diff **2.34% ($\le 10\%$ PASS)** (512 vs 500 MB), S0 estable (spread 146.5 MB), S2 4,624.0 MB. S3 post-workload caracterizado como meseta plana estática (~1,481.6 MB, spread 29 MB; +438 MB sobre S1). F7-D5 permanece NEGATIVE; gate 4.8 GB intacta · [`Report`](docs/F7_D6_METRIC_ATTRIBUTION_REPORT_01.md) · knowledge acquired through conversation with an AI agent |
 | **F7** | 720p Full Validation & Causal | 🔴 **CLOSED FAIL** | Pico Físico **4,996.0 MB** en Paso 6 (+196.0 MB violación). 480p ratificado como único estándar de producción · [`Report`](docs/F7_STAGE_B_FULL_VALIDATION_REPORT_01.md) |
 | **F8** | 10-Step A/B Quantization Screening | 🔴 **NULL RESULT (720p CLOSED)** | Delta Peak **-5.0 MB** ($\approx 0\text{ MB} < 50\text{ MB}$). Cuantización selectiva DiT no reduce el pico físico NVML en 720p. **Línea 720p definitivamente cerrada** · [`Report`](docs/F8_SCREENING_AB_REPORT_01.md) |
+| **F9** | Runtime Memory Research Sandbox | 🟡 **GENERATED / NOT EXECUTED** | Nueva línea: gestión dinámica de memoria (lifetime, coexistencia, reuso, workspaces, residency, scheduling). Sandbox **DiT** (no UNet), gate G3 + G1–G6, un único slot de validación Wan. F7/F8 permanecen cerradas · [`Charter`](docs/F9_RUNTIME_MEMORY_RESEARCH_SANDBOX_CHARTER_01.md) |
+| **F9-0** | Preregistered Memory Peak Attribution Diagnostic | 🟡 **PREREGISTERED / FROZEN** | Diagnóstico (**no** optimización): atribución ≥90 % del **pico inducido** (`Peak NVML − S0`) en 7 categorías excluyentes. NVML 20 ms, N≥5, lower bounds reproducibles, reutiliza instrumento F7-D6. Ref. **F7-D5 = 5,096.1 MB (+296.1 MB)**. **NO ejecutado** · [`Protocol`](docs/F9_0_PREREGISTERED_MEMORY_PEAK_ATTRIBUTION_PROTOCOL_01.md) |
 
 ---
 
@@ -453,6 +459,74 @@ Following the single-run benchmarks (F6-0 through F6-E), the project executed th
 
 ---
 
+## 🧪 Phase F9 — Runtime Memory Research Sandbox (🟡 GENERATED / F9-0 PREREGISTERED)
+
+Phase F9 is generated following the formal closure of **F7 (FAIL)** and **F8 (NULL RESULT)**. Neither
+phase is reopened. The 720p line remains experimental and uncertified; **480p / 33f / 30 steps** stays
+the single certified production baseline. The next investigation is explicitly **not** another round
+of quantization on Wan, but **dynamic runtime memory management**.
+
+### Mission
+
+Investigate mechanisms that can reduce the **physical VRAM peak** by controlling tensor lifetime,
+temporal buffer coexistence, memory reuse, kernel workspaces, eviction/residency, scheduling,
+prefetch/overlap and recomputation. The goal is not "less VRAM in Stable Diffusion" but discovering
+**runtime mechanisms** whose abstraction is transferable to a DiT/video graph such as
+Wan2.1-T2V-1.3B.
+
+- **Sandbox:** a **DiT-based** model (e.g. SD3 / MMDiT) is required for the fast lab so that G3 has a
+  defensible architectural correspondence with Wan2.1. **UNet-based Stable Diffusion must not be used
+  as primary transferability evidence.**
+- **Transferability gate G3:** phenomenon → structural evidence in Wan → falsifiable prediction → Wan.
+- **Experimental gates G1–G6:** reproducibility (N≥3 screening, N≥5 promotion), mechanistic
+  explanation, transferability, magnitude (G4-A ≥15 % / G4-B <15 % reproducible / G4-C no useful peak
+  reduction), correctness/quality, cost/portability.
+- **Composition rule:** effects cannot be summed theoretically; composition requires different peak
+  events, non-competing memory and an empirical combined measurement.
+- **Promotion:** a single isolated validation slot in Wan2.1 (1280×720 / 33f / 30 steps), same
+  seed/model/workload/gate and NVML primary metric.
+- **Route:** `MEDIR → ATRIBUIR → FORMULAR → EXPERIMENTAR → TRANSFERIR → VALIDAR → DECIDIR`.
+
+### F9-0 — Preregistered Memory Peak Attribution Diagnostic (🟡 PREREGISTERED / FROZEN — NOT EXECUTED)
+
+F9-0 is the mandatory entry gate of F9 and is **diagnostic, not optimization**; it consumes no Wan
+validation slot. It attributes the physical peak of the canonical 720p/33f/30-step run, taking
+**F7-D5 as the single frozen historical reference**.
+
+**Eight operational corrections incorporated before freezing:**
+
+1. **90 % denominator = workload-induced peak** (`Peak NVML − S0`); the WDDM/DWM idle baseline
+   (`S0_idle`) is reported separately and is **not** attributed to the Marley workload.
+2. **Mutually exclusive taxonomy** (partition, no double counting): weights, activations, kernel
+   workspace, allocator/free pool, fragmentation (subset of allocator, non-additive), CUDA/Driver/
+   Runtime overhead, other/transient. Each byte has exactly one primary category.
+3. **Realistic GPU exclusivity:** no other CUDA/compute contexts + stable `S0` (spread ≤150 MB). The
+   system graphics (WDDM/DWM) baseline does not invalidate a run.
+4. **Reproducible lower bounds:** `LB_analitico`, `Min_allocated_obs` and `LB_operativo`
+   (`LB_analitico + Overhead_CUDA/Driver/Runtime`); none presented as an absolute physical minimum.
+5. **DiT sandbox** for G3 (UNet excluded as primary evidence).
+6. **DiT/diffusion attribution**, VAE kept as a separate event; reuse the F7-D6 validated instrument
+   (temperature, clocks, controls, baseline, NVML behavior).
+7. **F7-D5 reference verified:** official Peak NVML **5,096.1 MB** (deficit **+296.1 MB**), bound to
+   `logs/f7_d5_full_30step_validation_telemetry.json` and
+   `docs/F7_D5_FULL_30STEP_VALIDATION_REPORT_01.md`. The **4,996.0 MB / +196.0 MB** figure belongs to
+   the separate **F7 Stage B** artifact and is **not** used as the F7-D5 reference.
+8. **F9-1…F9-4** are inactive placeholders; only F9-0 is enabled. The next mechanism is selected
+   solely from the F9-0 result.
+
+**Instrumentation:** NVML at 20 ms (50 Hz, min ≥10 Hz), CUDA synchronization points, peak time
+window, observer-effect test; if resolution is insufficient → `POSIBLE SUBESTIMACIÓN DEL PICO` and
+F9-0 cannot close. **N ≥ 5** independent runs with cooldown; maximum 2 instrumentation iterations.
+Closure: `CLOSED — ATTRIBUTED` (≥90 % of the induced peak) or
+`ATTRIBUTION INCOMPLETE — DOCUMENTED`.
+
+> [!IMPORTANT]
+> **F9-0 is PREREGISTERED / FROZEN and has NOT been executed.** No run is launched without explicit
+> Director authorization. Documents: [`F9 Charter`](docs/F9_RUNTIME_MEMORY_RESEARCH_SANDBOX_CHARTER_01.md) ·
+> [`F9-0 Protocol`](docs/F9_0_PREREGISTERED_MEMORY_PEAK_ATTRIBUTION_PROTOCOL_01.md).
+
+---
+
 ## 🏗️ Architecture & Core Components
 
 ```
@@ -559,7 +633,8 @@ marley-runtime/
 2. **Kill Gates** — Every conditional phase has measurable, non-negotiable exit criteria.
 3. **Falsifiable Hypotheses** — We test whether adaptive runtime scheduling outperforms static offloading within a strict 4.8 GB physical VRAM envelope.
 4. **WDDM Adaptation** — PCIe/compute concurrency is measured empirically under the WDDM driver scheduler before any async scheduling is committed.
-5. **Target Primacy** — 480p @ 33 frames is the primary objective; 720p is a secondary stretch goal.
+5. **Target Primacy** — 480p @ 33 frames is the certified production baseline; 720p is confined to experimental status after F7/F8, and its memory peak is now the object of the F9-0 attribution diagnostic.
+6. **Diagnose Before Optimizing (F9)** — Memory mechanisms are promoted only through a preregistered, falsifiable chain: measure → attribute → formulate → experiment → transfer → validate → decide.
 
 ---
 
