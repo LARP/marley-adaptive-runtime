@@ -1,0 +1,2919 @@
+{
+  "timestamp": "2026-09-10T01:28:53.008418",
+  "phase": "F7 Stage C (Inter-Process Causal Intervention)",
+  "protocol_reference": "docs/F7_720P_PREREGISTERED_PROTOCOL_01.md \u00a75",
+  "worker_pid": 45440,
+  "worker_exit_code": 0,
+  "worker_death_timestamp_s": 365.59,
+  "milestones_mb": {
+    "S0_monitor_mean": 937.82,
+    "S0_monitor_spread": 22.07,
+    "S3_worker_plateau": 1860.09,
+    "post_kill_5s_mean": 1075.15,
+    "post_kill_60s_mean": 1065.89,
+    "post_kill_final": 1056.68,
+    "evaporated_mb": 803.41,
+    "evaporated_pct": 87.1,
+    "delta_final_vs_s0": 118.86
+  },
+  "hypothesis_result": "H3",
+  "conclusion": "H3 SUPPORTED: PERSISTENT EXTERNAL RESIDENCY. VRAM remained elevated at 1056.7 MB (+118.9 MB vs S0) after 60s post-mortem. Residency survives process destruction.",
+  "worker_details": {
+    "pid": 16044,
+    "phase": "S3_CONFIRMED",
+    "timestamp": "2026-09-10T01:28:18.183117",
+    "data": {
+      "s3_mean_mb": 1860.09,
+      "s3_stats": {
+        "n": 30,
+        "interval_s": 1.0,
+        "min_mb": 1848.02,
+        "max_mb": 1878.89,
+        "mean_mb": 1860.09,
+        "median_mb": 1857.64,
+        "std_mb": 7.87,
+        "spread_mb": 30.88,
+        "trajectory": [
+          {
+            "t_s": 0.0,
+            "nvml_used_mb": 1848.828125
+          },
+          {
+            "t_s": 1.0,
+            "nvml_used_mb": 1848.828125
+          },
+          {
+            "t_s": 2.01,
+            "nvml_used_mb": 1854.015625
+          },
+          {
+            "t_s": 3.02,
+            "nvml_used_mb": 1854.640625
+          },
+          {
+            "t_s": 4.03,
+            "nvml_used_mb": 1854.515625
+          },
+          {
+            "t_s": 5.04,
+            "nvml_used_mb": 1863.015625
+          },
+          {
+            "t_s": 6.05,
+            "nvml_used_mb": 1863.203125
+          },
+          {
+            "t_s": 7.05,
+            "nvml_used_mb": 1863.453125
+          },
+          {
+            "t_s": 8.06,
+            "nvml_used_mb": 1854.703125
+          },
+          {
+            "t_s": 9.06,
+            "nvml_used_mb": 1854.953125
+          },
+          {
+            "t_s": 10.07,
+            "nvml_used_mb": 1863.390625
+          },
+          {
+            "t_s": 11.08,
+            "nvml_used_mb": 1863.203125
+          },
+          {
+            "t_s": 12.09,
+            "nvml_used_mb": 1863.203125
+          },
+          {
+            "t_s": 13.1,
+            "nvml_used_mb": 1857.078125
+          },
+          {
+            "t_s": 14.11,
+            "nvml_used_mb": 1857.015625
+          },
+          {
+            "t_s": 15.12,
+            "nvml_used_mb": 1856.828125
+          },
+          {
+            "t_s": 16.13,
+            "nvml_used_mb": 1852.515625
+          },
+          {
+            "t_s": 17.13,
+            "nvml_used_mb": 1848.015625
+          },
+          {
+            "t_s": 18.15,
+            "nvml_used_mb": 1862.328125
+          },
+          {
+            "t_s": 19.16,
+            "nvml_used_mb": 1870.671875
+          },
+          {
+            "t_s": 20.17,
+            "nvml_used_mb": 1878.890625
+          },
+          {
+            "t_s": 21.18,
+            "nvml_used_mb": 1872.265625
+          },
+          {
+            "t_s": 22.19,
+            "nvml_used_mb": 1872.140625
+          },
+          {
+            "t_s": 23.19,
+            "nvml_used_mb": 1872.703125
+          },
+          {
+            "t_s": 24.21,
+            "nvml_used_mb": 1866.703125
+          },
+          {
+            "t_s": 25.21,
+            "nvml_used_mb": 1858.203125
+          },
+          {
+            "t_s": 26.23,
+            "nvml_used_mb": 1853.453125
+          },
+          {
+            "t_s": 27.24,
+            "nvml_used_mb": 1853.328125
+          },
+          {
+            "t_s": 28.26,
+            "nvml_used_mb": 1853.265625
+          },
+          {
+            "t_s": 29.27,
+            "nvml_used_mb": 1867.328125
+          }
+        ]
+      },
+      "meminfo_s3": {
+        "free_mb": 4436.0,
+        "total_mb": 6143.5,
+        "used_mb": 1707.5
+      }
+    }
+  },
+  "timeline": [
+    {
+      "t_s": 0.0,
+      "phase": "PHASE_1_PRE_LAUNCH",
+      "used_mb": 928.54,
+      "free_mb": 5215.46,
+      "timestamp": "2026-09-10T01:22:17.138701"
+    },
+    {
+      "t_s": 1.0,
+      "phase": "PHASE_1_PRE_LAUNCH",
+      "used_mb": 943.11,
+      "free_mb": 5200.89,
+      "timestamp": "2026-09-10T01:22:18.143127"
+    },
+    {
+      "t_s": 2.01,
+      "phase": "PHASE_1_PRE_LAUNCH",
+      "used_mb": 933.17,
+      "free_mb": 5210.83,
+      "timestamp": "2026-09-10T01:22:19.152633"
+    },
+    {
+      "t_s": 3.02,
+      "phase": "PHASE_1_PRE_LAUNCH",
+      "used_mb": 938.98,
+      "free_mb": 5205.02,
+      "timestamp": "2026-09-10T01:22:20.163039"
+    },
+    {
+      "t_s": 4.02,
+      "phase": "PHASE_1_PRE_LAUNCH",
+      "used_mb": 938.85,
+      "free_mb": 5205.15,
+      "timestamp": "2026-09-10T01:22:21.163087"
+    },
+    {
+      "t_s": 5.04,
+      "phase": "PHASE_1_PRE_LAUNCH",
+      "used_mb": 928.66,
+      "free_mb": 5215.34,
+      "timestamp": "2026-09-10T01:22:22.174477"
+    },
+    {
+      "t_s": 6.05,
+      "phase": "PHASE_1_PRE_LAUNCH",
+      "used_mb": 927.16,
+      "free_mb": 5216.84,
+      "timestamp": "2026-09-10T01:22:23.189598"
+    },
+    {
+      "t_s": 7.06,
+      "phase": "PHASE_1_PRE_LAUNCH",
+      "used_mb": 930.41,
+      "free_mb": 5213.59,
+      "timestamp": "2026-09-10T01:22:24.198504"
+    },
+    {
+      "t_s": 8.07,
+      "phase": "PHASE_1_PRE_LAUNCH",
+      "used_mb": 940.91,
+      "free_mb": 5203.09,
+      "timestamp": "2026-09-10T01:22:25.213579"
+    },
+    {
+      "t_s": 9.08,
+      "phase": "PHASE_1_PRE_LAUNCH",
+      "used_mb": 940.6,
+      "free_mb": 5203.4,
+      "timestamp": "2026-09-10T01:22:26.214854"
+    },
+    {
+      "t_s": 10.08,
+      "phase": "PHASE_1_PRE_LAUNCH",
+      "used_mb": 948.29,
+      "free_mb": 5195.71,
+      "timestamp": "2026-09-10T01:22:27.218903"
+    },
+    {
+      "t_s": 11.08,
+      "phase": "PHASE_1_PRE_LAUNCH",
+      "used_mb": 949.23,
+      "free_mb": 5194.77,
+      "timestamp": "2026-09-10T01:22:28.223129"
+    },
+    {
+      "t_s": 12.09,
+      "phase": "PHASE_1_PRE_LAUNCH",
+      "used_mb": 939.87,
+      "free_mb": 5204.13,
+      "timestamp": "2026-09-10T01:22:29.230087"
+    },
+    {
+      "t_s": 13.09,
+      "phase": "PHASE_1_PRE_LAUNCH",
+      "used_mb": 948.99,
+      "free_mb": 5195.01,
+      "timestamp": "2026-09-10T01:22:30.232735"
+    },
+    {
+      "t_s": 14.11,
+      "phase": "PHASE_1_PRE_LAUNCH",
+      "used_mb": 930.55,
+      "free_mb": 5213.45,
+      "timestamp": "2026-09-10T01:22:31.247405"
+    },
+    {
+      "t_s": 15.14,
+      "phase": "PHASE_2_WORKER_ACTIVE_UNKNOWN",
+      "used_mb": 930.87,
+      "free_mb": 5213.13,
+      "timestamp": "2026-09-10T01:22:32.277603"
+    },
+    {
+      "t_s": 16.14,
+      "phase": "PHASE_2_WORKER_ACTIVE_UNKNOWN",
+      "used_mb": 930.62,
+      "free_mb": 5213.38,
+      "timestamp": "2026-09-10T01:22:33.283191"
+    },
+    {
+      "t_s": 17.15,
+      "phase": "PHASE_2_WORKER_ACTIVE_UNKNOWN",
+      "used_mb": 927.12,
+      "free_mb": 5216.88,
+      "timestamp": "2026-09-10T01:22:34.290795"
+    },
+    {
+      "t_s": 18.15,
+      "phase": "PHASE_2_WORKER_ACTIVE_UNKNOWN",
+      "used_mb": 928.62,
+      "free_mb": 5215.38,
+      "timestamp": "2026-09-10T01:22:35.291833"
+    },
+    {
+      "t_s": 19.16,
+      "phase": "PHASE_2_WORKER_ACTIVE_UNKNOWN",
+      "used_mb": 929.62,
+      "free_mb": 5214.38,
+      "timestamp": "2026-09-10T01:22:36.294584"
+    },
+    {
+      "t_s": 20.16,
+      "phase": "PHASE_2_WORKER_ACTIVE_UNKNOWN",
+      "used_mb": 925.97,
+      "free_mb": 5218.03,
+      "timestamp": "2026-09-10T01:22:37.295171"
+    },
+    {
+      "t_s": 21.16,
+      "phase": "PHASE_2_WORKER_ACTIVE_UNKNOWN",
+      "used_mb": 918.41,
+      "free_mb": 5225.59,
+      "timestamp": "2026-09-10T01:22:38.298375"
+    },
+    {
+      "t_s": 22.17,
+      "phase": "PHASE_2_WORKER_ACTIVE_UNKNOWN",
+      "used_mb": 904.22,
+      "free_mb": 5239.78,
+      "timestamp": "2026-09-10T01:22:39.306610"
+    },
+    {
+      "t_s": 23.18,
+      "phase": "PHASE_2_WORKER_ACTIVE_STARTED",
+      "used_mb": 937.51,
+      "free_mb": 5206.49,
+      "timestamp": "2026-09-10T01:22:40.316751"
+    },
+    {
+      "t_s": 24.19,
+      "phase": "PHASE_2_WORKER_ACTIVE_STARTED",
+      "used_mb": 967.13,
+      "free_mb": 5176.87,
+      "timestamp": "2026-09-10T01:22:41.330345"
+    },
+    {
+      "t_s": 25.19,
+      "phase": "PHASE_2_WORKER_ACTIVE_STARTED",
+      "used_mb": 1034.32,
+      "free_mb": 5109.68,
+      "timestamp": "2026-09-10T01:22:42.332406"
+    },
+    {
+      "t_s": 26.2,
+      "phase": "PHASE_2_WORKER_ACTIVE_STARTED",
+      "used_mb": 1039.12,
+      "free_mb": 5104.88,
+      "timestamp": "2026-09-10T01:22:43.334413"
+    },
+    {
+      "t_s": 27.2,
+      "phase": "PHASE_2_WORKER_ACTIVE_STARTED",
+      "used_mb": 1045.04,
+      "free_mb": 5098.96,
+      "timestamp": "2026-09-10T01:22:44.336571"
+    },
+    {
+      "t_s": 28.21,
+      "phase": "PHASE_2_WORKER_ACTIVE_CONTROL_A_DONE",
+      "used_mb": 1143.32,
+      "free_mb": 5000.68,
+      "timestamp": "2026-09-10T01:22:45.345550"
+    },
+    {
+      "t_s": 29.22,
+      "phase": "PHASE_2_WORKER_ACTIVE_CONTROL_A_DONE",
+      "used_mb": 1110.1,
+      "free_mb": 5033.9,
+      "timestamp": "2026-09-10T01:22:46.355090"
+    },
+    {
+      "t_s": 30.23,
+      "phase": "PHASE_2_WORKER_ACTIVE_CONTROL_A_DONE",
+      "used_mb": 1113.54,
+      "free_mb": 5030.46,
+      "timestamp": "2026-09-10T01:22:47.371437"
+    },
+    {
+      "t_s": 31.25,
+      "phase": "PHASE_2_WORKER_ACTIVE_CONTROL_A_DONE",
+      "used_mb": 1096.1,
+      "free_mb": 5047.9,
+      "timestamp": "2026-09-10T01:22:48.384497"
+    },
+    {
+      "t_s": 32.26,
+      "phase": "PHASE_2_WORKER_ACTIVE_CONTROL_A_DONE",
+      "used_mb": 1093.85,
+      "free_mb": 5050.15,
+      "timestamp": "2026-09-10T01:22:49.394381"
+    },
+    {
+      "t_s": 33.26,
+      "phase": "PHASE_2_WORKER_ACTIVE_CONTROL_A_DONE",
+      "used_mb": 1088.91,
+      "free_mb": 5055.09,
+      "timestamp": "2026-09-10T01:22:50.403435"
+    },
+    {
+      "t_s": 34.27,
+      "phase": "PHASE_2_WORKER_ACTIVE_CONTROL_A_DONE",
+      "used_mb": 1080.47,
+      "free_mb": 5063.53,
+      "timestamp": "2026-09-10T01:22:51.409682"
+    },
+    {
+      "t_s": 35.28,
+      "phase": "PHASE_2_WORKER_ACTIVE_CONTROL_A_DONE",
+      "used_mb": 1079.1,
+      "free_mb": 5064.9,
+      "timestamp": "2026-09-10T01:22:52.414298"
+    },
+    {
+      "t_s": 36.28,
+      "phase": "PHASE_2_WORKER_ACTIVE_CONTROL_A_DONE",
+      "used_mb": 1077.84,
+      "free_mb": 5066.16,
+      "timestamp": "2026-09-10T01:22:53.423571"
+    },
+    {
+      "t_s": 37.3,
+      "phase": "PHASE_2_WORKER_ACTIVE_CONTROL_A_DONE",
+      "used_mb": 1040.68,
+      "free_mb": 5103.32,
+      "timestamp": "2026-09-10T01:22:54.434467"
+    },
+    {
+      "t_s": 38.3,
+      "phase": "PHASE_2_WORKER_ACTIVE_CONTROL_A_DONE",
+      "used_mb": 1034.3,
+      "free_mb": 5109.7,
+      "timestamp": "2026-09-10T01:22:55.443212"
+    },
+    {
+      "t_s": 39.31,
+      "phase": "PHASE_2_WORKER_ACTIVE_CONTROL_A_DONE",
+      "used_mb": 1042.27,
+      "free_mb": 5101.73,
+      "timestamp": "2026-09-10T01:22:56.451553"
+    },
+    {
+      "t_s": 40.32,
+      "phase": "PHASE_2_WORKER_ACTIVE_CONTROL_A_DONE",
+      "used_mb": 1066.96,
+      "free_mb": 5077.04,
+      "timestamp": "2026-09-10T01:22:57.458973"
+    },
+    {
+      "t_s": 41.33,
+      "phase": "PHASE_2_WORKER_ACTIVE_CONTROL_A_DONE",
+      "used_mb": 1089.7,
+      "free_mb": 5054.3,
+      "timestamp": "2026-09-10T01:22:58.470973"
+    },
+    {
+      "t_s": 42.33,
+      "phase": "PHASE_2_WORKER_ACTIVE_CONTROL_A_DONE",
+      "used_mb": 1050.6,
+      "free_mb": 5093.4,
+      "timestamp": "2026-09-10T01:22:59.472994"
+    },
+    {
+      "t_s": 43.35,
+      "phase": "PHASE_2_WORKER_ACTIVE_CONTROL_A_DONE",
+      "used_mb": 1066.41,
+      "free_mb": 5077.59,
+      "timestamp": "2026-09-10T01:23:00.486342"
+    },
+    {
+      "t_s": 44.35,
+      "phase": "PHASE_2_WORKER_ACTIVE_CONTROL_A_DONE",
+      "used_mb": 1066.93,
+      "free_mb": 5077.07,
+      "timestamp": "2026-09-10T01:23:01.491126"
+    },
+    {
+      "t_s": 45.36,
+      "phase": "PHASE_2_WORKER_ACTIVE_CONTROL_A_DONE",
+      "used_mb": 1066.48,
+      "free_mb": 5077.52,
+      "timestamp": "2026-09-10T01:23:02.499537"
+    },
+    {
+      "t_s": 46.37,
+      "phase": "PHASE_2_WORKER_ACTIVE_CONTROL_A_DONE",
+      "used_mb": 1066.48,
+      "free_mb": 5077.52,
+      "timestamp": "2026-09-10T01:23:03.512859"
+    },
+    {
+      "t_s": 47.39,
+      "phase": "PHASE_2_WORKER_ACTIVE_CONTROL_A_DONE",
+      "used_mb": 1071.95,
+      "free_mb": 5072.05,
+      "timestamp": "2026-09-10T01:23:04.524550"
+    },
+    {
+      "t_s": 48.39,
+      "phase": "PHASE_2_WORKER_ACTIVE_CONTROL_A_DONE",
+      "used_mb": 1072.01,
+      "free_mb": 5071.99,
+      "timestamp": "2026-09-10T01:23:05.526246"
+    },
+    {
+      "t_s": 49.4,
+      "phase": "PHASE_2_WORKER_ACTIVE_CONTROL_A_DONE",
+      "used_mb": 1063.57,
+      "free_mb": 5080.43,
+      "timestamp": "2026-09-10T01:23:06.539461"
+    },
+    {
+      "t_s": 50.4,
+      "phase": "PHASE_2_WORKER_ACTIVE_CONTROL_A_DONE",
+      "used_mb": 1063.51,
+      "free_mb": 5080.49,
+      "timestamp": "2026-09-10T01:23:07.543318"
+    },
+    {
+      "t_s": 51.43,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1133.45,
+      "free_mb": 5010.55,
+      "timestamp": "2026-09-10T01:23:08.571119"
+    },
+    {
+      "t_s": 52.43,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1139.98,
+      "free_mb": 5004.02,
+      "timestamp": "2026-09-10T01:23:09.571414"
+    },
+    {
+      "t_s": 53.44,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1139.6,
+      "free_mb": 5004.4,
+      "timestamp": "2026-09-10T01:23:10.580943"
+    },
+    {
+      "t_s": 54.45,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1139.6,
+      "free_mb": 5004.4,
+      "timestamp": "2026-09-10T01:23:11.592660"
+    },
+    {
+      "t_s": 55.46,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1138.6,
+      "free_mb": 5005.4,
+      "timestamp": "2026-09-10T01:23:12.596788"
+    },
+    {
+      "t_s": 56.47,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1137.73,
+      "free_mb": 5006.27,
+      "timestamp": "2026-09-10T01:23:13.610454"
+    },
+    {
+      "t_s": 57.47,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1137.6,
+      "free_mb": 5006.4,
+      "timestamp": "2026-09-10T01:23:14.610505"
+    },
+    {
+      "t_s": 58.47,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1137.6,
+      "free_mb": 5006.4,
+      "timestamp": "2026-09-10T01:23:15.610642"
+    },
+    {
+      "t_s": 59.48,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1137.6,
+      "free_mb": 5006.4,
+      "timestamp": "2026-09-10T01:23:16.614535"
+    },
+    {
+      "t_s": 60.49,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1137.73,
+      "free_mb": 5006.27,
+      "timestamp": "2026-09-10T01:23:17.629578"
+    },
+    {
+      "t_s": 61.5,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1137.73,
+      "free_mb": 5006.27,
+      "timestamp": "2026-09-10T01:23:18.639014"
+    },
+    {
+      "t_s": 62.5,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1137.6,
+      "free_mb": 5006.4,
+      "timestamp": "2026-09-10T01:23:19.641350"
+    },
+    {
+      "t_s": 63.5,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1137.6,
+      "free_mb": 5006.4,
+      "timestamp": "2026-09-10T01:23:20.641913"
+    },
+    {
+      "t_s": 64.51,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1137.73,
+      "free_mb": 5006.27,
+      "timestamp": "2026-09-10T01:23:21.649016"
+    },
+    {
+      "t_s": 65.52,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1129.16,
+      "free_mb": 5014.84,
+      "timestamp": "2026-09-10T01:23:22.660252"
+    },
+    {
+      "t_s": 66.52,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1137.6,
+      "free_mb": 5006.4,
+      "timestamp": "2026-09-10T01:23:23.662737"
+    },
+    {
+      "t_s": 67.53,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1110.01,
+      "free_mb": 5033.99,
+      "timestamp": "2026-09-10T01:23:24.671174"
+    },
+    {
+      "t_s": 68.54,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1101.7,
+      "free_mb": 5042.3,
+      "timestamp": "2026-09-10T01:23:25.677022"
+    },
+    {
+      "t_s": 69.54,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1110.07,
+      "free_mb": 5033.93,
+      "timestamp": "2026-09-10T01:23:26.678577"
+    },
+    {
+      "t_s": 70.55,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1101.57,
+      "free_mb": 5042.43,
+      "timestamp": "2026-09-10T01:23:27.685254"
+    },
+    {
+      "t_s": 71.55,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1101.57,
+      "free_mb": 5042.43,
+      "timestamp": "2026-09-10T01:23:28.685661"
+    },
+    {
+      "t_s": 72.56,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1110.13,
+      "free_mb": 5033.87,
+      "timestamp": "2026-09-10T01:23:29.695617"
+    },
+    {
+      "t_s": 73.56,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1110.01,
+      "free_mb": 5033.99,
+      "timestamp": "2026-09-10T01:23:30.700062"
+    },
+    {
+      "t_s": 74.58,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1160.63,
+      "free_mb": 4983.37,
+      "timestamp": "2026-09-10T01:23:31.715390"
+    },
+    {
+      "t_s": 75.59,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1160.45,
+      "free_mb": 4983.55,
+      "timestamp": "2026-09-10T01:23:32.728459"
+    },
+    {
+      "t_s": 76.6,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1110.13,
+      "free_mb": 5033.87,
+      "timestamp": "2026-09-10T01:23:33.741372"
+    },
+    {
+      "t_s": 77.61,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1143.79,
+      "free_mb": 5000.21,
+      "timestamp": "2026-09-10T01:23:34.748732"
+    },
+    {
+      "t_s": 78.62,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1190.16,
+      "free_mb": 4953.84,
+      "timestamp": "2026-09-10T01:23:35.760546"
+    },
+    {
+      "t_s": 79.63,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1189.66,
+      "free_mb": 4954.34,
+      "timestamp": "2026-09-10T01:23:36.764580"
+    },
+    {
+      "t_s": 80.64,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1198.23,
+      "free_mb": 4945.77,
+      "timestamp": "2026-09-10T01:23:37.776175"
+    },
+    {
+      "t_s": 81.64,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1207.57,
+      "free_mb": 4936.43,
+      "timestamp": "2026-09-10T01:23:38.783276"
+    },
+    {
+      "t_s": 82.65,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1222.88,
+      "free_mb": 4921.12,
+      "timestamp": "2026-09-10T01:23:39.791964"
+    },
+    {
+      "t_s": 83.67,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1206.13,
+      "free_mb": 4937.87,
+      "timestamp": "2026-09-10T01:23:40.805801"
+    },
+    {
+      "t_s": 84.68,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1205.98,
+      "free_mb": 4938.02,
+      "timestamp": "2026-09-10T01:23:41.818690"
+    },
+    {
+      "t_s": 85.7,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1207.91,
+      "free_mb": 4936.09,
+      "timestamp": "2026-09-10T01:23:42.838427"
+    },
+    {
+      "t_s": 86.71,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1197.23,
+      "free_mb": 4946.77,
+      "timestamp": "2026-09-10T01:23:43.850911"
+    },
+    {
+      "t_s": 87.73,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1189.48,
+      "free_mb": 4954.52,
+      "timestamp": "2026-09-10T01:23:44.867994"
+    },
+    {
+      "t_s": 88.74,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1197.79,
+      "free_mb": 4946.21,
+      "timestamp": "2026-09-10T01:23:45.879419"
+    },
+    {
+      "t_s": 89.76,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1196.66,
+      "free_mb": 4947.34,
+      "timestamp": "2026-09-10T01:23:46.895713"
+    },
+    {
+      "t_s": 90.76,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1196.6,
+      "free_mb": 4947.4,
+      "timestamp": "2026-09-10T01:23:47.902234"
+    },
+    {
+      "t_s": 91.78,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1159.57,
+      "free_mb": 4984.43,
+      "timestamp": "2026-09-10T01:23:48.914633"
+    },
+    {
+      "t_s": 92.79,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1157.95,
+      "free_mb": 4986.05,
+      "timestamp": "2026-09-10T01:23:49.925445"
+    },
+    {
+      "t_s": 93.81,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1171.98,
+      "free_mb": 4972.02,
+      "timestamp": "2026-09-10T01:23:50.944342"
+    },
+    {
+      "t_s": 94.82,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1178.23,
+      "free_mb": 4965.77,
+      "timestamp": "2026-09-10T01:23:51.959437"
+    },
+    {
+      "t_s": 95.82,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1177.91,
+      "free_mb": 4966.09,
+      "timestamp": "2026-09-10T01:23:52.961478"
+    },
+    {
+      "t_s": 96.84,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1211.32,
+      "free_mb": 4932.68,
+      "timestamp": "2026-09-10T01:23:53.975503"
+    },
+    {
+      "t_s": 97.85,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1202.16,
+      "free_mb": 4941.84,
+      "timestamp": "2026-09-10T01:23:54.983952"
+    },
+    {
+      "t_s": 98.85,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1199.04,
+      "free_mb": 4944.96,
+      "timestamp": "2026-09-10T01:23:55.986252"
+    },
+    {
+      "t_s": 99.85,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1199.16,
+      "free_mb": 4944.84,
+      "timestamp": "2026-09-10T01:23:56.992571"
+    },
+    {
+      "t_s": 100.86,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1195.41,
+      "free_mb": 4948.59,
+      "timestamp": "2026-09-10T01:23:58.002086"
+    },
+    {
+      "t_s": 101.87,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1158.45,
+      "free_mb": 4985.55,
+      "timestamp": "2026-09-10T01:23:59.004692"
+    },
+    {
+      "t_s": 102.87,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1158.45,
+      "free_mb": 4985.55,
+      "timestamp": "2026-09-10T01:24:00.011508"
+    },
+    {
+      "t_s": 103.89,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1153.88,
+      "free_mb": 4990.12,
+      "timestamp": "2026-09-10T01:24:01.026949"
+    },
+    {
+      "t_s": 104.9,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1153.63,
+      "free_mb": 4990.37,
+      "timestamp": "2026-09-10T01:24:02.039673"
+    },
+    {
+      "t_s": 105.92,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1145.07,
+      "free_mb": 4998.93,
+      "timestamp": "2026-09-10T01:24:03.054686"
+    },
+    {
+      "t_s": 106.92,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1153.51,
+      "free_mb": 4990.49,
+      "timestamp": "2026-09-10T01:24:04.059315"
+    },
+    {
+      "t_s": 107.93,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1153.63,
+      "free_mb": 4990.37,
+      "timestamp": "2026-09-10T01:24:05.067945"
+    },
+    {
+      "t_s": 108.93,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1153.57,
+      "free_mb": 4990.43,
+      "timestamp": "2026-09-10T01:24:06.071827"
+    },
+    {
+      "t_s": 109.96,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1153.51,
+      "free_mb": 4990.49,
+      "timestamp": "2026-09-10T01:24:07.099729"
+    },
+    {
+      "t_s": 110.97,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1153.51,
+      "free_mb": 4990.49,
+      "timestamp": "2026-09-10T01:24:08.104670"
+    },
+    {
+      "t_s": 111.98,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1197.29,
+      "free_mb": 4946.71,
+      "timestamp": "2026-09-10T01:24:09.114702"
+    },
+    {
+      "t_s": 112.99,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1197.29,
+      "free_mb": 4946.71,
+      "timestamp": "2026-09-10T01:24:10.126464"
+    },
+    {
+      "t_s": 114.0,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1197.23,
+      "free_mb": 4946.77,
+      "timestamp": "2026-09-10T01:24:11.141544"
+    },
+    {
+      "t_s": 115.01,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1196.73,
+      "free_mb": 4947.27,
+      "timestamp": "2026-09-10T01:24:12.150096"
+    },
+    {
+      "t_s": 116.01,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1203.55,
+      "free_mb": 4940.45,
+      "timestamp": "2026-09-10T01:24:13.151274"
+    },
+    {
+      "t_s": 117.02,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1225.06,
+      "free_mb": 4918.94,
+      "timestamp": "2026-09-10T01:24:14.162725"
+    },
+    {
+      "t_s": 118.03,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1224.44,
+      "free_mb": 4919.56,
+      "timestamp": "2026-09-10T01:24:15.164706"
+    },
+    {
+      "t_s": 119.04,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1215.5,
+      "free_mb": 4928.5,
+      "timestamp": "2026-09-10T01:24:16.175428"
+    },
+    {
+      "t_s": 120.04,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1232.12,
+      "free_mb": 4911.88,
+      "timestamp": "2026-09-10T01:24:17.182687"
+    },
+    {
+      "t_s": 121.06,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1217.38,
+      "free_mb": 4926.62,
+      "timestamp": "2026-09-10T01:24:18.194477"
+    },
+    {
+      "t_s": 122.07,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1188.76,
+      "free_mb": 4955.24,
+      "timestamp": "2026-09-10T01:24:19.204620"
+    },
+    {
+      "t_s": 123.08,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1234.6,
+      "free_mb": 4909.4,
+      "timestamp": "2026-09-10T01:24:20.215544"
+    },
+    {
+      "t_s": 124.09,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1207.04,
+      "free_mb": 4936.96,
+      "timestamp": "2026-09-10T01:24:21.229651"
+    },
+    {
+      "t_s": 125.1,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1215.13,
+      "free_mb": 4928.87,
+      "timestamp": "2026-09-10T01:24:22.237336"
+    },
+    {
+      "t_s": 126.11,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1202.95,
+      "free_mb": 4941.05,
+      "timestamp": "2026-09-10T01:24:23.245586"
+    },
+    {
+      "t_s": 127.12,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1182.07,
+      "free_mb": 4961.93,
+      "timestamp": "2026-09-10T01:24:24.263817"
+    },
+    {
+      "t_s": 128.14,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1174.82,
+      "free_mb": 4969.18,
+      "timestamp": "2026-09-10T01:24:25.278936"
+    },
+    {
+      "t_s": 129.15,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1362.7,
+      "free_mb": 4781.3,
+      "timestamp": "2026-09-10T01:24:26.285740"
+    },
+    {
+      "t_s": 130.16,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1371.13,
+      "free_mb": 4772.87,
+      "timestamp": "2026-09-10T01:24:27.300549"
+    },
+    {
+      "t_s": 131.18,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1371.13,
+      "free_mb": 4772.87,
+      "timestamp": "2026-09-10T01:24:28.314264"
+    },
+    {
+      "t_s": 132.18,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1371.26,
+      "free_mb": 4772.74,
+      "timestamp": "2026-09-10T01:24:29.319515"
+    },
+    {
+      "t_s": 133.19,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1371.26,
+      "free_mb": 4772.74,
+      "timestamp": "2026-09-10T01:24:30.329804"
+    },
+    {
+      "t_s": 134.2,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1385.45,
+      "free_mb": 4758.55,
+      "timestamp": "2026-09-10T01:24:31.341450"
+    },
+    {
+      "t_s": 135.21,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1377.13,
+      "free_mb": 4766.87,
+      "timestamp": "2026-09-10T01:24:32.350237"
+    },
+    {
+      "t_s": 136.26,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1393.13,
+      "free_mb": 4750.87,
+      "timestamp": "2026-09-10T01:24:33.402397"
+    },
+    {
+      "t_s": 137.38,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1393.2,
+      "free_mb": 4750.8,
+      "timestamp": "2026-09-10T01:24:34.514572"
+    },
+    {
+      "t_s": 138.41,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1401.51,
+      "free_mb": 4742.49,
+      "timestamp": "2026-09-10T01:24:35.552131"
+    },
+    {
+      "t_s": 139.42,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1570.45,
+      "free_mb": 4573.55,
+      "timestamp": "2026-09-10T01:24:36.561372"
+    },
+    {
+      "t_s": 140.43,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1570.63,
+      "free_mb": 4573.37,
+      "timestamp": "2026-09-10T01:24:37.567163"
+    },
+    {
+      "t_s": 141.47,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1600.76,
+      "free_mb": 4543.24,
+      "timestamp": "2026-09-10T01:24:38.608574"
+    },
+    {
+      "t_s": 142.5,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1610.57,
+      "free_mb": 4533.43,
+      "timestamp": "2026-09-10T01:24:39.639912"
+    },
+    {
+      "t_s": 143.54,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1600.32,
+      "free_mb": 4543.68,
+      "timestamp": "2026-09-10T01:24:40.680507"
+    },
+    {
+      "t_s": 144.58,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1618.79,
+      "free_mb": 4525.21,
+      "timestamp": "2026-09-10T01:24:41.719435"
+    },
+    {
+      "t_s": 145.59,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1618.16,
+      "free_mb": 4525.84,
+      "timestamp": "2026-09-10T01:24:42.724171"
+    },
+    {
+      "t_s": 146.6,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1602.13,
+      "free_mb": 4541.87,
+      "timestamp": "2026-09-10T01:24:43.736621"
+    },
+    {
+      "t_s": 147.61,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1807.79,
+      "free_mb": 4336.21,
+      "timestamp": "2026-09-10T01:24:44.748890"
+    },
+    {
+      "t_s": 148.62,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1807.16,
+      "free_mb": 4336.84,
+      "timestamp": "2026-09-10T01:24:45.760315"
+    },
+    {
+      "t_s": 149.63,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 3175.48,
+      "free_mb": 2968.52,
+      "timestamp": "2026-09-10T01:24:46.765472"
+    },
+    {
+      "t_s": 150.64,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4284.85,
+      "free_mb": 1859.15,
+      "timestamp": "2026-09-10T01:24:47.778760"
+    },
+    {
+      "t_s": 151.64,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4281.85,
+      "free_mb": 1862.15,
+      "timestamp": "2026-09-10T01:24:48.783340"
+    },
+    {
+      "t_s": 152.65,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4274.91,
+      "free_mb": 1869.09,
+      "timestamp": "2026-09-10T01:24:49.793317"
+    },
+    {
+      "t_s": 153.66,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4277.91,
+      "free_mb": 1866.09,
+      "timestamp": "2026-09-10T01:24:50.803551"
+    },
+    {
+      "t_s": 154.68,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4293.16,
+      "free_mb": 1850.84,
+      "timestamp": "2026-09-10T01:24:51.815698"
+    },
+    {
+      "t_s": 155.69,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4302.41,
+      "free_mb": 1841.59,
+      "timestamp": "2026-09-10T01:24:52.826803"
+    },
+    {
+      "t_s": 156.69,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4298.54,
+      "free_mb": 1845.46,
+      "timestamp": "2026-09-10T01:24:53.832784"
+    },
+    {
+      "t_s": 157.71,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4292.35,
+      "free_mb": 1851.65,
+      "timestamp": "2026-09-10T01:24:54.847615"
+    },
+    {
+      "t_s": 158.72,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4285.91,
+      "free_mb": 1858.09,
+      "timestamp": "2026-09-10T01:24:55.857703"
+    },
+    {
+      "t_s": 159.73,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4292.29,
+      "free_mb": 1851.71,
+      "timestamp": "2026-09-10T01:24:56.864456"
+    },
+    {
+      "t_s": 160.74,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4281.23,
+      "free_mb": 1862.77,
+      "timestamp": "2026-09-10T01:24:57.880378"
+    },
+    {
+      "t_s": 161.76,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4280.54,
+      "free_mb": 1863.46,
+      "timestamp": "2026-09-10T01:24:58.894484"
+    },
+    {
+      "t_s": 162.77,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4283.29,
+      "free_mb": 1860.71,
+      "timestamp": "2026-09-10T01:24:59.908740"
+    },
+    {
+      "t_s": 163.77,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4289.6,
+      "free_mb": 1854.4,
+      "timestamp": "2026-09-10T01:25:00.911643"
+    },
+    {
+      "t_s": 164.79,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4289.48,
+      "free_mb": 1854.52,
+      "timestamp": "2026-09-10T01:25:01.926984"
+    },
+    {
+      "t_s": 165.8,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4282.48,
+      "free_mb": 1861.52,
+      "timestamp": "2026-09-10T01:25:02.936560"
+    },
+    {
+      "t_s": 166.83,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4304.16,
+      "free_mb": 1839.84,
+      "timestamp": "2026-09-10T01:25:03.966797"
+    },
+    {
+      "t_s": 167.84,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4304.16,
+      "free_mb": 1839.84,
+      "timestamp": "2026-09-10T01:25:04.975007"
+    },
+    {
+      "t_s": 168.85,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4295.85,
+      "free_mb": 1848.15,
+      "timestamp": "2026-09-10T01:25:05.988063"
+    },
+    {
+      "t_s": 169.85,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4291.6,
+      "free_mb": 1852.4,
+      "timestamp": "2026-09-10T01:25:06.989834"
+    },
+    {
+      "t_s": 170.86,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4285.91,
+      "free_mb": 1858.09,
+      "timestamp": "2026-09-10T01:25:07.994681"
+    },
+    {
+      "t_s": 171.87,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4280.73,
+      "free_mb": 1863.27,
+      "timestamp": "2026-09-10T01:25:09.004959"
+    },
+    {
+      "t_s": 172.88,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4295.66,
+      "free_mb": 1848.34,
+      "timestamp": "2026-09-10T01:25:10.015212"
+    },
+    {
+      "t_s": 173.89,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4317.64,
+      "free_mb": 1826.36,
+      "timestamp": "2026-09-10T01:25:11.029598"
+    },
+    {
+      "t_s": 174.9,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4319.14,
+      "free_mb": 1824.86,
+      "timestamp": "2026-09-10T01:25:12.043576"
+    },
+    {
+      "t_s": 175.91,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4311.05,
+      "free_mb": 1832.95,
+      "timestamp": "2026-09-10T01:25:13.044720"
+    },
+    {
+      "t_s": 176.91,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4302.73,
+      "free_mb": 1841.27,
+      "timestamp": "2026-09-10T01:25:14.045384"
+    },
+    {
+      "t_s": 177.92,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 2264.61,
+      "free_mb": 3879.39,
+      "timestamp": "2026-09-10T01:25:15.056542"
+    },
+    {
+      "t_s": 178.93,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4297.86,
+      "free_mb": 1846.14,
+      "timestamp": "2026-09-10T01:25:16.064721"
+    },
+    {
+      "t_s": 179.93,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4297.98,
+      "free_mb": 1846.02,
+      "timestamp": "2026-09-10T01:25:17.065552"
+    },
+    {
+      "t_s": 180.94,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4297.98,
+      "free_mb": 1846.02,
+      "timestamp": "2026-09-10T01:25:18.075424"
+    },
+    {
+      "t_s": 181.95,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4297.86,
+      "free_mb": 1846.14,
+      "timestamp": "2026-09-10T01:25:19.084603"
+    },
+    {
+      "t_s": 182.96,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4297.86,
+      "free_mb": 1846.14,
+      "timestamp": "2026-09-10T01:25:20.099229"
+    },
+    {
+      "t_s": 183.96,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4297.98,
+      "free_mb": 1846.02,
+      "timestamp": "2026-09-10T01:25:21.100339"
+    },
+    {
+      "t_s": 184.97,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4306.42,
+      "free_mb": 1837.58,
+      "timestamp": "2026-09-10T01:25:22.112530"
+    },
+    {
+      "t_s": 185.99,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4297.86,
+      "free_mb": 1846.14,
+      "timestamp": "2026-09-10T01:25:23.126582"
+    },
+    {
+      "t_s": 186.99,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4297.86,
+      "free_mb": 1846.14,
+      "timestamp": "2026-09-10T01:25:24.132471"
+    },
+    {
+      "t_s": 188.0,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4297.98,
+      "free_mb": 1846.02,
+      "timestamp": "2026-09-10T01:25:25.136448"
+    },
+    {
+      "t_s": 189.01,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4297.98,
+      "free_mb": 1846.02,
+      "timestamp": "2026-09-10T01:25:26.146341"
+    },
+    {
+      "t_s": 190.02,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4306.3,
+      "free_mb": 1837.7,
+      "timestamp": "2026-09-10T01:25:27.160513"
+    },
+    {
+      "t_s": 191.03,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4297.86,
+      "free_mb": 1846.14,
+      "timestamp": "2026-09-10T01:25:28.164153"
+    },
+    {
+      "t_s": 192.03,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4297.98,
+      "free_mb": 1846.02,
+      "timestamp": "2026-09-10T01:25:29.167616"
+    },
+    {
+      "t_s": 193.04,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4297.98,
+      "free_mb": 1846.02,
+      "timestamp": "2026-09-10T01:25:30.179554"
+    },
+    {
+      "t_s": 194.05,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4306.3,
+      "free_mb": 1837.7,
+      "timestamp": "2026-09-10T01:25:31.185021"
+    },
+    {
+      "t_s": 195.06,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4297.86,
+      "free_mb": 1846.14,
+      "timestamp": "2026-09-10T01:25:32.194487"
+    },
+    {
+      "t_s": 196.06,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4297.92,
+      "free_mb": 1846.08,
+      "timestamp": "2026-09-10T01:25:33.195566"
+    },
+    {
+      "t_s": 197.06,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4305.73,
+      "free_mb": 1838.27,
+      "timestamp": "2026-09-10T01:25:34.196201"
+    },
+    {
+      "t_s": 198.07,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4349.42,
+      "free_mb": 1794.58,
+      "timestamp": "2026-09-10T01:25:35.211908"
+    },
+    {
+      "t_s": 199.08,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4305.73,
+      "free_mb": 1838.27,
+      "timestamp": "2026-09-10T01:25:36.219176"
+    },
+    {
+      "t_s": 200.08,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4304.67,
+      "free_mb": 1839.33,
+      "timestamp": "2026-09-10T01:25:37.223289"
+    },
+    {
+      "t_s": 201.09,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4303.98,
+      "free_mb": 1840.02,
+      "timestamp": "2026-09-10T01:25:38.225037"
+    },
+    {
+      "t_s": 202.09,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4303.92,
+      "free_mb": 1840.08,
+      "timestamp": "2026-09-10T01:25:39.227995"
+    },
+    {
+      "t_s": 203.1,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4303.92,
+      "free_mb": 1840.08,
+      "timestamp": "2026-09-10T01:25:40.239031"
+    },
+    {
+      "t_s": 204.11,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4297.17,
+      "free_mb": 1846.83,
+      "timestamp": "2026-09-10T01:25:41.244536"
+    },
+    {
+      "t_s": 205.12,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4296.55,
+      "free_mb": 1847.45,
+      "timestamp": "2026-09-10T01:25:42.254326"
+    },
+    {
+      "t_s": 206.12,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4294.1,
+      "free_mb": 1849.9,
+      "timestamp": "2026-09-10T01:25:43.262047"
+    },
+    {
+      "t_s": 207.13,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4711.7,
+      "free_mb": 1432.3,
+      "timestamp": "2026-09-10T01:25:44.267835"
+    },
+    {
+      "t_s": 208.13,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4501.38,
+      "free_mb": 1642.62,
+      "timestamp": "2026-09-10T01:25:45.269669"
+    },
+    {
+      "t_s": 209.15,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4497.29,
+      "free_mb": 1646.71,
+      "timestamp": "2026-09-10T01:25:46.286831"
+    },
+    {
+      "t_s": 210.15,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4494.54,
+      "free_mb": 1649.46,
+      "timestamp": "2026-09-10T01:25:47.288373"
+    },
+    {
+      "t_s": 211.16,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4496.01,
+      "free_mb": 1647.99,
+      "timestamp": "2026-09-10T01:25:48.296955"
+    },
+    {
+      "t_s": 212.17,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4496.13,
+      "free_mb": 1647.87,
+      "timestamp": "2026-09-10T01:25:49.312683"
+    },
+    {
+      "t_s": 213.18,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4493.95,
+      "free_mb": 1650.05,
+      "timestamp": "2026-09-10T01:25:50.321250"
+    },
+    {
+      "t_s": 214.19,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4492.51,
+      "free_mb": 1651.49,
+      "timestamp": "2026-09-10T01:25:51.327519"
+    },
+    {
+      "t_s": 215.2,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4487.48,
+      "free_mb": 1656.52,
+      "timestamp": "2026-09-10T01:25:52.338121"
+    },
+    {
+      "t_s": 216.21,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4475.66,
+      "free_mb": 1668.34,
+      "timestamp": "2026-09-10T01:25:53.345505"
+    },
+    {
+      "t_s": 217.21,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4484.04,
+      "free_mb": 1659.96,
+      "timestamp": "2026-09-10T01:25:54.352583"
+    },
+    {
+      "t_s": 218.23,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4475.54,
+      "free_mb": 1668.46,
+      "timestamp": "2026-09-10T01:25:55.366127"
+    },
+    {
+      "t_s": 219.24,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4473.79,
+      "free_mb": 1670.21,
+      "timestamp": "2026-09-10T01:25:56.380140"
+    },
+    {
+      "t_s": 220.25,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4481.38,
+      "free_mb": 1662.62,
+      "timestamp": "2026-09-10T01:25:57.391794"
+    },
+    {
+      "t_s": 221.26,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4481.51,
+      "free_mb": 1662.49,
+      "timestamp": "2026-09-10T01:25:58.396375"
+    },
+    {
+      "t_s": 222.27,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4483.26,
+      "free_mb": 1660.74,
+      "timestamp": "2026-09-10T01:25:59.405905"
+    },
+    {
+      "t_s": 223.28,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4477.48,
+      "free_mb": 1666.52,
+      "timestamp": "2026-09-10T01:26:00.418870"
+    },
+    {
+      "t_s": 224.29,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4477.54,
+      "free_mb": 1666.46,
+      "timestamp": "2026-09-10T01:26:01.430086"
+    },
+    {
+      "t_s": 225.3,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4469.1,
+      "free_mb": 1674.9,
+      "timestamp": "2026-09-10T01:26:02.443336"
+    },
+    {
+      "t_s": 226.32,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4468.79,
+      "free_mb": 1675.21,
+      "timestamp": "2026-09-10T01:26:03.454360"
+    },
+    {
+      "t_s": 227.33,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4467.98,
+      "free_mb": 1676.02,
+      "timestamp": "2026-09-10T01:26:04.467747"
+    },
+    {
+      "t_s": 228.34,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4466.41,
+      "free_mb": 1677.59,
+      "timestamp": "2026-09-10T01:26:05.478111"
+    },
+    {
+      "t_s": 229.35,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4466.29,
+      "free_mb": 1677.71,
+      "timestamp": "2026-09-10T01:26:06.485335"
+    },
+    {
+      "t_s": 230.36,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4474.66,
+      "free_mb": 1669.34,
+      "timestamp": "2026-09-10T01:26:07.500878"
+    },
+    {
+      "t_s": 231.38,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4466.23,
+      "free_mb": 1677.77,
+      "timestamp": "2026-09-10T01:26:08.516319"
+    },
+    {
+      "t_s": 232.39,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4466.35,
+      "free_mb": 1677.65,
+      "timestamp": "2026-09-10T01:26:09.531262"
+    },
+    {
+      "t_s": 233.41,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4474.73,
+      "free_mb": 1669.27,
+      "timestamp": "2026-09-10T01:26:10.547212"
+    },
+    {
+      "t_s": 234.41,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4474.66,
+      "free_mb": 1669.34,
+      "timestamp": "2026-09-10T01:26:11.549721"
+    },
+    {
+      "t_s": 235.42,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4474.48,
+      "free_mb": 1669.52,
+      "timestamp": "2026-09-10T01:26:12.562787"
+    },
+    {
+      "t_s": 236.42,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4466.35,
+      "free_mb": 1677.65,
+      "timestamp": "2026-09-10T01:26:13.562912"
+    },
+    {
+      "t_s": 237.43,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4466.35,
+      "free_mb": 1677.65,
+      "timestamp": "2026-09-10T01:26:14.564412"
+    },
+    {
+      "t_s": 238.43,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4452.66,
+      "free_mb": 1691.34,
+      "timestamp": "2026-09-10T01:26:15.573153"
+    },
+    {
+      "t_s": 239.44,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4444.23,
+      "free_mb": 1699.77,
+      "timestamp": "2026-09-10T01:26:16.577798"
+    },
+    {
+      "t_s": 240.45,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4444.35,
+      "free_mb": 1699.65,
+      "timestamp": "2026-09-10T01:26:17.584832"
+    },
+    {
+      "t_s": 241.45,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4452.66,
+      "free_mb": 1691.34,
+      "timestamp": "2026-09-10T01:26:18.586087"
+    },
+    {
+      "t_s": 242.46,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4444.23,
+      "free_mb": 1699.77,
+      "timestamp": "2026-09-10T01:26:19.601511"
+    },
+    {
+      "t_s": 243.47,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4444.1,
+      "free_mb": 1699.9,
+      "timestamp": "2026-09-10T01:26:20.607761"
+    },
+    {
+      "t_s": 244.48,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4444.23,
+      "free_mb": 1699.77,
+      "timestamp": "2026-09-10T01:26:21.614631"
+    },
+    {
+      "t_s": 245.48,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4444.1,
+      "free_mb": 1699.9,
+      "timestamp": "2026-09-10T01:26:22.622755"
+    },
+    {
+      "t_s": 246.49,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4445.26,
+      "free_mb": 1698.74,
+      "timestamp": "2026-09-10T01:26:23.633141"
+    },
+    {
+      "t_s": 247.5,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4445.26,
+      "free_mb": 1698.74,
+      "timestamp": "2026-09-10T01:26:24.640183"
+    },
+    {
+      "t_s": 248.51,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4453.66,
+      "free_mb": 1690.34,
+      "timestamp": "2026-09-10T01:26:25.648542"
+    },
+    {
+      "t_s": 249.52,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4452.91,
+      "free_mb": 1691.09,
+      "timestamp": "2026-09-10T01:26:26.654997"
+    },
+    {
+      "t_s": 250.52,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4444.23,
+      "free_mb": 1699.77,
+      "timestamp": "2026-09-10T01:26:27.663470"
+    },
+    {
+      "t_s": 251.53,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4444.16,
+      "free_mb": 1699.84,
+      "timestamp": "2026-09-10T01:26:28.672873"
+    },
+    {
+      "t_s": 252.55,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4444.29,
+      "free_mb": 1699.71,
+      "timestamp": "2026-09-10T01:26:29.686593"
+    },
+    {
+      "t_s": 253.55,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4444.29,
+      "free_mb": 1699.71,
+      "timestamp": "2026-09-10T01:26:30.688859"
+    },
+    {
+      "t_s": 254.56,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4452.6,
+      "free_mb": 1691.4,
+      "timestamp": "2026-09-10T01:26:31.697435"
+    },
+    {
+      "t_s": 255.56,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4444.98,
+      "free_mb": 1699.02,
+      "timestamp": "2026-09-10T01:26:32.702486"
+    },
+    {
+      "t_s": 256.57,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4445.1,
+      "free_mb": 1698.9,
+      "timestamp": "2026-09-10T01:26:33.711321"
+    },
+    {
+      "t_s": 257.58,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4451.7,
+      "free_mb": 1692.3,
+      "timestamp": "2026-09-10T01:26:34.722726"
+    },
+    {
+      "t_s": 258.59,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4451.38,
+      "free_mb": 1692.62,
+      "timestamp": "2026-09-10T01:26:35.731538"
+    },
+    {
+      "t_s": 259.6,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4446.79,
+      "free_mb": 1697.21,
+      "timestamp": "2026-09-10T01:26:36.738846"
+    },
+    {
+      "t_s": 260.61,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4446.85,
+      "free_mb": 1697.15,
+      "timestamp": "2026-09-10T01:26:37.751273"
+    },
+    {
+      "t_s": 261.62,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4452.6,
+      "free_mb": 1691.4,
+      "timestamp": "2026-09-10T01:26:38.761906"
+    },
+    {
+      "t_s": 262.63,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4450.91,
+      "free_mb": 1693.09,
+      "timestamp": "2026-09-10T01:26:39.768735"
+    },
+    {
+      "t_s": 263.64,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4444.48,
+      "free_mb": 1699.52,
+      "timestamp": "2026-09-10T01:26:40.778744"
+    },
+    {
+      "t_s": 264.64,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4444.79,
+      "free_mb": 1699.21,
+      "timestamp": "2026-09-10T01:26:41.781329"
+    },
+    {
+      "t_s": 265.65,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4444.66,
+      "free_mb": 1699.34,
+      "timestamp": "2026-09-10T01:26:42.787933"
+    },
+    {
+      "t_s": 266.66,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4444.23,
+      "free_mb": 1699.77,
+      "timestamp": "2026-09-10T01:26:43.801777"
+    },
+    {
+      "t_s": 267.68,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4465.2,
+      "free_mb": 1678.8,
+      "timestamp": "2026-09-10T01:26:44.817500"
+    },
+    {
+      "t_s": 268.69,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4587.63,
+      "free_mb": 1556.37,
+      "timestamp": "2026-09-10T01:26:45.832751"
+    },
+    {
+      "t_s": 269.7,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4595.64,
+      "free_mb": 1548.36,
+      "timestamp": "2026-09-10T01:26:46.841255"
+    },
+    {
+      "t_s": 270.71,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4557.98,
+      "free_mb": 1586.02,
+      "timestamp": "2026-09-10T01:26:47.845714"
+    },
+    {
+      "t_s": 271.72,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4557.17,
+      "free_mb": 1586.83,
+      "timestamp": "2026-09-10T01:26:48.854769"
+    },
+    {
+      "t_s": 272.73,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4599.33,
+      "free_mb": 1544.67,
+      "timestamp": "2026-09-10T01:26:49.866370"
+    },
+    {
+      "t_s": 273.74,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4588.95,
+      "free_mb": 1555.05,
+      "timestamp": "2026-09-10T01:26:50.879447"
+    },
+    {
+      "t_s": 274.74,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4598.45,
+      "free_mb": 1545.55,
+      "timestamp": "2026-09-10T01:26:51.881155"
+    },
+    {
+      "t_s": 275.75,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4585.98,
+      "free_mb": 1558.02,
+      "timestamp": "2026-09-10T01:26:52.889012"
+    },
+    {
+      "t_s": 276.76,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4561.86,
+      "free_mb": 1582.14,
+      "timestamp": "2026-09-10T01:26:53.896246"
+    },
+    {
+      "t_s": 277.77,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4569.92,
+      "free_mb": 1574.08,
+      "timestamp": "2026-09-10T01:26:54.911658"
+    },
+    {
+      "t_s": 278.79,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4566.17,
+      "free_mb": 1577.83,
+      "timestamp": "2026-09-10T01:26:55.926471"
+    },
+    {
+      "t_s": 279.8,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4560.73,
+      "free_mb": 1583.27,
+      "timestamp": "2026-09-10T01:26:56.935201"
+    },
+    {
+      "t_s": 280.8,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4583.05,
+      "free_mb": 1560.95,
+      "timestamp": "2026-09-10T01:26:57.940807"
+    },
+    {
+      "t_s": 281.81,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4583.42,
+      "free_mb": 1560.58,
+      "timestamp": "2026-09-10T01:26:58.946621"
+    },
+    {
+      "t_s": 282.82,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4584.7,
+      "free_mb": 1559.3,
+      "timestamp": "2026-09-10T01:26:59.961947"
+    },
+    {
+      "t_s": 283.83,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4610.39,
+      "free_mb": 1533.61,
+      "timestamp": "2026-09-10T01:27:00.969924"
+    },
+    {
+      "t_s": 284.85,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4605.64,
+      "free_mb": 1538.36,
+      "timestamp": "2026-09-10T01:27:01.985088"
+    },
+    {
+      "t_s": 285.85,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4582.7,
+      "free_mb": 1561.3,
+      "timestamp": "2026-09-10T01:27:02.993074"
+    },
+    {
+      "t_s": 286.87,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4591.33,
+      "free_mb": 1552.67,
+      "timestamp": "2026-09-10T01:27:04.007920"
+    },
+    {
+      "t_s": 287.9,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4596.45,
+      "free_mb": 1547.55,
+      "timestamp": "2026-09-10T01:27:05.042963"
+    },
+    {
+      "t_s": 288.91,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4593.39,
+      "free_mb": 1550.61,
+      "timestamp": "2026-09-10T01:27:06.046789"
+    },
+    {
+      "t_s": 289.93,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4597.14,
+      "free_mb": 1546.86,
+      "timestamp": "2026-09-10T01:27:07.067963"
+    },
+    {
+      "t_s": 290.93,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4600.77,
+      "free_mb": 1543.23,
+      "timestamp": "2026-09-10T01:27:08.070904"
+    },
+    {
+      "t_s": 291.94,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4596.83,
+      "free_mb": 1547.17,
+      "timestamp": "2026-09-10T01:27:09.081552"
+    },
+    {
+      "t_s": 292.95,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4597.17,
+      "free_mb": 1546.83,
+      "timestamp": "2026-09-10T01:27:10.093358"
+    },
+    {
+      "t_s": 293.97,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4597.61,
+      "free_mb": 1546.39,
+      "timestamp": "2026-09-10T01:27:11.108008"
+    },
+    {
+      "t_s": 294.98,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4592.42,
+      "free_mb": 1551.58,
+      "timestamp": "2026-09-10T01:27:12.119836"
+    },
+    {
+      "t_s": 295.98,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4592.33,
+      "free_mb": 1551.67,
+      "timestamp": "2026-09-10T01:27:13.121896"
+    },
+    {
+      "t_s": 296.99,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4600.64,
+      "free_mb": 1543.36,
+      "timestamp": "2026-09-10T01:27:14.133066"
+    },
+    {
+      "t_s": 298.0,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4596.39,
+      "free_mb": 1547.61,
+      "timestamp": "2026-09-10T01:27:15.142205"
+    },
+    {
+      "t_s": 299.01,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4975.27,
+      "free_mb": 1168.73,
+      "timestamp": "2026-09-10T01:27:16.145291"
+    },
+    {
+      "t_s": 300.01,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4588.95,
+      "free_mb": 1555.05,
+      "timestamp": "2026-09-10T01:27:17.149833"
+    },
+    {
+      "t_s": 301.01,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4598.11,
+      "free_mb": 1545.89,
+      "timestamp": "2026-09-10T01:27:18.153427"
+    },
+    {
+      "t_s": 302.02,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4590.14,
+      "free_mb": 1553.86,
+      "timestamp": "2026-09-10T01:27:19.162944"
+    },
+    {
+      "t_s": 303.03,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4583.27,
+      "free_mb": 1560.73,
+      "timestamp": "2026-09-10T01:27:20.165500"
+    },
+    {
+      "t_s": 304.04,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4596.14,
+      "free_mb": 1547.86,
+      "timestamp": "2026-09-10T01:27:21.177389"
+    },
+    {
+      "t_s": 305.04,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4596.02,
+      "free_mb": 1547.98,
+      "timestamp": "2026-09-10T01:27:22.181782"
+    },
+    {
+      "t_s": 306.05,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4574.52,
+      "free_mb": 1569.48,
+      "timestamp": "2026-09-10T01:27:23.187734"
+    },
+    {
+      "t_s": 307.06,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4590.45,
+      "free_mb": 1553.55,
+      "timestamp": "2026-09-10T01:27:24.195852"
+    },
+    {
+      "t_s": 308.07,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4596.8,
+      "free_mb": 1547.2,
+      "timestamp": "2026-09-10T01:27:25.205907"
+    },
+    {
+      "t_s": 309.08,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4589.05,
+      "free_mb": 1554.95,
+      "timestamp": "2026-09-10T01:27:26.214732"
+    },
+    {
+      "t_s": 310.09,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4579.33,
+      "free_mb": 1564.67,
+      "timestamp": "2026-09-10T01:27:27.228441"
+    },
+    {
+      "t_s": 311.1,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4588.27,
+      "free_mb": 1555.73,
+      "timestamp": "2026-09-10T01:27:28.243394"
+    },
+    {
+      "t_s": 312.12,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4588.27,
+      "free_mb": 1555.73,
+      "timestamp": "2026-09-10T01:27:29.254530"
+    },
+    {
+      "t_s": 313.13,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4578.77,
+      "free_mb": 1565.23,
+      "timestamp": "2026-09-10T01:27:30.269130"
+    },
+    {
+      "t_s": 314.14,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4577.27,
+      "free_mb": 1566.73,
+      "timestamp": "2026-09-10T01:27:31.278315"
+    },
+    {
+      "t_s": 315.15,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4585.58,
+      "free_mb": 1558.42,
+      "timestamp": "2026-09-10T01:27:32.289588"
+    },
+    {
+      "t_s": 316.16,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4571.89,
+      "free_mb": 1572.11,
+      "timestamp": "2026-09-10T01:27:33.301409"
+    },
+    {
+      "t_s": 317.17,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4563.58,
+      "free_mb": 1580.42,
+      "timestamp": "2026-09-10T01:27:34.312275"
+    },
+    {
+      "t_s": 318.19,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4563.52,
+      "free_mb": 1580.48,
+      "timestamp": "2026-09-10T01:27:35.327442"
+    },
+    {
+      "t_s": 319.2,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4563.45,
+      "free_mb": 1580.55,
+      "timestamp": "2026-09-10T01:27:36.334737"
+    },
+    {
+      "t_s": 320.2,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4563.45,
+      "free_mb": 1580.55,
+      "timestamp": "2026-09-10T01:27:37.343810"
+    },
+    {
+      "t_s": 321.21,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4563.58,
+      "free_mb": 1580.42,
+      "timestamp": "2026-09-10T01:27:38.348423"
+    },
+    {
+      "t_s": 322.23,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4563.45,
+      "free_mb": 1580.55,
+      "timestamp": "2026-09-10T01:27:39.364495"
+    },
+    {
+      "t_s": 323.23,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4563.45,
+      "free_mb": 1580.55,
+      "timestamp": "2026-09-10T01:27:40.372358"
+    },
+    {
+      "t_s": 324.24,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4563.58,
+      "free_mb": 1580.42,
+      "timestamp": "2026-09-10T01:27:41.379015"
+    },
+    {
+      "t_s": 325.24,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4563.58,
+      "free_mb": 1580.42,
+      "timestamp": "2026-09-10T01:27:42.381731"
+    },
+    {
+      "t_s": 326.26,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4563.45,
+      "free_mb": 1580.55,
+      "timestamp": "2026-09-10T01:27:43.395919"
+    },
+    {
+      "t_s": 327.26,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4563.45,
+      "free_mb": 1580.55,
+      "timestamp": "2026-09-10T01:27:44.401420"
+    },
+    {
+      "t_s": 328.27,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4563.58,
+      "free_mb": 1580.42,
+      "timestamp": "2026-09-10T01:27:45.410254"
+    },
+    {
+      "t_s": 329.28,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 4562.95,
+      "free_mb": 1581.05,
+      "timestamp": "2026-09-10T01:27:46.415111"
+    },
+    {
+      "t_s": 330.28,
+      "phase": "PHASE_2_WORKER_ACTIVE_S1_DONE",
+      "used_mb": 1952.83,
+      "free_mb": 4191.17,
+      "timestamp": "2026-09-10T01:27:47.422325"
+    },
+    {
+      "t_s": 331.31,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1848.83,
+      "free_mb": 4295.17,
+      "timestamp": "2026-09-10T01:27:48.445349"
+    },
+    {
+      "t_s": 332.32,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1848.95,
+      "free_mb": 4295.05,
+      "timestamp": "2026-09-10T01:27:49.454987"
+    },
+    {
+      "t_s": 333.32,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1854.77,
+      "free_mb": 4289.23,
+      "timestamp": "2026-09-10T01:27:50.458676"
+    },
+    {
+      "t_s": 334.34,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1854.7,
+      "free_mb": 4289.3,
+      "timestamp": "2026-09-10T01:27:51.474631"
+    },
+    {
+      "t_s": 335.35,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1862.95,
+      "free_mb": 4281.05,
+      "timestamp": "2026-09-10T01:27:52.486226"
+    },
+    {
+      "t_s": 336.36,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1854.7,
+      "free_mb": 4289.3,
+      "timestamp": "2026-09-10T01:27:53.501386"
+    },
+    {
+      "t_s": 337.38,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1863.2,
+      "free_mb": 4280.8,
+      "timestamp": "2026-09-10T01:27:54.517443"
+    },
+    {
+      "t_s": 338.38,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1863.27,
+      "free_mb": 4280.73,
+      "timestamp": "2026-09-10T01:27:55.520361"
+    },
+    {
+      "t_s": 339.39,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1854.95,
+      "free_mb": 4289.05,
+      "timestamp": "2026-09-10T01:27:56.530911"
+    },
+    {
+      "t_s": 340.4,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1863.39,
+      "free_mb": 4280.61,
+      "timestamp": "2026-09-10T01:27:57.539624"
+    },
+    {
+      "t_s": 341.41,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1854.95,
+      "free_mb": 4289.05,
+      "timestamp": "2026-09-10T01:27:58.545954"
+    },
+    {
+      "t_s": 342.42,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1854.77,
+      "free_mb": 4289.23,
+      "timestamp": "2026-09-10T01:27:59.559639"
+    },
+    {
+      "t_s": 343.43,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1857.08,
+      "free_mb": 4286.92,
+      "timestamp": "2026-09-10T01:28:00.564478"
+    },
+    {
+      "t_s": 344.43,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1857.08,
+      "free_mb": 4286.92,
+      "timestamp": "2026-09-10T01:28:01.572424"
+    },
+    {
+      "t_s": 345.45,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1848.45,
+      "free_mb": 4295.55,
+      "timestamp": "2026-09-10T01:28:02.584938"
+    },
+    {
+      "t_s": 346.45,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1844.27,
+      "free_mb": 4299.73,
+      "timestamp": "2026-09-10T01:28:03.586122"
+    },
+    {
+      "t_s": 347.46,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1848.02,
+      "free_mb": 4295.98,
+      "timestamp": "2026-09-10T01:28:04.600186"
+    },
+    {
+      "t_s": 348.46,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1848.02,
+      "free_mb": 4295.98,
+      "timestamp": "2026-09-10T01:28:05.601949"
+    },
+    {
+      "t_s": 349.47,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1870.05,
+      "free_mb": 4273.95,
+      "timestamp": "2026-09-10T01:28:06.606117"
+    },
+    {
+      "t_s": 350.48,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1870.58,
+      "free_mb": 4273.42,
+      "timestamp": "2026-09-10T01:28:07.617510"
+    },
+    {
+      "t_s": 351.48,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1872.27,
+      "free_mb": 4271.73,
+      "timestamp": "2026-09-10T01:28:08.623082"
+    },
+    {
+      "t_s": 352.49,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1872.27,
+      "free_mb": 4271.73,
+      "timestamp": "2026-09-10T01:28:09.626455"
+    },
+    {
+      "t_s": 353.5,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1880.2,
+      "free_mb": 4263.8,
+      "timestamp": "2026-09-10T01:28:10.638697"
+    },
+    {
+      "t_s": 354.51,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1865.33,
+      "free_mb": 4278.67,
+      "timestamp": "2026-09-10T01:28:11.646236"
+    },
+    {
+      "t_s": 355.52,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1858.2,
+      "free_mb": 4285.8,
+      "timestamp": "2026-09-10T01:28:12.659489"
+    },
+    {
+      "t_s": 356.53,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1853.45,
+      "free_mb": 4290.55,
+      "timestamp": "2026-09-10T01:28:13.670411"
+    },
+    {
+      "t_s": 357.54,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1853.33,
+      "free_mb": 4290.67,
+      "timestamp": "2026-09-10T01:28:14.680811"
+    },
+    {
+      "t_s": 358.55,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1853.33,
+      "free_mb": 4290.67,
+      "timestamp": "2026-09-10T01:28:15.684947"
+    },
+    {
+      "t_s": 359.55,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1854.89,
+      "free_mb": 4289.11,
+      "timestamp": "2026-09-10T01:28:16.686005"
+    },
+    {
+      "t_s": 360.56,
+      "phase": "PHASE_2_WORKER_ACTIVE_WORKLOAD_DONE",
+      "used_mb": 1881.2,
+      "free_mb": 4262.8,
+      "timestamp": "2026-09-10T01:28:17.700447"
+    },
+    {
+      "t_s": 361.57,
+      "phase": "PHASE_2_WORKER_ACTIVE_S3_CONFIRMED",
+      "used_mb": 1891.27,
+      "free_mb": 4252.73,
+      "timestamp": "2026-09-10T01:28:18.706985"
+    },
+    {
+      "t_s": 362.58,
+      "phase": "PHASE_2_WORKER_ACTIVE_S3_CONFIRMED",
+      "used_mb": 1888.52,
+      "free_mb": 4255.48,
+      "timestamp": "2026-09-10T01:28:19.714385"
+    },
+    {
+      "t_s": 363.58,
+      "phase": "PHASE_2_WORKER_ACTIVE_S3_CONFIRMED",
+      "used_mb": 1249.14,
+      "free_mb": 4894.86,
+      "timestamp": "2026-09-10T01:28:20.722940"
+    },
+    {
+      "t_s": 364.59,
+      "phase": "PHASE_2_WORKER_ACTIVE_S3_CONFIRMED",
+      "used_mb": 1085.55,
+      "free_mb": 5058.45,
+      "timestamp": "2026-09-10T01:28:21.727127"
+    },
+    {
+      "t_s": 365.6,
+      "phase": "MOMENT_OF_PROCESS_DEATH",
+      "used_mb": 1082.24,
+      "free_mb": 5061.76,
+      "timestamp": "2026-09-10T01:28:22.736042"
+    },
+    {
+      "t_s": 365.6,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1082.24,
+      "free_mb": 5061.76,
+      "timestamp": "2026-09-10T01:28:22.737039"
+    },
+    {
+      "t_s": 366.6,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1085.86,
+      "free_mb": 5058.14,
+      "timestamp": "2026-09-10T01:28:23.740401"
+    },
+    {
+      "t_s": 367.61,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1072.36,
+      "free_mb": 5071.64,
+      "timestamp": "2026-09-10T01:28:24.750297"
+    },
+    {
+      "t_s": 368.62,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1068.24,
+      "free_mb": 5075.76,
+      "timestamp": "2026-09-10T01:28:25.761297"
+    },
+    {
+      "t_s": 369.63,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1067.05,
+      "free_mb": 5076.95,
+      "timestamp": "2026-09-10T01:28:26.766468"
+    },
+    {
+      "t_s": 370.63,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1066.99,
+      "free_mb": 5077.01,
+      "timestamp": "2026-09-10T01:28:27.773433"
+    },
+    {
+      "t_s": 371.64,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1065.83,
+      "free_mb": 5078.17,
+      "timestamp": "2026-09-10T01:28:28.781820"
+    },
+    {
+      "t_s": 372.66,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1065.61,
+      "free_mb": 5078.39,
+      "timestamp": "2026-09-10T01:28:29.797426"
+    },
+    {
+      "t_s": 373.66,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1077.49,
+      "free_mb": 5066.51,
+      "timestamp": "2026-09-10T01:28:30.803777"
+    },
+    {
+      "t_s": 374.67,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1079.68,
+      "free_mb": 5064.32,
+      "timestamp": "2026-09-10T01:28:31.809159"
+    },
+    {
+      "t_s": 375.68,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1079.68,
+      "free_mb": 5064.32,
+      "timestamp": "2026-09-10T01:28:32.817333"
+    },
+    {
+      "t_s": 376.68,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1072.99,
+      "free_mb": 5071.01,
+      "timestamp": "2026-09-10T01:28:33.822323"
+    },
+    {
+      "t_s": 377.69,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1059.61,
+      "free_mb": 5084.39,
+      "timestamp": "2026-09-10T01:28:34.826696"
+    },
+    {
+      "t_s": 378.7,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1068.05,
+      "free_mb": 5075.95,
+      "timestamp": "2026-09-10T01:28:35.841932"
+    },
+    {
+      "t_s": 379.71,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1049.74,
+      "free_mb": 5094.26,
+      "timestamp": "2026-09-10T01:28:36.844433"
+    },
+    {
+      "t_s": 380.73,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1058.49,
+      "free_mb": 5085.51,
+      "timestamp": "2026-09-10T01:28:37.866443"
+    },
+    {
+      "t_s": 381.74,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1058.49,
+      "free_mb": 5085.51,
+      "timestamp": "2026-09-10T01:28:38.877309"
+    },
+    {
+      "t_s": 382.74,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1058.49,
+      "free_mb": 5085.51,
+      "timestamp": "2026-09-10T01:28:39.879461"
+    },
+    {
+      "t_s": 383.76,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1058.49,
+      "free_mb": 5085.51,
+      "timestamp": "2026-09-10T01:28:40.894689"
+    },
+    {
+      "t_s": 384.76,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1058.49,
+      "free_mb": 5085.51,
+      "timestamp": "2026-09-10T01:28:41.900332"
+    },
+    {
+      "t_s": 385.77,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1049.99,
+      "free_mb": 5094.01,
+      "timestamp": "2026-09-10T01:28:42.906832"
+    },
+    {
+      "t_s": 386.78,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1067.96,
+      "free_mb": 5076.04,
+      "timestamp": "2026-09-10T01:28:43.921357"
+    },
+    {
+      "t_s": 387.79,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1078.89,
+      "free_mb": 5065.11,
+      "timestamp": "2026-09-10T01:28:44.932233"
+    },
+    {
+      "t_s": 388.8,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1074.02,
+      "free_mb": 5069.98,
+      "timestamp": "2026-09-10T01:28:45.942134"
+    },
+    {
+      "t_s": 389.81,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1069.33,
+      "free_mb": 5074.67,
+      "timestamp": "2026-09-10T01:28:46.952245"
+    },
+    {
+      "t_s": 390.82,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1064.86,
+      "free_mb": 5079.14,
+      "timestamp": "2026-09-10T01:28:47.962657"
+    },
+    {
+      "t_s": 391.83,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1052.43,
+      "free_mb": 5091.57,
+      "timestamp": "2026-09-10T01:28:48.972230"
+    },
+    {
+      "t_s": 392.84,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1051.8,
+      "free_mb": 5092.2,
+      "timestamp": "2026-09-10T01:28:49.981550"
+    },
+    {
+      "t_s": 393.85,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1056.93,
+      "free_mb": 5087.07,
+      "timestamp": "2026-09-10T01:28:50.988958"
+    },
+    {
+      "t_s": 394.85,
+      "phase": "PHASE_3_POST_KILL",
+      "used_mb": 1056.68,
+      "free_mb": 5087.32,
+      "timestamp": "2026-09-10T01:28:51.989040"
+    }
+  ]
+}
