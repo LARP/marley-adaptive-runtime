@@ -29,4 +29,17 @@
 
 ## 3. Epistemological and Engineering Governance
 
-The run failed to satisfy both gates simultaneously. Gate A observed 4996.0 MB vs 4,800.0 MB limit. Gate B observed 4046.3 MB vs 3,850.0 MB limit.
+### 3.1 Lo que NO se demostró
+- No se demostró cumplimiento del Gate A de 4,800.0 MB (déficit cuantificado de **+196.0 MB**).
+- No se demostró cumplimiento del Gate B de 3,850.0 MB (déficit cuantificado de **+196.3 MB**).
+- No se autoriza la certificación ni la integración de la resolución 1280×720 (720p) en la rama de producción.
+
+### 3.2 Lo que SÍ se demostró
+- **Estabilidad Operacional Completa:** Ejecución ininterrumpida de 30 pasos DiT continuos sin OOM y sin activar el kill-switch.
+- **Cadencia Nominal Sostenida:** **58.47 s/paso** (denoise total: 1,754.2 s).
+- **Control del Allocator de PyTorch:** Reserva estabilizada de forma plana en **~3.77 GB** (`reserved` final: 3,766.0 MB; `alloc` final: 601.3 MB), demostrando la eficacia del drenaje de inicio de paso y la liberación en costura (`seam release`).
+- **Ausencia de Fuga Monotónica:** El pico físico absoluto ocurrió en el **Paso 6 (4,996.0 MB)** y descendió en los pasos finales (4,714 – 4,773 MB en pasos 24–30).
+- **Integridad Perceptual y Funcional:** Decodificación VAE tileada completada en 75.70 s con 0 NaNs/Infs y video MP4 válido exportado.
+
+### 3.3 Pregunta de Investigación Abierta
+> *«¿Qué evento o conjunto de eventos produce el sobrepico de residencia física de aproximadamente 196 MB alrededor del Paso 6, y por qué dicho componente deja de requerirse o deja de permanecer físicamente residente en los pasos posteriores?»*
