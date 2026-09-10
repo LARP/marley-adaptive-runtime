@@ -23,8 +23,9 @@
 [![Phase F6: CERTIFIED PASS & FROZEN](https://img.shields.io/badge/Phase%20F6-CERTIFIED%20%26%20FROZEN-22c55e.svg)](docs/F6_REPRODUCIBILITY_VARIABILITY_REPORT_01.md)
 [![Phase F7-0: GATE FAIL](https://img.shields.io/badge/Phase%20F7--0-GATE%20FAIL%20(6.05GB)-ef4444.svg)](docs/F7_0_FEASIBILITY_PROBE_REPORT_01.md)
 [![Phase F7-D4: FAVORABLE](https://img.shields.io/badge/Phase%20F7--D4-FAVORABLE%20(4.71GB)-22c55e.svg)](docs/F7_D4_MULTISTEP_VALIDATION_REPORT_01.md)
-[![Phase F7-D5: NEGATIVE](https://img.shields.io/badge/Phase%20F7--D5-NEGATIVE%20(5.10GB)-ef4444.svg)](docs/F7_D5_FULL_30STEP_VALIDATION_REPORT_01.md)
 [![Phase F7-D6: VALIDATED](https://img.shields.io/badge/Phase%20F7--D6-INSTRUMENT%20VALIDATED-22c55e.svg)](docs/F7_D6_METRIC_ATTRIBUTION_REPORT_01.md)
+[![Phase F7: CLOSED FAIL](https://img.shields.io/badge/Phase%20F7-CLOSED%20FAIL%20(4.99GB)-ef4444.svg)](docs/F7_STAGE_B_FULL_VALIDATION_REPORT_01.md)
+[![Phase F8: IN PROGRESS](https://img.shields.io/badge/Phase%20F8-SCREENING%20ACTIVE-f59e0b.svg)](docs/F8_PREREGISTERED_SCREENING_PROTOCOL_01.md)
 
 *In loving memory of Marley 🐾*
 
@@ -430,6 +431,23 @@ Following the single-run benchmarks (F6-0 through F6-E), the project executed th
   - **Veredicto:** 🟢 **INSTRUMENT VALIDATED**.
   - *Gobernanza inalterada:* F7-D5 permanece `NEGATIVE` (5,096 MB); gate en 4,800 MB congelada; sin re-run de 30 pasos ni integración de 720p.
 - **Documentos:** [`Report`](docs/F7_D6_METRIC_ATTRIBUTION_REPORT_01.md) · [`Spec`](docs/F7_D6_METRIC_ATTRIBUTION_SPEC_01.md) · knowledge acquired through conversation with an AI agent · [`Telemetry`](logs/f7_d6_attribution_probe_telemetry.json) · Runner [`f7_d6_attribution_probe.py`](f7_d6_attribution_probe.py).
+
+### Phase F7: 720p Re-evaluation & Causal Intervention Campaign (🔴 CLOSED AS FAIL)
+- **F7 Stage C (Intervención Causal Inter-Proceso — 🟢 PASS / H3 SUPPORTED):** Arquitectura de 2 procesos demostró que el **87.1% (803.4 MB)** de la meseta residual post-workload se evaporó en $\le 1\text{ s}$ tras la muerte del contexto (`os._exit(0)`). Persistió un remanente externo de +118.9 MB a nivel de SO cuya atribución permanece abierta. Reporte: [`docs/F7_STAGE_C_INTERVENTION_REPORT_01.md`](docs/F7_STAGE_C_INTERVENTION_REPORT_01.md).
+- **F7 Stage B (Validación Completa 30 Pasos @ 720p — 🔴 COMPLETE REJECTION):** Inferencia ininterrumpida de 30 pasos DiT a 1280×720 / 33f. Allocator de PyTorch estabilizado en ~3.77 GB sin crecimiento monotónico (cadencia nominal de 58.47 s/paso, 0 NaNs, VAE correcto en 75.7s, MP4 válido). Sin embargo, el pico físico NVML alcanzó **4,996.0 MB** en el Paso 6, excediendo el Gate A por **+196.0 MB** (y Gate B por +196.3 MB).
+- **Cierre Formal:** La Campaña F7 se cierra como **FAIL LIMPIO**. 480p se ratifica como único estándar de producción; 720p queda confinada a modo experimental. Reporte: [`docs/F7_STAGE_B_FULL_VALIDATION_REPORT_01.md`](docs/F7_STAGE_B_FULL_VALIDATION_REPORT_01.md).
+
+### Phase F8: 10-Step A/B Screening Benchmark (🟡 IN PROGRESS)
+- **Objetivo:** Evaluar mediante falsación rápida (*fail-fast*) si la cuantización selectiva de proyecciones DiT (F1.7) reduce la presión de memoria lo suficiente como para recuperar el déficit de **196.0 MB** en la ventana de los pasos 5 a 7.
+- **Arquitectura:** Dos procesos limpios independientes (`clean processes`) desacoplados por el sistema operativo con ventana de reposo de 60 s para evitar herencia de memoria:
+  - **Control A:** 10 pasos exactos en FP16 nativo (baseline F7-D5).
+  - **Tratamiento B:** 10 pasos exactos con proyecciones cuantizadas INT8.
+- **Matriz de Decisión Vinculante:**
+  - $\ge 196\text{ MB} \rightarrow$ 🟢 **GO** (autoriza validación completa de 30 pasos F8 Stage B).
+  - $100\text{--}195\text{ MB} \rightarrow$ 🟡 **GO Condicional** (evaluar micro-intervención mínima).
+  - $< 50\text{ MB} \rightarrow$ 🔴 **NO-GO** (se descarta la cuantización).
+  - $\approx 0\text{ MB} \rightarrow$ 🔴 **Cierre Definitivo** de 720p en 6 GB.
+- **Documentos:** [`Protocolo`](docs/F8_PREREGISTERED_SCREENING_PROTOCOL_01.md) · [`Dictamen Consejero`](docs/F8_CONSULTANT_VERDICT_SCREENING_01.md) · Runner [`f8_screening_runner.py`](f8_screening_runner.py).
 
 ---
 
