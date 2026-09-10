@@ -29,4 +29,4 @@
 
 ## 2. Epistemological and Engineering Implications
 
-The persistence of memory following complete process termination indicates that the residual residency exists outside the process boundary (e.g. DWM composition caching, shared display driver surface pool, or persistent GPU kernel heaps).
+Se observa un remanente de residencia GPU externo al proceso (~118.9 MB), cuya implementación causal específica —DWM, superficies compartidas, WDDM u otro componente del stack gráfico— permanece abierta para investigación posterior. Sin embargo, el hecho empírico central es que el 87.1% (803.4 MB) de la meseta residual previa dependía estrictamente del ciclo de vida del proceso y fue recuperada inmediatamente por el sistema operativo al morir el contexto.
