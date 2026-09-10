@@ -24,7 +24,7 @@
 [![Phase F7-0: GATE FAIL](https://img.shields.io/badge/Phase%20F7--0-GATE%20FAIL%20(6.05GB)-ef4444.svg)](docs/F7_0_FEASIBILITY_PROBE_REPORT_01.md)
 [![Phase F7-D4: FAVORABLE](https://img.shields.io/badge/Phase%20F7--D4-FAVORABLE%20(4.71GB)-22c55e.svg)](docs/F7_D4_MULTISTEP_VALIDATION_REPORT_01.md)
 [![Phase F7-D5: NEGATIVE](https://img.shields.io/badge/Phase%20F7--D5-NEGATIVE%20(5.10GB)-ef4444.svg)](docs/F7_D5_FULL_30STEP_VALIDATION_REPORT_01.md)
-[![Phase F7-D6: PROPOSED](https://img.shields.io/badge/Phase%20F7--D6-PROPOSED%20(metric%20attribution)-f59e0b.svg)](docs/F7_D6_METRIC_ATTRIBUTION_SPEC_01.md)
+[![Phase F7-D6: PROPOSED](https://img.shields.io/badge/Phase%20F7--D6-PROPOSED%20(consultant--reviewed)-f59e0b.svg)](docs/F7_D6_METRIC_ATTRIBUTION_SPEC_01.md)
 
 *In loving memory of Marley 🐾*
 
@@ -88,7 +88,7 @@ Memory is tracked across **three distinct layers** to prevent WDDM virtualizatio
 | **F7-D3**| Seam Release Causal Probe | 🟢 **FAVORABLE** | `empty_cache()` focalizado en costura cond→uncond baja pico NVML a **4,403.5 MB** (1 paso) · [`Report`](docs/F7_D3_COND_UNCOND_SEAM_RELEASE_REPORT_01.md) |
 | **F7-D4**| Reduced Multi-Step Validation | 🟢 **FAVORABLE** | 10 pasos con costura cond→uncond: **Peak NVML 4,708.9 MB ($\le 4,800$ MB PASS)**, cadencia 59.89 s/p, 0 NaNs · [`Report`](docs/F7_D4_MULTISTEP_VALIDATION_REPORT_01.md) |
 | **F7-D5**| Full 30-Step E2E Validation | 🔴 **PARTIAL/NEGATIVE** | 30 pasos continuos a 720p/33f con costura cond→uncond: **Peak NVML 5,096.1 MB ($\le 4,800$ MB FAIL)**, Reserved estabilizado 3,766 MB, 0 NaNs. Integración **NO autorizada** · [`Report`](docs/F7_D5_FULL_30STEP_VALIDATION_REPORT_01.md) |
-| **F7-D6**| NVML Metric Attribution Probe | 🟠 **PROPOSED (sin ejecutar)** | Hipótesis: la métrica NVML de dispositivo incluye **~1.07 GB de baseline SO/WDDM irreducible** (idle, 0 MB atribuible por PID). Probe de hitos S0/S1/S2 propuesto para aislar la residencia atribuible al proceso. Pendiente de autorización · [`Spec`](docs/F7_D6_METRIC_ATTRIBUTION_SPEC_01.md) · [`Review`](docs/F7_D6_REVIEW_PACKAGE_FOR_CONSULTANT_01.md) |
+| **F7-D6**| NVML Metric Attribution Probe | 🟠 **PROPOSED (revisado por Consejero; sin ejecutar)** | Consejero: **no reclasificar F7-D5, no cambiar la gate, no integrar 720p**. Estudiar F7-D6 como **metrología**: baseline idle ~1.07 GB, control workload conocido, `S2−S0` = *workload-induced device residency delta* (no ownership). Métrica en 2 capas bajo estudio · [`Spec`](docs/F7_D6_METRIC_ATTRIBUTION_SPEC_01.md) · [`Review`](docs/F7_D6_REVIEW_PACKAGE_FOR_CONSULTANT_01.md) · [`Consejero`](docs/F7_D6_CONSULTANT_RESPONSE_01.md) |
 
 ---
 
@@ -408,12 +408,14 @@ Following the single-run benchmarks (F6-0 through F6-E), the project executed th
 - **Conclusión:** La liberación en costura **previene la divergencia del allocator** a 30 pasos, pero el delta físico NVML−Reserved (~1,130 MB, residencia WDDM/`FreePool` no devuelta al driver) mantiene el pico real **por encima de 4,800 MB**. Kill-gate F7-D5 activado → **720p permanece experimental; la integración en `marley/core/pipeline.py` NO se autoriza** por este resultado.
 - **Reporte:** [`docs/F7_D5_FULL_30STEP_VALIDATION_REPORT_01.md`](docs/F7_D5_FULL_30STEP_VALIDATION_REPORT_01.md).
 
-### F7-D6: NVML Metric Attribution Probe (🟠 PROPUESTO — sin ejecutar)
-- **Motivación:** F7-D5 mostró un allocator **estable y acotado** (`reserved` ~3,766 MB en 30 pasos) mientras la métrica física del **dispositivo** (NVML `used`) alcanzó 5,096.1 MB, con un delta `NVML − reserved` de ~1,320 MB. Esto motivó investigar si parte del "pico" **no es atribuible al proceso**.
-- **Hallazgo preliminar (read-only, sin proceso Marley corriendo):** el dispositivo reporta **~1,065.8–1,071.8 MB usados en idle**, con **0.0 MB atribuibles** a los ~40 procesos compute + ~40 gráficos enumerados (todos con `usedGpuMemory = None` bajo WDDM). Hipótesis: **~1.0–1.1 GB de baseline irreducible del SO/desktop/driver** contamina la métrica ground-truth de "todo el dispositivo".
-- **Diseño propuesto (a revisión):** probe aislado que mide hitos NVML en-sesión `S0` (so_baseline) → `S1` (ctx_baseline) → `S2` (denoise_peak) → `S3` (floor), derivando `process_attributable_peak = S2 − S0` y contrastándolo con `torch.reserved`.
-- **Estado:** ⏸ **PROPUESTA — NO ejecutada**. La observación del baseline es `PRELIMINARY` y no-autorizante. La reclasificación de F7-D5 y cualquier redefinición de la métrica de ROADMAP §2 son decisiones separadas del Director/Consejero. Evidencia de ejecución F7-D6: **ninguna**.
-- **Documentos:** [`Spec`](docs/F7_D6_METRIC_ATTRIBUTION_SPEC_01.md) · [`Review Package`](docs/F7_D6_REVIEW_PACKAGE_FOR_CONSULTANT_01.md) · Runner [`f7_d6_attribution_probe.py`](f7_d6_attribution_probe.py).
+### F7-D6: NVML Metric Attribution Probe (🟠 PROPUESTO — revisado por el Consejero; sin ejecutar)
+- **Motivación:** F7-D5 mostró un allocator **estable y acotado** (`reserved` ~3,766 MB en 30 pasos) mientras la métrica física del **dispositivo** (NVML `used`) alcanzó 5,096.1 MB (delta ~1,320 MB). Esto motivó investigar si parte del "pico" **no es atribuible al proceso**.
+- **Hallazgo preliminar (read-only, sin proceso Marley):** el dispositivo reporta **~1,065.8–1,071.8 MB usados en idle**. **Advertencia del Consejero:** `usedGpuMemory = None` por PID bajo WDDM **NO significa 0 MB**; significa que NVML no expone el contador por proceso. Por tanto una gate "PID NVML" **no es viable**.
+- **Dictamen del Consejero (2026-09-09, ANÁLISIS — NO APROBACIÓN):** **no reclasificar F7-D5** (permanece NEGATIVE), **no modificar la gate de 4,800 MB**, **no integrar 720p**, **no cerrar la línea**. Sí estudiar F7-D6 como **fase de metrología/atribución** (requiere autorización del Director).
+- **Protocolo revisado:** `S0` baseline idle con **muestreo de estabilidad** (30–60 s: min/max/media/mediana/σ); `S1` baseline de contexto CUDA/PyTorch; `S2` pico del micro-workload (3–5 pasos); `S3` floor post-run (verificar `S3 ≈ S0`). **Workload de control** CUDA conocido (~500 MB alloc/compute/free) para validar el instrumento. Registro de `cudaMemGetInfo`. La cantidad `S2−S0` se denomina **"workload-induced device residency delta"** (crecimiento device-wide), **no** ownership demostrado.
+- **Gobernanza propuesta:** métrica en **dos capas** — (A) device-wide raw (siempre reportada) y (B) incremental workload residency (etiqueta pendiente de validación). Se mantienen abiertos 5 escenarios de falsación.
+- **Estado:** ⏸ **PROPUESTA — NO ejecutada**. Evidencia de ejecución F7-D6: **ninguna**.
+- **Documentos:** [`Spec`](docs/F7_D6_METRIC_ATTRIBUTION_SPEC_01.md) · [`Review Package`](docs/F7_D6_REVIEW_PACKAGE_FOR_CONSULTANT_01.md) · [`Respuesta del Consejero`](docs/F7_D6_CONSULTANT_RESPONSE_01.md) · Runner [`f7_d6_attribution_probe.py`](f7_d6_attribution_probe.py).
 
 ---
 
