@@ -1,0 +1,116 @@
+{
+  "pid": 49944,
+  "quantized": false,
+  "s0_stats": {
+    "n": 15,
+    "mean_mb": 916.4,
+    "min_mb": 889.76,
+    "max_mb": 990.22,
+    "spread_mb": 100.46
+  },
+  "s1_mb": 1017.0390625,
+  "peak_nvml_mb": 4483.046875,
+  "workload": {
+    "step_telemetry": [
+      {
+        "step": 1,
+        "step_time_s": 59.8,
+        "alloc_mb": 407.41,
+        "reserved_mb": 3308.0,
+        "end_nvml_mb": 4358.95,
+        "peak_so_far_mb": 4375.7
+      },
+      {
+        "step": 2,
+        "step_time_s": 59.11,
+        "alloc_mb": 415.09,
+        "reserved_mb": 3292.0,
+        "end_nvml_mb": 4308.04,
+        "peak_so_far_mb": 4375.7
+      },
+      {
+        "step": 3,
+        "step_time_s": 61.05,
+        "alloc_mb": 415.09,
+        "reserved_mb": 3388.0,
+        "end_nvml_mb": 4445.54,
+        "peak_so_far_mb": 4445.5
+      },
+      {
+        "step": 4,
+        "step_time_s": 61.79,
+        "alloc_mb": 415.96,
+        "reserved_mb": 3392.0,
+        "end_nvml_mb": 4446.1,
+        "peak_so_far_mb": 4446.1
+      },
+      {
+        "step": 5,
+        "step_time_s": 61.98,
+        "alloc_mb": 415.09,
+        "reserved_mb": 3388.0,
+        "end_nvml_mb": 4467.54,
+        "peak_so_far_mb": 4467.5
+      },
+      {
+        "step": 6,
+        "step_time_s": 61.94,
+        "alloc_mb": 415.96,
+        "reserved_mb": 3388.0,
+        "end_nvml_mb": 4425.3,
+        "peak_so_far_mb": 4467.5
+      },
+      {
+        "step": 7,
+        "step_time_s": 62.0,
+        "alloc_mb": 415.09,
+        "reserved_mb": 3388.0,
+        "end_nvml_mb": 4477.52,
+        "peak_so_far_mb": 4477.5
+      },
+      {
+        "step": 8,
+        "step_time_s": 63.68,
+        "alloc_mb": 415.09,
+        "reserved_mb": 3384.0,
+        "end_nvml_mb": 4483.05,
+        "peak_so_far_mb": 4483.0
+      },
+      {
+        "step": 9,
+        "step_time_s": 62.75,
+        "alloc_mb": 415.96,
+        "reserved_mb": 3384.0,
+        "end_nvml_mb": 4436.36,
+        "peak_so_far_mb": 4483.0
+      },
+      {
+        "step": 10,
+        "step_time_s": 61.83,
+        "alloc_mb": 415.96,
+        "reserved_mb": 3384.0,
+        "end_nvml_mb": 4430.23,
+        "peak_so_far_mb": 4483.0
+      }
+    ],
+    "step_times_s": [
+      59.8,
+      59.11,
+      61.05,
+      61.79,
+      61.98,
+      61.94,
+      62.0,
+      63.68,
+      62.75,
+      61.83
+    ],
+    "cadence_avg_s": 61.59,
+    "total_denoise_s": 693.29,
+    "latent_norm": 953.2133,
+    "has_nan": false,
+    "has_inf": false,
+    "latent_dump_path": "logs/f8_latent_control.pt"
+  },
+  "error": null
+}

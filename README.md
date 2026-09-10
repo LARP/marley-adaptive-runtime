@@ -25,7 +25,7 @@
 [![Phase F7-D4: FAVORABLE](https://img.shields.io/badge/Phase%20F7--D4-FAVORABLE%20(4.71GB)-22c55e.svg)](docs/F7_D4_MULTISTEP_VALIDATION_REPORT_01.md)
 [![Phase F7-D6: VALIDATED](https://img.shields.io/badge/Phase%20F7--D6-INSTRUMENT%20VALIDATED-22c55e.svg)](docs/F7_D6_METRIC_ATTRIBUTION_REPORT_01.md)
 [![Phase F7: CLOSED FAIL](https://img.shields.io/badge/Phase%20F7-CLOSED%20FAIL%20(4.99GB)-ef4444.svg)](docs/F7_STAGE_B_FULL_VALIDATION_REPORT_01.md)
-[![Phase F8: IN PROGRESS](https://img.shields.io/badge/Phase%20F8-SCREENING%20ACTIVE-f59e0b.svg)](docs/F8_PREREGISTERED_SCREENING_PROTOCOL_01.md)
+[![Phase F8: NULL RESULT & DEFINITIVE CLOSURE](https://img.shields.io/badge/Phase%20F8-NULL%20RESULT%20%7C%20720p%20CLOSED-ef4444.svg)](docs/F8_SCREENING_AB_REPORT_01.md)
 
 *In loving memory of Marley 🐾*
 
@@ -90,6 +90,8 @@ Memory is tracked across **three distinct layers** to prevent WDDM virtualizatio
 | **F7-D4**| Reduced Multi-Step Validation | 🟢 **FAVORABLE** | 10 pasos con costura cond→uncond: **Peak NVML 4,708.9 MB ($\le 4,800$ MB PASS)**, cadencia 59.89 s/p, 0 NaNs · [`Report`](docs/F7_D4_MULTISTEP_VALIDATION_REPORT_01.md) |
 | **F7-D5**| Full 30-Step E2E Validation | 🔴 **PARTIAL/NEGATIVE** | 30 pasos continuos a 720p/33f con costura cond→uncond: **Peak NVML 5,096.1 MB ($\le 4,800$ MB FAIL)**, Reserved estabilizado 3,766 MB, 0 NaNs. Integración **NO autorizada** · [`Report`](docs/F7_D5_FULL_30STEP_VALIDATION_REPORT_01.md) |
 | **F7-D6**| NVML Metric Attribution Probe | 🟢 **INSTRUMENT VALIDATED** | Probe corregido ejecutado: Control A/B diff **2.34% ($\le 10\%$ PASS)** (512 vs 500 MB), S0 estable (spread 146.5 MB), S2 4,624.0 MB. S3 post-workload caracterizado como meseta plana estática (~1,481.6 MB, spread 29 MB; +438 MB sobre S1). F7-D5 permanece NEGATIVE; gate 4.8 GB intacta · [`Report`](docs/F7_D6_METRIC_ATTRIBUTION_REPORT_01.md) · knowledge acquired through conversation with an AI agent |
+| **F7** | 720p Full Validation & Causal | 🔴 **CLOSED FAIL** | Pico Físico **4,996.0 MB** en Paso 6 (+196.0 MB violación). 480p ratificado como único estándar de producción · [`Report`](docs/F7_STAGE_B_FULL_VALIDATION_REPORT_01.md) |
+| **F8** | 10-Step A/B Quantization Screening | 🔴 **NULL RESULT (720p CLOSED)** | Delta Peak **-5.0 MB** ($\approx 0\text{ MB} < 50\text{ MB}$). Cuantización selectiva DiT no reduce el pico físico NVML en 720p. **Línea 720p definitivamente cerrada** · [`Report`](docs/F8_SCREENING_AB_REPORT_01.md) |
 
 ---
 
@@ -437,17 +439,17 @@ Following the single-run benchmarks (F6-0 through F6-E), the project executed th
 - **F7 Stage B (Validación Completa 30 Pasos @ 720p — 🔴 COMPLETE REJECTION):** Inferencia ininterrumpida de 30 pasos DiT a 1280×720 / 33f. Allocator de PyTorch estabilizado en ~3.77 GB sin crecimiento monotónico (cadencia nominal de 58.47 s/paso, 0 NaNs, VAE correcto en 75.7s, MP4 válido). Sin embargo, el pico físico NVML alcanzó **4,996.0 MB** en el Paso 6, excediendo el Gate A por **+196.0 MB** (y Gate B por +196.3 MB).
 - **Cierre Formal:** La Campaña F7 se cierra como **FAIL LIMPIO**. 480p se ratifica como único estándar de producción; 720p queda confinada a modo experimental. Reporte: [`docs/F7_STAGE_B_FULL_VALIDATION_REPORT_01.md`](docs/F7_STAGE_B_FULL_VALIDATION_REPORT_01.md).
 
-### Phase F8: 10-Step A/B Screening Benchmark (🟡 IN PROGRESS)
-- **Objetivo:** Evaluar mediante falsación rápida (*fail-fast*) si la cuantización selectiva de proyecciones DiT (F1.7) reduce la presión de memoria lo suficiente como para recuperar el déficit de **196.0 MB** en la ventana de los pasos 5 a 7.
-- **Arquitectura:** Dos procesos limpios independientes (`clean processes`) desacoplados por el sistema operativo con ventana de reposo de 60 s para evitar herencia de memoria:
-  - **Control A:** 10 pasos exactos en FP16 nativo (baseline F7-D5).
-  - **Tratamiento B:** 10 pasos exactos con proyecciones cuantizadas INT8.
-- **Matriz de Decisión Vinculante:**
-  - $\ge 196\text{ MB} \rightarrow$ 🟢 **GO** (autoriza validación completa de 30 pasos F8 Stage B).
-  - $100\text{--}195\text{ MB} \rightarrow$ 🟡 **GO Condicional** (evaluar micro-intervención mínima).
-  - $< 50\text{ MB} \rightarrow$ 🔴 **NO-GO** (se descarta la cuantización).
-  - $\approx 0\text{ MB} \rightarrow$ 🔴 **Cierre Definitivo** de 720p en 6 GB.
-- **Documentos:** [`Protocolo`](docs/F8_PREREGISTERED_SCREENING_PROTOCOL_01.md) · [`Dictamen Consejero`](docs/F8_CONSULTANT_VERDICT_SCREENING_01.md) · Runner [`f8_screening_runner.py`](f8_screening_runner.py).
+### Phase F8: 10-Step A/B Screening Benchmark (🔴 NULL RESULT & DEFINITIVE CLOSURE)
+- **Objetivo:** Evaluar mediante falsación rápida (*fail-fast*) si la cuantización selectiva de proyecciones DiT (F1.7) reduce la presión de memoria lo suficiente como para recuperar el déficit de **196.0 MB** en la ventana crítica de los pasos 5 a 7 a 1280×720 / 33f.
+- **Arquitectura de Ejecución:** Dos procesos limpios e independientes (`clean processes`) en el SO, desacoplados por una ventana de reposo de 30 s de enfriamiento WDDM:
+  - **Control A (FP16 nativo):** Pico físico medido **4,483.0 MB** (cadencia 61.59 s/paso, 0 NaNs).
+  - **Tratamiento B (INT8 proyecciones):** Pico físico medido **4,488.0 MB** (cadencia 63.23 s/paso, 0 NaNs).
+- **Resultados Empíricos y Matriz de Decisión:**
+  - **Delta de Reducción ($\text{Peak}_A - \text{Peak}_B$):** **-5.0 MB** ($\approx 0\text{ MB} < 50\text{ MB}$).
+  - **Fidelidad Numérica Latente:** Coseno **1.000030** (sin degradación numérica).
+  - **Dictamen Vinculante:** 🔴 **RESULTADO NULO / CIERRE DEFINITIVO**.
+- **Conclusión de Gobernanza:** La cuantización de pesos DiT no ataca el cuello de botella físico de 720p (activaciones de atención geométrica y buffers WDDM). La línea experimental 720p en hardware de 6 GB queda **definitivamente cerrada**. La resolución **480p ($832 \times 480$) a 33 frames** (Phase F6) queda ratificada de forma permanente como el **único estándar de producción viable y certificado** de `marley-runtime`.
+- **Documentos:** [`Protocolo`](docs/F8_PREREGISTERED_SCREENING_PROTOCOL_01.md) · [`Reporte Técnico`](docs/F8_SCREENING_AB_REPORT_01.md) · [`Dictamen del Consejero`](docs/F8_CONSULTANT_VERDICT_SCREENING_01.md) · Runner [`f8_screening_runner.py`](f8_screening_runner.py) · Telemetría [`logs/f8_screening_ab_telemetry.json`](logs/f8_screening_ab_telemetry.json).
 
 ---
 

@@ -231,6 +231,7 @@ docs/private/
 # Telemetry evidence (logs/*.json, *.log) is intentionally tracked.
 logs/*.mp4
 logs/*.pickle
+logs/*.pt
 benchmarks/*.mp4
 benchmarks/*.json
 results/*.mp4

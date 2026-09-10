@@ -1,0 +1,187 @@
+{
+  "timestamp": "2026-09-10T03:27:52.606258",
+  "protocol_reference": "docs/F8_PREREGISTERED_SCREENING_PROTOCOL_01.md",
+  "control_a_fp16": {
+    "s0_mean_mb": 916.4,
+    "s1_mb": 1017.0390625,
+    "peak_nvml_mb": 4483.046875,
+    "cadence_avg_s": 61.59,
+    "telemetry": [
+      {
+        "step": 1,
+        "step_time_s": 59.8,
+        "alloc_mb": 407.41,
+        "reserved_mb": 3308.0,
+        "end_nvml_mb": 4358.95,
+        "peak_so_far_mb": 4375.7
+      },
+      {
+        "step": 2,
+        "step_time_s": 59.11,
+        "alloc_mb": 415.09,
+        "reserved_mb": 3292.0,
+        "end_nvml_mb": 4308.04,
+        "peak_so_far_mb": 4375.7
+      },
+      {
+        "step": 3,
+        "step_time_s": 61.05,
+        "alloc_mb": 415.09,
+        "reserved_mb": 3388.0,
+        "end_nvml_mb": 4445.54,
+        "peak_so_far_mb": 4445.5
+      },
+      {
+        "step": 4,
+        "step_time_s": 61.79,
+        "alloc_mb": 415.96,
+        "reserved_mb": 3392.0,
+        "end_nvml_mb": 4446.1,
+        "peak_so_far_mb": 4446.1
+      },
+      {
+        "step": 5,
+        "step_time_s": 61.98,
+        "alloc_mb": 415.09,
+        "reserved_mb": 3388.0,
+        "end_nvml_mb": 4467.54,
+        "peak_so_far_mb": 4467.5
+      },
+      {
+        "step": 6,
+        "step_time_s": 61.94,
+        "alloc_mb": 415.96,
+        "reserved_mb": 3388.0,
+        "end_nvml_mb": 4425.3,
+        "peak_so_far_mb": 4467.5
+      },
+      {
+        "step": 7,
+        "step_time_s": 62.0,
+        "alloc_mb": 415.09,
+        "reserved_mb": 3388.0,
+        "end_nvml_mb": 4477.52,
+        "peak_so_far_mb": 4477.5
+      },
+      {
+        "step": 8,
+        "step_time_s": 63.68,
+        "alloc_mb": 415.09,
+        "reserved_mb": 3384.0,
+        "end_nvml_mb": 4483.05,
+        "peak_so_far_mb": 4483.0
+      },
+      {
+        "step": 9,
+        "step_time_s": 62.75,
+        "alloc_mb": 415.96,
+        "reserved_mb": 3384.0,
+        "end_nvml_mb": 4436.36,
+        "peak_so_far_mb": 4483.0
+      },
+      {
+        "step": 10,
+        "step_time_s": 61.83,
+        "alloc_mb": 415.96,
+        "reserved_mb": 3384.0,
+        "end_nvml_mb": 4430.23,
+        "peak_so_far_mb": 4483.0
+      }
+    ]
+  },
+  "treatment_b_int8": {
+    "s0_mean_mb": 910.84,
+    "s1_mb": 1068.0703125,
+    "peak_nvml_mb": 4488.046875,
+    "cadence_avg_s": 63.23,
+    "telemetry": [
+      {
+        "step": 1,
+        "step_time_s": 61.97,
+        "alloc_mb": 407.49,
+        "reserved_mb": 3328.0,
+        "end_nvml_mb": 4329.92,
+        "peak_so_far_mb": 4343.5
+      },
+      {
+        "step": 2,
+        "step_time_s": 61.66,
+        "alloc_mb": 415.18,
+        "reserved_mb": 3312.0,
+        "end_nvml_mb": 4322.91,
+        "peak_so_far_mb": 4343.5
+      },
+      {
+        "step": 3,
+        "step_time_s": 63.64,
+        "alloc_mb": 415.18,
+        "reserved_mb": 3408.0,
+        "end_nvml_mb": 4449.48,
+        "peak_so_far_mb": 4479.0
+      },
+      {
+        "step": 4,
+        "step_time_s": 63.36,
+        "alloc_mb": 416.04,
+        "reserved_mb": 3412.0,
+        "end_nvml_mb": 4458.8,
+        "peak_so_far_mb": 4479.0
+      },
+      {
+        "step": 5,
+        "step_time_s": 63.5,
+        "alloc_mb": 415.18,
+        "reserved_mb": 3408.0,
+        "end_nvml_mb": 4448.05,
+        "peak_so_far_mb": 4488.0
+      },
+      {
+        "step": 6,
+        "step_time_s": 63.54,
+        "alloc_mb": 416.04,
+        "reserved_mb": 3408.0,
+        "end_nvml_mb": 4440.23,
+        "peak_so_far_mb": 4488.0
+      },
+      {
+        "step": 7,
+        "step_time_s": 63.36,
+        "alloc_mb": 415.18,
+        "reserved_mb": 3408.0,
+        "end_nvml_mb": 4405.63,
+        "peak_so_far_mb": 4488.0
+      },
+      {
+        "step": 8,
+        "step_time_s": 64.18,
+        "alloc_mb": 415.18,
+        "reserved_mb": 3404.0,
+        "end_nvml_mb": 4432.55,
+        "peak_so_far_mb": 4488.0
+      },
+      {
+        "step": 9,
+        "step_time_s": 63.54,
+        "alloc_mb": 416.04,
+        "reserved_mb": 3404.0,
+        "end_nvml_mb": 4441.25,
+        "peak_so_far_mb": 4488.0
+      },
+      {
+        "step": 10,
+        "step_time_s": 63.6,
+        "alloc_mb": 416.04,
+        "reserved_mb": 3404.0,
+        "end_nvml_mb": 4439.09,
+        "peak_so_far_mb": 4488.0
+      }
+    ]
+  },
+  "comparison": {
+    "delta_peak_reduction_mb": -5.0,
+    "cosine_similarity_step10": 1.00003,
+    "cadence_delta_s": 1.64,
+    "verdict": "\ud83d\udd34 RESULTADO NULO (CIERRE DEFINITIVO)",
+    "verdict_action": "CIERRE DEFINITIVO: Sin efecto apreciable (< 50 MB). La l\u00ednea 720p se cierra definitivamente."
+  }
+}

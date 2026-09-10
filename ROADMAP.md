@@ -1,9 +1,8 @@
 # Marley Runtime (`marley-runtime`) — Roadmap v5
 
-**Release Date:** 2026-09-09  
-**Status:** Active — F1.5, F1.7, **F3 (CERTIFIED PASS)**, **F3+INT8 (PASS)**, **F4 (CORE VALIDATED)**, **F5 (RETIRED)** & **F6 (CERTIFIED PASS & FROZEN)** · **Phase F7 (720p Strategy) ACTIVE (F7-D5 NEGATIVE · 720p confined to experimental)**  
+**Status:** Active — F1.5, F1.7, **F3 (CERTIFIED PASS)**, **F3+INT8 (PASS)**, **F4 (CORE VALIDATED)**, **F5 (RETIRED)** & **F6 (CERTIFIED PASS & FROZEN)** · **Phase F7 (CLOSED FAIL) & Phase F8 (NULL RESULT & DEFINITIVE 720p CLOSURE)**  
 **Target Repository:** [`LARP/marley-runtime`](https://github.com/LARP/marley-runtime)  
-**Primary Objective:** Investigate and deploy adaptive memory management policies for Wan2.1-T2V-1.3B constrained to ~4.8 GB effective physical VRAM (NVIDIA GeForce RTX 3050 6GB Laptop, Windows WDDM), transitioning to 720p exploration following 480p/33f multidimensional certification.
+**Primary Objective:** Investigate and deploy adaptive memory management policies for Wan2.1-T2V-1.3B constrained to ~4.8 GB effective physical VRAM (NVIDIA GeForce RTX 3050 6GB Laptop, Windows WDDM), with 480p/33f certified as the single production baseline following definitive closure of the 720p line in Phase F8.
 
 > **Phase F0 completed 2026-09-08T06:04:40Z.** First real Wan2.1-T2V-1.3B video generated at 480p/16f/FP16. Peak NVML: 5,451 MB (gate exceeded by 651 MB in VAE decode). VAE confirmed as primary bottleneck — Phase F5 trigger pre-activated. Report: [`results/TEST_F0_baseline_ref.md`](results/TEST_F0_baseline_ref.md).
 
@@ -101,14 +100,15 @@ flowchart TD
     F4 -.->|"Resolved in F0.5/F5-A"| F5["F5: Temporal VAE Stitcher (RETIRED) 🟢"]
     F4 --> F6["F6: Multidimensional Benchmarks 🟢"]
     F5 --> F6
-    F6 --> F7["F7: 720p Strategy (F7-D5 Negative / Experimental) 🔴"]
+    F6 --> F7["F7: 720p Strategy (Full E2E Fail / 4,996 MB) 🔴"]
+    F7 --> F8["F8: Clean A/B Screening (Null Result / 720p Closed) 🔴"]
 
     classDef pass fill:#1b4332,stroke:#40916c,stroke-width:2px,color:#d8f3dc;
     classDef inprog fill:#5c4d00,stroke:#d4af37,stroke-width:2px,color:#fff3b0;
     classDef bypass fill:#4a1525,stroke:#9b2226,stroke-width:1px,color:#f8d7da;
     class F0,F05,F06,F1,F15,F17,F3 pass;
     class F3I8,F4,F5,F6 pass;
-    class F7 inprog;
+    class F7,F8 bypass;
     class F2 bypass;
 ```
 
@@ -491,6 +491,8 @@ Full report: [`docs/F6_MULTIDIMENSIONAL_BENCHMARK_REPORT_01.md`](docs/F6_MULTIDI
 | **F7-D3**| Seam Release Causal Probe | F7-D2 verification | Peak NVML $> 4,800.0\text{ MB}$ or crash on seam | Revert seam flush | 🟢 **FAVORABLE**<br>Peak 4,403.5 MB (1-step PASS) · [`Report`](docs/F7_D3_COND_UNCOND_SEAM_RELEASE_REPORT_01.md) |
 | **F7-D4**| Reduced Multi-Step Validation | F7-D3 favorable | Peak NVML $> 4,800.0\text{ MB}$ on 10 steps | Re-scope multi-step memory bounds | 🟢 **FAVORABLE**<br>Peak 4,708.9 MB (10-step PASS) · [`Report`](docs/F7_D4_MULTISTEP_VALIDATION_REPORT_01.md) |
 | **F7-D5**| Full 30-Step E2E Validation | F7-D4 favorable | Peak NVML $> 4,800.0\text{ MB}$, OOM, or wall-clock $> 45\text{ min}$ | Confine 720p to experimental / low-res focus | 🔴 **NEGATIVE**<br>Peak NVML 5,096.1 MB ($> 4,800$); allocator estabilizado (3,766 MB), 0 NaNs, MP4 OK. Integración NO autorizada · [`Report`](docs/F7_D5_FULL_30STEP_VALIDATION_REPORT_01.md) |
+| **F7** | 720p Re-evaluation Stage B | F7 Stage C PASS | Peak NVML $> 4,800.0\text{ MB}$ at 30 steps | Confine 720p to experimental; freeze 480p baseline | 🔴 **CLOSED FAIL**<br>Peak 4,996.0 MB en Paso 6 (+196.0 MB violación). 480p ratificado · [`Report`](docs/F7_STAGE_B_FULL_VALIDATION_REPORT_01.md) |
+| **F8** | 10-Step A/B Quantization Screening | F7 deficit +196 MB | Delta Peak $< 50\text{ MB}$ (sin efecto de cuantización) | Definitive closure of 720p line; freeze 480p | 🔴 **NULL RESULT (720p CLOSED)**<br>Delta -5.0 MB ($\approx 0\text{ MB}$). Hipótesis falsada. Línea 720p cerrada definitivamente · [`Report`](docs/F8_SCREENING_AB_REPORT_01.md) |
 
 ---
 
