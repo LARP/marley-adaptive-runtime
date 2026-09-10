@@ -23,7 +23,7 @@
 [![Phase F6: CERTIFIED PASS & FROZEN](https://img.shields.io/badge/Phase%20F6-CERTIFIED%20%26%20FROZEN-22c55e.svg)](docs/F6_REPRODUCIBILITY_VARIABILITY_REPORT_01.md)
 [![Phase F7-0: GATE FAIL](https://img.shields.io/badge/Phase%20F7--0-GATE%20FAIL%20(6.05GB)-ef4444.svg)](docs/F7_0_FEASIBILITY_PROBE_REPORT_01.md)
 [![Phase F7-D4: FAVORABLE](https://img.shields.io/badge/Phase%20F7--D4-FAVORABLE%20(4.71GB)-22c55e.svg)](docs/F7_D4_MULTISTEP_VALIDATION_REPORT_01.md)
-[![Phase F7-D5: PENDING](https://img.shields.io/badge/Phase%20F7--D5-PENDING%20(30%20Steps)-f59e0b.svg)](ROADMAP.md)
+[![Phase F7-D5: NEGATIVE](https://img.shields.io/badge/Phase%20F7--D5-NEGATIVE%20(5.10GB)-ef4444.svg)](docs/F7_D5_FULL_30STEP_VALIDATION_REPORT_01.md)
 
 *In loving memory of Marley 🐾*
 
@@ -86,7 +86,7 @@ Memory is tracked across **three distinct layers** to prevent WDDM virtualizatio
 | **F7-D2**| Allocator Causal Probes | 🟢 **COMPLETE** | Trazado a 8ms demostró no-reutilización de segmentos entre pases cond y uncond · [`Package`](docs/F7_ALLOCATOR_REVIEW_PACKAGE_FOR_CONSULTANT_01.md) |
 | **F7-D3**| Seam Release Causal Probe | 🟢 **FAVORABLE** | `empty_cache()` focalizado en costura cond→uncond baja pico NVML a **4,403.5 MB** (1 paso) · [`Report`](docs/F7_D3_COND_UNCOND_SEAM_RELEASE_REPORT_01.md) |
 | **F7-D4**| Reduced Multi-Step Validation | 🟢 **FAVORABLE** | 10 pasos con costura cond→uncond: **Peak NVML 4,708.9 MB ($\le 4,800$ MB PASS)**, cadencia 59.89 s/p, 0 NaNs · [`Report`](docs/F7_D4_MULTISTEP_VALIDATION_REPORT_01.md) |
-| **F7-D5**| Full 30-Step E2E Validation | 🟡 **PENDING (Próximo Hito)** | Validación de 30 pasos continuos a 720p/33f ($\le 4,800$ MB target) e integración condicional en `marley/core/pipeline.py` · [`Roadmap`](ROADMAP.md) |
+| **F7-D5**| Full 30-Step E2E Validation | 🔴 **PARTIAL/NEGATIVE** | 30 pasos continuos a 720p/33f con costura cond→uncond: **Peak NVML 5,096.1 MB ($\le 4,800$ MB FAIL)**, Reserved estabilizado 3,766 MB, 0 NaNs. Integración **NO autorizada** · [`Report`](docs/F7_D5_FULL_30STEP_VALIDATION_REPORT_01.md) |
 
 ---
 
@@ -397,9 +397,14 @@ Following the single-run benchmarks (F6-0 through F6-E), the project executed th
   - **Cadencia:** 59.89 s/paso (598.91 s en denoise). VAE decode: 69.57 s. 0 NaNs/Infs, MP4 generado correctamente.
 - **Reporte:** [`docs/F7_D4_MULTISTEP_VALIDATION_REPORT_01.md`](docs/F7_D4_MULTISTEP_VALIDATION_REPORT_01.md).
 
-### F7-D5: Full 30-Step E2E Validation & Integration (🟡 PRÓXIMO HITO)
-- **Workload:** 1280×720 @ 33 frames, 30 diffusion steps completos, modo `adaptive` con costura `cond → uncond`.
-- **Objetivos:** Confirmar estabilidad continua de VRAM ($\le 4,800.0\text{ MB}$), tiempo total de ejecución estimado de ~32 a 35 minutos, e integrar condicionalmente la liberación en [`marley/core/pipeline.py`](marley/core/pipeline.py) para resoluciones $> 480\text{p}$.
+### F7-D5: Full 30-Step E2E Validation & Integration (🔴 PARTIAL/NEGATIVE)
+- **Workload:** 1280×720 @ 33 frames, **30 diffusion steps completos**, modo `adaptive` con liberación en costura `cond → uncond` + drenaje al inicio de cada paso (config FAVORABLE de F7-D4), seguido de VAE.
+- **Resultado:**
+  - **Peak Físico NVML:** **5,096.1 MB** ($\le 4,800.0\text{ MB}$ Hard Gate **FAIL**, margen $-296.1\text{ MB}$; safe-abort a >5,050 MB disparado, sin OOM).
+  - **Peak Reserved:** 3,776.0 MB — allocator **totalmente estabilizado** en ~3,766 MB del paso 1 al 30 (acumulación neta +246 MB, sin divergencia).
+  - **Cadencia:** 62.13 s/paso (1,864.1 s denoise); VAE decode 68.06 s; wall-clock total 2,667.7 s (44.46 min, $\le 45$ min gate). **0 NaNs/Infs**, MP4 generado correctamente.
+- **Conclusión:** La liberación en costura **previene la divergencia del allocator** a 30 pasos, pero el delta físico NVML−Reserved (~1,130 MB, residencia WDDM/`FreePool` no devuelta al driver) mantiene el pico real **por encima de 4,800 MB**. Kill-gate F7-D5 activado → **720p permanece experimental; la integración en `marley/core/pipeline.py` NO se autoriza** por este resultado.
+- **Reporte:** [`docs/F7_D5_FULL_30STEP_VALIDATION_REPORT_01.md`](docs/F7_D5_FULL_30STEP_VALIDATION_REPORT_01.md).
 
 ---
 

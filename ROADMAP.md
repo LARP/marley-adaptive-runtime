@@ -1,7 +1,7 @@
 # Marley Runtime (`marley-runtime`) — Roadmap v5
 
 **Release Date:** 2026-09-09  
-**Status:** Active — F1.5, F1.7, **F3 (CERTIFIED PASS)**, **F3+INT8 (PASS)**, **F4 (CORE VALIDATED)**, **F5 (RETIRED)** & **F6 (CERTIFIED PASS & FROZEN)** · **Phase F7 (720p Strategy) ACTIVE (F7-D4 FAVORABLE · F7-D5 PENDING)**  
+**Status:** Active — F1.5, F1.7, **F3 (CERTIFIED PASS)**, **F3+INT8 (PASS)**, **F4 (CORE VALIDATED)**, **F5 (RETIRED)** & **F6 (CERTIFIED PASS & FROZEN)** · **Phase F7 (720p Strategy) ACTIVE (F7-D5 NEGATIVE · 720p confined to experimental)**  
 **Target Repository:** [`LARP/marley-runtime`](https://github.com/LARP/marley-runtime)  
 **Primary Objective:** Investigate and deploy adaptive memory management policies for Wan2.1-T2V-1.3B constrained to ~4.8 GB effective physical VRAM (NVIDIA GeForce RTX 3050 6GB Laptop, Windows WDDM), transitioning to 720p exploration following 480p/33f multidimensional certification.
 
@@ -102,7 +102,7 @@ flowchart TD
     F4 -.->|"Resolved in F0.5/F5-A"| F5["F5: Temporal VAE Stitcher (RETIRED) 🟢"]
     F4 --> F6["F6: Multidimensional Benchmarks 🟢"]
     F5 --> F6
-    F6 --> F7["F7: 720p Strategy (F7-D4 Favorable / F7-D5 Pending) 🟡"]
+    F6 --> F7["F7: 720p Strategy (F7-D5 Negative / Experimental) 🔴"]
 
     classDef pass fill:#1b4332,stroke:#40916c,stroke-width:2px,color:#d8f3dc;
     classDef inprog fill:#5c4d00,stroke:#d4af37,stroke-width:2px,color:#fff3b0;
@@ -461,10 +461,11 @@ Full report: [`docs/F6_MULTIDIMENSIONAL_BENCHMARK_REPORT_01.md`](docs/F6_MULTIDI
   - **Cadencia DiT:** 59.89 s/paso (598.91 s en denoise). VAE decode: 69.57 s. Integridad: 0 NaNs / 0 Infs, MP4 generado correctamente.
   - Reporte oficial: [`docs/F7_D4_MULTISTEP_VALIDATION_REPORT_01.md`](docs/F7_D4_MULTISTEP_VALIDATION_REPORT_01.md).
 
-- **Phase F7-D5 — Full 30-Step End-to-End Validation & Production Integration (PRÓXIMO HITO):**
-  - **Workload:** 1280×720 @ 33 frames, 30 diffusion steps completos, modo `adaptive` con costura `cond → uncond`.
-  - **Objetivo Primario:** Confirmar que a 30 pasos continuos el Peak Físico NVML se mantenga estrictamente $\le 4,800.0\text{ MB}$ con cadencia nominal (~60 s/paso, tiempo total ~32–35 min) y 0 NaNs.
-  - **Criterio de Integración:** Si F7-D5 es FAVORABLE, autorizar la incorporación formal del mecanismo de liberación de costura en [`marley/core/pipeline.py`](marley/core/pipeline.py) condicionado a resoluciones $> 480\text{p}$, preservando la inmutabilidad y latencia del baseline 480p certificado en F6.
+- **Phase F7-D5 — Full 30-Step End-to-End Validation & Production Integration (Completed 2026-09-09 · 🔴 PARTIAL/NEGATIVE):**
+  - **Workload:** 1280×720 @ 33 frames, 30 diffusion steps completos, modo `adaptive` con costura `cond → uncond` + drenaje al inicio de cada paso (config FAVORABLE de F7-D4), seguido de VAE.
+  - **Resultado (30 pasos completos + VAE):** Peak Físico NVML **5,096.1 MB** (Hard Gate $\le 4,800.0\text{ MB}$ **FAIL**, margen $-296.1\text{ MB}$); Peak Reserved **3,776.0 MB** — allocator **estabilizado** en ~3,766 MB (acumulación neta +246 MB, **sin divergencia** del paso 1 al 30); cadencia 62.13 s/paso (1,864.1 s denoise); VAE 68.06 s; wall-clock 2,667.7 s (44.46 min, $\le 45$ min gate); **0 NaNs/Infs**; MP4 correcto.
+  - **Conclusión:** La liberación en costura previene la **divergencia** del allocator, pero el delta físico NVML−Reserved (~1,130 MB de residencia WDDM/`FreePool` no devuelta al driver) mantiene el pico físico **por encima de 4,800 MB** a 30 pasos. Kill-gate F7-D5 activado → **720p confinado a experimental / enfoque de baja resolución; la integración en [`marley/core/pipeline.py`](marley/core/pipeline.py) NO se autoriza** por este resultado (el baseline 480p F6 permanece inmutable).
+  - Reporte: [`docs/F7_D5_FULL_30STEP_VALIDATION_REPORT_01.md`](docs/F7_D5_FULL_30STEP_VALIDATION_REPORT_01.md) · Telemetría: [`logs/f7_d5_full_30step_validation_telemetry.json`](logs/f7_d5_full_30step_validation_telemetry.json) · Runner: [`f7_d5_full_30step_validation.py`](f7_d5_full_30step_validation.py).
 
 ---
 
@@ -490,7 +491,7 @@ Full report: [`docs/F6_MULTIDIMENSIONAL_BENCHMARK_REPORT_01.md`](docs/F6_MULTIDI
 | **F7-D2**| Allocator Causal Probes | F7-D1 diagnostics | Inability to isolate allocator free pool at seams | Retain standard caching allocator | 🟢 **COMPLETE**<br>FreePool transitorio domina el pico · [`Package`](docs/F7_ALLOCATOR_REVIEW_PACKAGE_FOR_CONSULTANT_01.md) |
 | **F7-D3**| Seam Release Causal Probe | F7-D2 verification | Peak NVML $> 4,800.0\text{ MB}$ or crash on seam | Revert seam flush | 🟢 **FAVORABLE**<br>Peak 4,403.5 MB (1-step PASS) · [`Report`](docs/F7_D3_COND_UNCOND_SEAM_RELEASE_REPORT_01.md) |
 | **F7-D4**| Reduced Multi-Step Validation | F7-D3 favorable | Peak NVML $> 4,800.0\text{ MB}$ on 10 steps | Re-scope multi-step memory bounds | 🟢 **FAVORABLE**<br>Peak 4,708.9 MB (10-step PASS) · [`Report`](docs/F7_D4_MULTISTEP_VALIDATION_REPORT_01.md) |
-| **F7-D5**| Full 30-Step E2E Validation | F7-D4 favorable | Peak NVML $> 4,800.0\text{ MB}$, OOM, or wall-clock $> 45\text{ min}$ | Confine 720p to experimental / low-res focus | 🟡 **PENDING (Próximo Hito)**<br>Target: 720p/33f/30 steps $\le 4,800\text{ MB}$, 0 NaNs, integration pipeline |
+| **F7-D5**| Full 30-Step E2E Validation | F7-D4 favorable | Peak NVML $> 4,800.0\text{ MB}$, OOM, or wall-clock $> 45\text{ min}$ | Confine 720p to experimental / low-res focus | 🔴 **NEGATIVE**<br>Peak NVML 5,096.1 MB ($> 4,800$); allocator estabilizado (3,766 MB), 0 NaNs, MP4 OK. Integración NO autorizada · [`Report`](docs/F7_D5_FULL_30STEP_VALIDATION_REPORT_01.md) |
 
 ---
 
