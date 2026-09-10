@@ -21,7 +21,7 @@
 
 > **Phase F3 + INT8 CLOSED / FROZEN 2026-09-08.** Isolation experiment certified **PASS**: halving the per-block H2D payload to **INT8** (92.9 → 46.5 MB, **−49.9%**) on the unchanged async scheduler (FP16 compute, on-device dequant) raised the **Async-vs-Sync margin to +13.2%** (min +10.4 / max +15.4, σ ±2.5) with overlap **98.1%**, peak NVML **2,076 MB (−508 vs FP16)** and dequant fidelity cos ≥ **0.9999** (0 NaNs/Infs). Result flagged for official docs: the +13.2% is the *within-run* Async-vs-Sync margin (NOT an absolute cross-session claim). Closure acta: [`docs/F3_INT8_CLOSURE_01.md`](docs/F3_INT8_CLOSURE_01.md) · Report: [`results/TEST_F3_INT8_benchmark.md`](results/TEST_F3_INT8_benchmark.md). Architecture frozen → **advance to F4**. A same-session A/B/C (Sync-FP16 / Async-FP16 / Async-INT8) is scheduled as F4 validation methodology.
 
-> **Expert Technical Directive (2026-09-08):** Following F1.5 and F1.7, technical guidance from an external IA Generative / SD / ComfyUI runtime expert was formally adopted. Key directives: (1) Freeze prior optimizations to preserve causal attribution; (2) Reject adding new memory tricks before F3; (3) Mandate 7 quantitative metrics for F3 benchmark; (4) Retain INT8 as production baseline while restricting NF4 to extreme low-memory mode; (5) Architect F4 around *Performance* vs *Memory Safe* operational profiles; (6) Retain 480p/33f as primary scalability milestone. Full directive: [`docs/private/F3_F4_TECHNICAL_OPINION_01.md`](docs/private/F3_F4_TECHNICAL_OPINION_01.md).
+> **Expert Technical Directive (2026-09-08):** Following F1.5 and F1.7, technical guidance from an external IA Generative / SD / ComfyUI runtime expert was formally adopted. Key directives: (1) Freeze prior optimizations to preserve causal attribution; (2) Reject adding new memory tricks before F3; (3) Mandate 7 quantitative metrics for F3 benchmark; (4) Retain INT8 as production baseline while restricting NF4 to extreme low-memory mode; (5) Architect F4 around *Performance* vs *Memory Safe* operational profiles; (6) Retain 480p/33f as primary scalability milestone. Full directive: knowledge acquired through conversation with an AI agent.
 
 > **Phase F4 CORE SYSTEM VALIDATED 2026-09-08 (adaptative decision engine).** The F4 decision loop
 > ([`marley/core/adaptive.py`](marley/core/adaptive.py) + [`marley/core/policies.py`](marley/core/policies.py),
@@ -54,8 +54,7 @@
 > Phase F5 is formally closed as **`🟢 RETIRED (Resolved by Tiling)`**. Advance directly to Phase F6.
 > Report: [`results/TEST_F5_vae_probe_33f.md`](results/TEST_F5_vae_probe_33f.md) · Telemetry:
 > [`logs/f5_vae_probe_33f.json`](logs/f5_vae_probe_33f.json) · Directives:
-> [`docs/private/F5_DIRECTOR_RESOLUTION_01.md`](docs/private/F5_DIRECTOR_RESOLUTION_01.md) /
-> [`docs/private/F5_CONSULTANT_RATIFICATION_01.md`](docs/private/F5_CONSULTANT_RATIFICATION_01.md).
+> knowledge acquired through conversation with an AI agent.
 
 > **Provenance Note:** This roadmap represents the unified **v5 architectural consensus**, synthesized and hardened via a multi-agent review ensemble (ChatGPT, DeepSeek Pro, and Gemini Pro) and calibrated with external generative runtime advisory.
 
@@ -363,7 +362,7 @@ projections vs FP16) on the frozen F3 async scheduler with FP16 compute. NF4/F4 
 ---
 
 ### Phase F5 — Temporal VAE Stitcher · 🟢 RETIRED (Resolved by Tiling)
-- **Protocol:** Decision-First Protocol ([`docs/private/F5_DIRECTOR_RESOLUTION_01.md`](docs/private/F5_DIRECTOR_RESOLUTION_01.md) / [`docs/private/F5_CONSULTANT_RATIFICATION_01.md`](docs/private/F5_CONSULTANT_RATIFICATION_01.md)).
+- **Protocol:** Decision-First Protocol (knowledge acquired through conversation with an AI agent).
 - **Canonical 33f Workload:** $832 \times 480$, 33 frames exact, latent `(1, 16, 9, 60, 104)`, `bfloat16`, spatial tiling $256 \times 256$ with causal caching.
 - **Measured Result (F5-A Probe):**
   - Peak Physical VRAM (NVML): **2,109.0 MB** (Hard Gate $\le 4,800\text{ MB}$ PASS, Target $\le 4,000\text{ MB}$ MET with **+2,691 MB headroom**).
@@ -446,7 +445,7 @@ Full report: [`docs/F6_MULTIDIMENSIONAL_BENCHMARK_REPORT_01.md`](docs/F6_MULTIDI
 - **Phase F7-D2 / F7-D2b / F7-D2c — Allocator Causal & Live Boundary Probes (Completed 2026-09-09):**
   - Muestreo a ~8 ms y trazado bloque a bloque: demostró que el pase `uncond_blocks_30` apila ~2,3 GB adicionales en vez de reutilizar los segmentos liberados por `cond_blocks_30`.
   - El vaciado nativo post-denoise (`AdaptiveEngine.release()`) entrega la GPU limpia (~1,26 GB) al VAE, descartando que el VAE sufra por retención previa de memoria GPU.
-  - Reportes: [`docs/private/F7_ALLOCATOR_REVIEW_PACKAGE_FOR_CONSULTANT_01.md`](docs/private/F7_ALLOCATOR_REVIEW_PACKAGE_FOR_CONSULTANT_01.md), [`docs/private/F7_DIRECTOR_COUNTER_RESPONSE_02.md`](docs/private/F7_DIRECTOR_COUNTER_RESPONSE_02.md).
+  - Reportes: knowledge acquired through conversation with an AI agent.
 
 - **Phase F7-D3 — Cond→Uncond Seam Release Causal Probe (Completed 2026-09-09):**
   - Variable única evaluada: inserción de `empty_cache()` exclusivamente en la costura sincrónica `cond → uncond` en prueba causal de 1 paso.
@@ -488,7 +487,7 @@ Full report: [`docs/F6_MULTIDIMENSIONAL_BENCHMARK_REPORT_01.md`](docs/F6_MULTIDI
 | **F7-0** | 720p Feasibility Probe | F6 certified & frozen | Peak NVML $> 4,800.0\text{ MB}$ on 720p 5-step probe | Forensic memory profiling (F7-D1) | ❌ **FAIL (Peak 6,058.5 MB)**<br>Integrity PASS (0 NaNs, MP4 OK) · Frozen baseline · [`Report`](docs/F7_0_FEASIBILITY_PROBE_REPORT_01.md) |
 | **F7-1** | Attention Chunking Pilot | F7-0 baseline failure | Peak NVML $> 4,800.0\text{ MB}$ or severe latency | Retain standard SDPA / causal probe | ❌ **BYPASSED / RESULT C**<br>Peak 5,968.4 MB (No reduce pico dominante) · [`Report`](docs/F7_1_ATTENTION_CHUNKING_PILOT_REPORT_01.md) |
 | **F7-D1**| Forensic Memory Profiling | F7-0 / F7-1 failure | Observational failure or distortion of memory causality | Re-scope diagnostic instrumentation | 🟢 **COMPLETE**<br>Alloc real 2.15 GB vs Reserved 5.78 GB · [`Report`](docs/F7_D1_FORENSIC_SPEC_01.md) |
-| **F7-D2**| Allocator Causal Probes | F7-D1 diagnostics | Inability to isolate allocator free pool at seams | Retain standard caching allocator | 🟢 **COMPLETE**<br>FreePool transitorio domina el pico · [`Package`](docs/private/F7_ALLOCATOR_REVIEW_PACKAGE_FOR_CONSULTANT_01.md) |
+| **F7-D2**| Allocator Causal Probes | F7-D1 diagnostics | Inability to isolate allocator free pool at seams | Retain standard caching allocator | 🟢 **COMPLETE**<br>FreePool transitorio domina el pico · knowledge acquired through conversation with an AI agent |
 | **F7-D3**| Seam Release Causal Probe | F7-D2 verification | Peak NVML $> 4,800.0\text{ MB}$ or crash on seam | Revert seam flush | 🟢 **FAVORABLE**<br>Peak 4,403.5 MB (1-step PASS) · [`Report`](docs/F7_D3_COND_UNCOND_SEAM_RELEASE_REPORT_01.md) |
 | **F7-D4**| Reduced Multi-Step Validation | F7-D3 favorable | Peak NVML $> 4,800.0\text{ MB}$ on 10 steps | Re-scope multi-step memory bounds | 🟢 **FAVORABLE**<br>Peak 4,708.9 MB (10-step PASS) · [`Report`](docs/F7_D4_MULTISTEP_VALIDATION_REPORT_01.md) |
 | **F7-D5**| Full 30-Step E2E Validation | F7-D4 favorable | Peak NVML $> 4,800.0\text{ MB}$, OOM, or wall-clock $> 45\text{ min}$ | Confine 720p to experimental / low-res focus | 🔴 **NEGATIVE**<br>Peak NVML 5,096.1 MB ($> 4,800$); allocator estabilizado (3,766 MB), 0 NaNs, MP4 OK. Integración NO autorizada · [`Report`](docs/F7_D5_FULL_30STEP_VALIDATION_REPORT_01.md) |

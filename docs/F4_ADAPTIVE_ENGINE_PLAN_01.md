@@ -10,7 +10,7 @@
   Acta de cierre: [`docs/F3_INT8_CLOSURE_01.md`](F3_INT8_CLOSURE_01.md).
 **Consultant guidance:** closure letter recommending F4 (dynamic strategy selection) and the
 new observable bottleneck (dequantization on the critical path). Binding directive §5/§6:
-[`docs/private/F3_F4_TECHNICAL_OPINION_01.md`](private/F3_F4_TECHNICAL_OPINION_01.md).
+knowledge acquired through conversation with an AI agent.
 **Existing primitives to reuse (DO NOT rewrite):**
 - [`marley/ops/async_stream.py`](../marley/ops/async_stream.py) — `BudgetedAsyncStreamer` (Sync/Async, double-buffer, `StreamMetrics`).
 - [`marley/ops/async_stream_int8.py`](../marley/ops/async_stream_int8.py) — `INT8BudgetedStreamer` (INT8 transfer + on-device dequant, FP16 compute).

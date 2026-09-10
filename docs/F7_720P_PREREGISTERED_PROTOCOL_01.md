@@ -5,7 +5,7 @@
 **Autor:** Director de Proyecto — Marley Runtime  
 **Revisor / Autoridad:** Consejero Técnico Externo  
 **Estado:** **PRE-REGISTRADO Y CONGELADO ANTES DE EJECUCIÓN**  
-**Referencias:** Dictamen Final del Consejero (`docs/private/F7_D6_CONSULTANT_FINAL_DICTAMEN_01.md`); Telemetría F7-D6 (`logs/f7_d6_attribution_probe_telemetry.json`).  
+**Referencias:** Dictamen Final del Consejero (knowledge acquired through conversation with an AI agent); Telemetría F7-D6 (`logs/f7_d6_attribution_probe_telemetry.json`).  
 
 ---
 

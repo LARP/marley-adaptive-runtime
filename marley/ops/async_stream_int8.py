@@ -34,7 +34,7 @@ AFTER the slot holds final dequantized FP16 weights.
 References
 ----------
 - docs/F3_INT8_EXPERIMENT_PLAN_01.md  — isolation experiment design
-- docs/private/F3_F4_TECHNICAL_OPINION_01.md  — INT8-as-production-baseline directive
+- knowledge acquired through conversation with an AI agent  — INT8-as-production-baseline directive
 - docs/F3_CALIBRATION_CHANGES_02.md   — measurement-integrity (Enmiendas 1-3)
 - marley/ops/async_stream.py          — BudgetedAsyncStreamer / StreamMetrics
 """

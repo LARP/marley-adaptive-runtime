@@ -39,7 +39,7 @@
 Rather than relying purely on blunt sequential CPU offloading, `marley-runtime` investigates and measures **adaptive, block-level memory management policies** that dynamically balance PCIe transfer latency, activation recomputation, tensor lifetime management, and selective quantization.
 
 > [!NOTE]
-> The current architectural design and phased milestone strategy is governed by **[Roadmap v5](ROADMAP.md)**, reviewed and approved through a multi-agent consensus using **free-tier models** (ChatGPT, DeepSeek Pro, and Gemini Pro). Active execution is performed by **Antigravity Pro** (Gemini 2.5 Flash and Claude Sonnet 4.6), with formal strategic adoption of technical guidance from an external **Generative AI & ComfyUI Runtime Expert** ([Technical Directive](docs/private/F3_F4_TECHNICAL_OPINION_01.md)).
+> The current architectural design and phased milestone strategy is governed by **[Roadmap v5](ROADMAP.md)**, reviewed and approved through a multi-agent consensus using **free-tier models** (ChatGPT, DeepSeek Pro, and Gemini Pro). Active execution is performed by **Antigravity Pro** (Gemini 2.5 Flash and Claude Sonnet 4.6), with formal strategic adoption of technical guidance from an external **Generative AI & ComfyUI Runtime Expert** (knowledge acquired through conversation with an AI agent).
 
 ---
 
@@ -84,11 +84,11 @@ Memory is tracked across **three distinct layers** to prevent WDDM virtualizatio
 | **F7-0** | 720p Feasibility Probe | ❌ **GATE FAIL / 🟢 PASS** | 1280×720 @ 33f (5 steps): Peak NVML **6,058.5 MB** (+1,258.5 MB over gate), 0 NaNs, MP4 OK. Frozen (`83f138a`) · [`Report`](docs/F7_0_FEASIBILITY_PROBE_REPORT_01.md) |
 | **F7-1** | Attention Chunking Pilot | ❌ **RESULT C (BYPASSED)** | Peak NVML **5,968.4 MB** ($C=2048$). No reduce pico dominante; atención descartada como cuello de botella · [`Report`](docs/F7_1_ATTENTION_CHUNKING_PILOT_REPORT_01.md) |
 | **F7-D1**| Forensic Memory Profiling | 🟢 **COMPLETE** | Diagnóstico causal: Tensores vivos son solo **~2.15 GB**; el exceso es **~5.18 GB de `FreePool` inactivo** retenido por el allocator · [`Spec`](docs/F7_D1_FORENSIC_SPEC_01.md) |
-| **F7-D2**| Allocator Causal Probes | 🟢 **COMPLETE** | Trazado a 8ms demostró no-reutilización de segmentos entre pases cond y uncond · [`Package`](docs/private/F7_ALLOCATOR_REVIEW_PACKAGE_FOR_CONSULTANT_01.md) |
+| **F7-D2**| Allocator Causal Probes | 🟢 **COMPLETE** | Trazado a 8ms demostró no-reutilización de segmentos entre pases cond y uncond · knowledge acquired through conversation with an AI agent |
 | **F7-D3**| Seam Release Causal Probe | 🟢 **FAVORABLE** | `empty_cache()` focalizado en costura cond→uncond baja pico NVML a **4,403.5 MB** (1 paso) · [`Report`](docs/F7_D3_COND_UNCOND_SEAM_RELEASE_REPORT_01.md) |
 | **F7-D4**| Reduced Multi-Step Validation | 🟢 **FAVORABLE** | 10 pasos con costura cond→uncond: **Peak NVML 4,708.9 MB ($\le 4,800$ MB PASS)**, cadencia 59.89 s/p, 0 NaNs · [`Report`](docs/F7_D4_MULTISTEP_VALIDATION_REPORT_01.md) |
 | **F7-D5**| Full 30-Step E2E Validation | 🔴 **PARTIAL/NEGATIVE** | 30 pasos continuos a 720p/33f con costura cond→uncond: **Peak NVML 5,096.1 MB ($\le 4,800$ MB FAIL)**, Reserved estabilizado 3,766 MB, 0 NaNs. Integración **NO autorizada** · [`Report`](docs/F7_D5_FULL_30STEP_VALIDATION_REPORT_01.md) |
-| **F7-D6**| NVML Metric Attribution Probe | 🟢 **INSTRUMENT VALIDATED** | Probe corregido ejecutado: Control A/B diff **2.34% ($\le 10\%$ PASS)** (512 vs 500 MB), S0 estable (spread 146.5 MB), S2 4,624.0 MB. S3 post-workload caracterizado como meseta plana estática (~1,481.6 MB, spread 29 MB; +438 MB sobre S1). F7-D5 permanece NEGATIVE; gate 4.8 GB intacta · [`Report`](docs/F7_D6_METRIC_ATTRIBUTION_REPORT_01.md) · [`Carta Resultados`](docs/private/F7_D6_RESULTS_LETTER_TO_CONSULTANT_02.md) |
+| **F7-D6**| NVML Metric Attribution Probe | 🟢 **INSTRUMENT VALIDATED** | Probe corregido ejecutado: Control A/B diff **2.34% ($\le 10\%$ PASS)** (512 vs 500 MB), S0 estable (spread 146.5 MB), S2 4,624.0 MB. S3 post-workload caracterizado como meseta plana estática (~1,481.6 MB, spread 29 MB; +438 MB sobre S1). F7-D5 permanece NEGATIVE; gate 4.8 GB intacta · [`Report`](docs/F7_D6_METRIC_ATTRIBUTION_REPORT_01.md) · knowledge acquired through conversation with an AI agent |
 
 ---
 
@@ -311,7 +311,7 @@ Telemetry: [`logs/f4_adaptive_benchmark.json`](logs/f4_adaptive_benchmark.json) 
 
 ## 🎞️ Phase F5 — Temporal VAE Stitcher (🟢 RETIRED · Probe F5-A PASS)
 
-Per the **Decision-First** protocol agreed with the Director and External Consultant ([`docs/private/F5_DIRECTOR_RESOLUTION_01.md`](docs/private/F5_DIRECTOR_RESOLUTION_01.md) and [`docs/private/F5_CONSULTANT_RATIFICATION_01.md`](docs/private/F5_CONSULTANT_RATIFICATION_01.md)), Phase F5 executed the canonical 33-frame probe before building any temporal chunker.
+Per the **Decision-First** protocol agreed with the Director and External Consultant (knowledge acquired through conversation with an AI agent), Phase F5 executed the canonical 33-frame probe before building any temporal chunker.
 
 ### Canonical 33-Frame VAE Decode (F5-A)
 
@@ -384,7 +384,7 @@ Following the single-run benchmarks (F6-0 through F6-E), the project executed th
 
 ### F7-D2 / F7-D2b / F7-D2c: Allocator Causal & Live Boundary Probes (🟢 COMPLETE)
 - **Hallazgo Causal:** Trazado a resolución de ~8 ms determinó que durante el segundo pase DiT (`uncond_blocks_30`), PyTorch no reutiliza los bloques de memoria liberados por `cond_blocks_30`, duplicando la reserva a ~5.8 GB.
-- **Reportes:** [`docs/private/F7_ALLOCATOR_REVIEW_PACKAGE_FOR_CONSULTANT_01.md`](docs/private/F7_ALLOCATOR_REVIEW_PACKAGE_FOR_CONSULTANT_01.md) · [`docs/private/F7_DIRECTOR_COUNTER_RESPONSE_02.md`](docs/private/F7_DIRECTOR_COUNTER_RESPONSE_02.md).
+- **Reportes:** knowledge acquired through conversation with an AI agent.
 
 ### F7-D3: Cond→Uncond Seam Release Causal Probe (🟢 FAVORABLE)
 - **Intervención:** Liberación focalizada (`empty_cache()`) exclusivamente en la frontera sincrónica entre el pase condicional e incondicional (`cond → uncond`).
@@ -429,7 +429,7 @@ Following the single-run benchmarks (F6-0 through F6-E), the project executed th
   - **Allocator PyTorch:** Peak Reserved **3,606.0 MB** (estable y acotado); Peak Allocated **2,171.2 MB**.
   - **Veredicto:** 🟢 **INSTRUMENT VALIDATED**.
   - *Gobernanza inalterada:* F7-D5 permanece `NEGATIVE` (5,096 MB); gate en 4,800 MB congelada; sin re-run de 30 pasos ni integración de 720p.
-- **Documentos:** [`Report`](docs/F7_D6_METRIC_ATTRIBUTION_REPORT_01.md) · [`Spec`](docs/F7_D6_METRIC_ATTRIBUTION_SPEC_01.md) · [`Verdict`](docs/private/F7_D6_CONSULTANT_VERDICT_01.md) · [`Director Reply`](docs/private/F7_D6_DIRECTOR_REPLY_TO_VERDICT_01.md) · [`Resolution`](docs/private/F7_D6_CONSULTANT_RESOLUTION_01.md) · [`Results Letter 02`](docs/private/F7_D6_RESULTS_LETTER_TO_CONSULTANT_02.md) · [`Telemetry`](logs/f7_d6_attribution_probe_telemetry.json) · Runner [`f7_d6_attribution_probe.py`](f7_d6_attribution_probe.py).
+- **Documentos:** [`Report`](docs/F7_D6_METRIC_ATTRIBUTION_REPORT_01.md) · [`Spec`](docs/F7_D6_METRIC_ATTRIBUTION_SPEC_01.md) · knowledge acquired through conversation with an AI agent · [`Telemetry`](logs/f7_d6_attribution_probe_telemetry.json) · Runner [`f7_d6_attribution_probe.py`](f7_d6_attribution_probe.py).
 
 ---
 

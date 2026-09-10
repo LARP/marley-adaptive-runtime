@@ -140,7 +140,7 @@ F6-E Stress    Adapt + 1200MB      446.31 s      14.88 s/p     525.95 s      5,1
 * **Informes y Alertas de Diagnóstico:**
   * [`docs/F6_MULTIDIMENSIONAL_BENCHMARK_REPORT_01.md`](file:///d:/Gemini_Admin_Tool/marley_720p/docs/F6_MULTIDIMENSIONAL_BENCHMARK_REPORT_01.md)
   * [`docs/F6_ALERT_01_INT8_HOST_RSS_OVERHEAD.md`](file:///d:/Gemini_Admin_Tool/marley_720p/docs/F6_ALERT_01_INT8_HOST_RSS_OVERHEAD.md)
-  * [`docs/private/F6_CONSULTANT_EVALUATION_01.md`](file:///d:/Gemini_Admin_Tool/marley_720p/docs/private/F6_CONSULTANT_EVALUATION_01.md)
+  * knowledge acquired through conversation with an AI agent
 
 ---
 

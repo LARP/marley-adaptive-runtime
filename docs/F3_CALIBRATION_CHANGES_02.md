@@ -28,7 +28,7 @@ The Letter 2 ratified all changes without adding new ones. It added one methodol
 
 > **"F3-A demuestra que el scheduler funciona; F3-B demuestra que el scheduler aporta valor real a Wan2.1."**
 
-Both letters are stored in `docs/private/F3_F4_TECHNICAL_OPINION_01.md` for full traceability.
+Both letters were knowledge acquired through conversation with an AI agent, retained for full traceability.
 
 ### Human Supervisor Approval
 Explicit authorization received on 2026-09-08: code writing authorized, execution pending separate authorization.

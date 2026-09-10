@@ -4,7 +4,7 @@
 **Phase:** F3 + INT8 (isolation experiment; **NOT** F4, **NOT** NF4)
 **Date:** 2026-09-08
 **Status:** ✅ **IMPLEMENTED & MEASURED — 🟢 PASS** (plan executed; results in [`results/TEST_F3_INT8_benchmark.md`](../results/TEST_F3_INT8_benchmark.md))
-**Consultant Directive:** [`docs/private/F3_F4_TECHNICAL_OPINION_01.md`](private/F3_F4_TECHNICAL_OPINION_01.md) · Closure letter: F3 certified +7.2% and frozen as baseline.
+**Consultant Directive:** knowledge acquired through conversation with an AI agent · Closure letter: F3 certified +7.2% and frozen as baseline.
 **Baseline evidence:** [`results/TEST_F3_verification.md`](../results/TEST_F3_verification.md)
 **Baseline quantization evidence:** [`results/TEST_F1.7_selective_quantization.md`](../results/TEST_F1.7_selective_quantization.md)
 **Implementation:** [`marley/ops/async_stream_int8.py`](../marley/ops/async_stream_int8.py) (`INT8BudgetedStreamer`) · [`f3_int8_scheduler_benchmark.py`](../f3_int8_scheduler_benchmark.py)

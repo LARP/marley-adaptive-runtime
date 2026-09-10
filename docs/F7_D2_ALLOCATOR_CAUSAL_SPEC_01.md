@@ -4,7 +4,7 @@
 **Phase:** F7 (1280×720) — Diagnostic sub-phase F7-D2
 **Date:** 2026-09-09
 **Status:** SPEC — awaiting Director execution authorization
-**References:** F7-D1 Forensic Report (`docs/F7_D1_FORENSIC_PROFILING_REPORT_01.md`); Consultant Letter 2026-09-09 (§7 causal experiment); Director Response (`docs/private/F7_DIRECTOR_RESPONSE_TO_CONSULTANT_01.md` §4 Paso 3); F7-1 Pilot (Result C).
+**References:** F7-D1 Forensic Report (`docs/F7_D1_FORENSIC_PROFILING_REPORT_01.md`); Consultant Letter 2026-09-09 (§7 causal experiment); Director Response (knowledge acquired through conversation with an AI agent §4 Paso 3); F7-1 Pilot (Result C).
 
 **Evidence classification:** `MEASURED` = instrumented in-run; `OBSERVED` = sampled telemetry; `DERIVED` = computed; `HYPOTHESIS` = expectation, never presented as result.
 
