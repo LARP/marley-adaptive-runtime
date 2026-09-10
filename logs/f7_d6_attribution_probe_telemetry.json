@@ -1,0 +1,176 @@
+{
+  "timestamp": "2026-09-09T22:08:43.882454",
+  "phase": "F7-D6 (NVML metric attribution probe)",
+  "evidence_class": "All measured/observed; derived computed",
+  "governance_note": "Metrology per External Consultant authorizations no.1-4: NOT a reclassification of F7-D5 and NOT a gate change. S2-S0 is 'workload-induced device residency delta', not proven process ownership.",
+  "workload": {
+    "resolution": "1280x720",
+    "frames": 33,
+    "steps": 3,
+    "mode": "adaptive",
+    "seed": 42
+  },
+  "s0_stability": {
+    "n": 1200,
+    "min_mb": 982.96,
+    "max_mb": 983.21,
+    "mean_mb": 982.97,
+    "median_mb": 982.96,
+    "std_mb": 0.05,
+    "spread_mb": 0.25
+  },
+  "s3_stability": {
+    "n": 600,
+    "min_mb": 1767.49,
+    "max_mb": 2117.24,
+    "mean_mb": 1887.22,
+    "median_mb": 1869.55,
+    "std_mb": 118.23,
+    "spread_mb": 349.75
+  },
+  "s4_stability": {
+    "n": 600,
+    "min_mb": 1856.19,
+    "max_mb": 2091.78,
+    "mean_mb": 1902.93,
+    "median_mb": 1881.25,
+    "std_mb": 53.67,
+    "spread_mb": 235.59
+  },
+  "milestones_mb": {
+    "S0_idle_baseline": 983.0,
+    "S1_operational_baseline": 1095.42,
+    "S2_workload_peak": 4883.3,
+    "S3_post_workload_mean": 1887.22,
+    "S4_final_mean": 1902.93
+  },
+  "derived_mb": {
+    "ctx_overhead": 112.5,
+    "workload_increment_S2_S1": 3787.8,
+    "workload_induced_device_residency_delta": 3900.3,
+    "so_share": 983.0
+  },
+  "control_A": {
+    "requested_mb": 500.0,
+    "pre_mb": 982.96,
+    "during_mb": 1575.49,
+    "post_mb": 1075.49,
+    "delta_alloc_mb": 592.53,
+    "delta_return_mb": 92.53,
+    "expected_mb": 500.0,
+    "responds_proportionally": true
+  },
+  "control_B": {
+    "requested_mb": 500.0,
+    "pre_mb": 1878.66,
+    "during_mb": 2378.79,
+    "post_mb": 1878.79,
+    "delta_alloc_mb": 500.13,
+    "delta_return_mb": 0.13,
+    "expected_mb": 500.0,
+    "responds_proportionally": true
+  },
+  "classification": {
+    "s0_stable": true,
+    "signal_floor_mb": 150.0,
+    "control_a_delta_mb": 592.53,
+    "control_b_delta_mb": 500.13,
+    "control_a_observable": true,
+    "control_abs_diff_mb": 92.4,
+    "control_rel_diff_pct": 15.59,
+    "control_guard_tripped": false,
+    "control_consistent": false,
+    "workload_increment_mb": 3787.8,
+    "workload_measurable": true,
+    "s3_mean_mb": 1887.22,
+    "s3_spread_mb": 349.75,
+    "s3_vs_s0_abs_mb": 904.2,
+    "s3_stable": false,
+    "s3_returns_to_baseline": false,
+    "cudaMemGetInfo_coherent": true,
+    "s4_mean_mb": 1902.93,
+    "s4_spread_mb": 235.59,
+    "s4_stable": false,
+    "s4_vs_s3_abs_mb": 15.7,
+    "s4_vs_s0_abs_mb": 920.0,
+    "verdict": "INSTRUMENT NOT VALIDATED",
+    "reason": "Control A/B not reproducible (relative difference > 10%)"
+  },
+  "cross_checks_mb": {
+    "peak_torch_reserved": 3776.0,
+    "peak_torch_alloc": 2179.3,
+    "peak_process_ram": 355.8,
+    "cudaMemGetInfo_S1": {
+      "free_mb": 5072.0,
+      "total_mb": 6143.5,
+      "used_mb": 1071.5
+    },
+    "cudaMemGetInfo_S2_peak": {
+      "free_mb": 1021.12,
+      "total_mb": 6143.5,
+      "used_mb": 5122.38
+    },
+    "cudaMemGetInfo_S3": {
+      "free_mb": 4436.0,
+      "total_mb": 6143.5,
+      "used_mb": 1707.5
+    },
+    "cudaMemGetInfo_S4": {
+      "free_mb": 4436.0,
+      "total_mb": 6143.5,
+      "used_mb": 1707.5
+    }
+  },
+  "per_step": [
+    3692.0,
+    3676.0,
+    3772.0
+  ],
+  "denoise_time_s": 166.65,
+  "processes_pre": {
+    "compute_n": 41,
+    "compute_attrib_mb": 0.0,
+    "graphics_n": 41,
+    "graphics_attrib_mb": 0.0,
+    "note": "usedGpuMemory=None means the counter is UNAVAILABLE under WDDM, NOT that the process uses 0 MB"
+  },
+  "processes_post": {
+    "compute_n": 43,
+    "compute_attrib_mb": 0.0,
+    "graphics_n": 42,
+    "graphics_attrib_mb": 0.0,
+    "note": "usedGpuMemory=None means the counter is UNAVAILABLE under WDDM, NOT that the process uses 0 MB"
+  },
+  "comparison": {
+    "d5_peak_nvml_device_used_mb": 5096.1,
+    "d5_peak_torch_reserved_mb": 3776.0
+  },
+  "result_class": "INSTRUMENT NOT VALIDATED",
+  "verdict": {
+    "execution_completed": true,
+    "error_detail": null,
+    "s0_stable": true,
+    "signal_floor_mb": 150.0,
+    "control_a_delta_mb": 592.53,
+    "control_b_delta_mb": 500.13,
+    "control_a_observable": true,
+    "control_abs_diff_mb": 92.4,
+    "control_rel_diff_pct": 15.59,
+    "control_guard_tripped": false,
+    "control_consistent": false,
+    "workload_increment_mb": 3787.8,
+    "workload_measurable": true,
+    "s3_mean_mb": 1887.22,
+    "s3_spread_mb": 349.75,
+    "s3_vs_s0_abs_mb": 904.2,
+    "s3_stable": false,
+    "s3_returns_to_baseline": false,
+    "cudaMemGetInfo_coherent": true,
+    "s4_mean_mb": 1902.93,
+    "s4_spread_mb": 235.59,
+    "s4_stable": false,
+    "s4_vs_s3_abs_mb": 15.7,
+    "s4_vs_s0_abs_mb": 920.0,
+    "reason": "Control A/B not reproducible (relative difference > 10%)"
+  }
+}
