@@ -3,11 +3,32 @@
 **Project:** Marley Runtime — Low-VRAM Diffusion Orchestration
 **Phase:** F7 (1280×720) — F7-D6 measurement-metrology diagnostic
 **Date:** 2026-09-09
-**Status:** ⏸ **PROPOSAL — REVISED per External Consultant (analysis, NOT approval). Awaiting Director authorization to execute.**
+**Status:** ✅ **AUTHORIZED & IMPLEMENTED — awaiting Director go-ahead to execute.** Authorized by External Consultant (no.1–4, 2026-09-09); runner updated per the final protocol. `py_compile` OK, `--dry-run` OK. **NOT executed.**
 **Trigger:** F7-D5 returned NEGATIVE (peak NVML device `used` 5,096.1 MB > 4,800 MB gate) despite `torch.reserved` stabilizing at ~3,766 MB across all 30 steps with no allocator divergence.
-**References:** F7-D1 forensic profiling; F7-D3/D4/D5 seam-release series; ROADMAP §2 three-layer telemetry model; ROADMAP F7-D5 kill-gate; **External Consultant response (2026-09-09)** — this revision incorporates its directives.
+**References:** F7-D1 forensic profiling; F7-D3/D4/D5 seam-release series; ROADMAP §2 three-layer telemetry model; ROADMAP F7-D5 kill-gate; **External Consultant authorizations no.1–4 (2026-09-09)**; implementation change log [`docs/F7_D6_IMPLEMENTATION_CHANGES_01.md`](F7_D6_IMPLEMENTATION_CHANGES_01.md).
 
 **Evidence:** `MEASURED` / `OBSERVED` / `DERIVED` / `HYPOTHESIS` throughout.
+
+---
+
+## 0.0 Final authorized protocol (Consultant no.4)
+
+```text
+S0 idle (60 s)
+  -> Control A (~500 MB, pre-workload, before CUDA/pipeline init)
+  -> init CUDA/PyTorch/pipeline
+  -> S1 operational baseline
+  -> Wan 3 DiT steps (VAE skipped)
+  -> S3 post-workload (30 s)
+  -> Control B (~500 MB, post-workload)
+  -> S4 final observation (30 s)
+```
+
+Operational criteria: S0/S3/S4 spread ≤150 MB; Control A/B relative difference ≤10%
+(guard: if ΔA < max(3×S0_std, 150 MB) → INCONCLUSIVE); workload measurable if
+(S2−S1) ≥ max(3×S0_std, 150 MB); |S3_mean − S0_mean| ≤200 MB; `cudaMemGetInfo`
+coherence qualitative/temporal. Verdict: INSTRUMENT VALIDATED / INCONCLUSIVE /
+INSTRUMENT NOT VALIDATED. These are operational criteria for F7-D6, NOT a gate change.
 
 ---
 
