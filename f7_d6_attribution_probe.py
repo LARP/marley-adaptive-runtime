@@ -6,7 +6,7 @@ Phase F7-D6 (measurement metrology) -- Characterize how much of the device-wide 
 
 REVISED and AUTHORIZED per External Consultant:
 - Authorizations no.1-4 (2026-09-09)
-- Methodological Resolution (2026-09-10, F7_D6_CONSULTANT_RESOLUTION_01.md):
+- Methodological Resolution (2026-09-10, docs/private/F7_D6_CONSULTANT_RESOLUTION_01.md):
   * S3 return-to-baseline decoupled from instrument validity -> phenomenological characterization.
   * Control A executed post-CUDA init with deterministic warm-up (~10 MB), pre-pipeline.
   * NVML per-process is auxiliary under Windows WDDM; complemented with psutil.
@@ -456,7 +456,7 @@ def parse_args() -> argparse.Namespace:
 
 
 # ---------------------------------------------------------------------------
-# Classification -- 3 levels per Consultant Resolution (F7_D6_CONSULTANT_RESOLUTION_01.md)
+# Classification -- 3 levels per Consultant Resolution (docs/private/F7_D6_CONSULTANT_RESOLUTION_01.md)
 #   🟢 INSTRUMENT VALIDATED / 🟡 INCONCLUSIVE / 🔴 INSTRUMENT NOT VALIDATED
 # Primary instrument validity criteria:
 #   S0 spread <= 150 MB; control A/B relative diff <= 10%;

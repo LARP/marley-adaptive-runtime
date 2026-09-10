@@ -32,7 +32,7 @@ compute_stream is still mid-forward on block[i] using that same slot.
 References
 ----------
 - docs/F3_CALIBRATION_CHANGES_02.md â€” full rationale for all design decisions
-- docs/F3_F4_TECHNICAL_OPINION_01.md â€” consultant advisory letters
+- docs/private/F3_F4_TECHNICAL_OPINION_01.md â€” consultant advisory letters
 """
 
 from __future__ import annotations

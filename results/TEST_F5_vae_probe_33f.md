@@ -9,7 +9,7 @@
 **Workload (Canonical F5):** 832×480 (480p) · **33 frames exact** · Latent `(1, 16, 9, 60, 104)`  
 **Configuration:** Native `enable_tiling()` with 256×256 spatial tiles & causal temporal caching  
 **Telemetry Artifact:** [`logs/f5_vae_probe_33f.json`](../logs/f5_vae_probe_33f.json)  
-**Directive Authority:** [`docs/F5_DIRECTOR_RESOLUTION_01.md`](../docs/F5_DIRECTOR_RESOLUTION_01.md) · [`docs/F5_CONSULTANT_RATIFICATION_01.md`](../docs/F5_CONSULTANT_RATIFICATION_01.md)  
+**Directive Authority:** [`docs/private/F5_DIRECTOR_RESOLUTION_01.md`](../docs/private/F5_DIRECTOR_RESOLUTION_01.md) · [`docs/private/F5_CONSULTANT_RATIFICATION_01.md`](../docs/private/F5_CONSULTANT_RATIFICATION_01.md)  
 **Status:** 🟢 **CERTIFIED PASS — RETIRE F5-C**
 
 ---
@@ -52,7 +52,7 @@ The VAE decoder in `AutoencoderKLWan` utilizes causal 3D convolutions with inter
 
 ## 4. Decision & Architectural Action
 
-Following Section 3 of `docs/F5_DIRECTOR_RESOLUTION_01.md`:
+Following Section 3 of `docs/private/F5_DIRECTOR_RESOLUTION_01.md`:
 
 ```text
 [ F5-A: CANONICAL 33f PROBE ] ──► VRAM = 2,109 MB (<= 4,800) & Decode = 27 s (<= 150)

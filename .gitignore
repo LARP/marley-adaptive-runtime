@@ -224,6 +224,9 @@ __marimo__/
 GEMINI.md
 AGENTS.md
 
+# Private correspondence (director / consultant / external AI letters, do not push)
+docs/private/
+
 # Marley Runtime — Generated outputs (heavy binaries, not versioned)
 # Telemetry evidence (logs/*.json, *.log) is intentionally tracked.
 logs/*.mp4

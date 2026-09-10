@@ -5,8 +5,8 @@
 **Date:** 2026-09-09
 **Artifact:** [`f7_d6_attribution_probe.py`](../f7_d6_attribution_probe.py)
 **Authorization:** External Consultant authorizations no.1–4 (2026-09-09), recorded in
-[`docs/F7_D6_CONSULTANT_AUTHORIZATION_01.md`](F7_D6_CONSULTANT_AUTHORIZATION_01.md) …
-[`docs/F7_D6_CONSULTANT_AUTHORIZATION_04.md`](F7_D6_CONSULTANT_AUTHORIZATION_04.md).
+[`docs/private/F7_D6_CONSULTANT_AUTHORIZATION_01.md`](private/F7_D6_CONSULTANT_AUTHORIZATION_01.md) …
+[`docs/private/F7_D6_CONSULTANT_AUTHORIZATION_04.md`](private/F7_D6_CONSULTANT_AUTHORIZATION_04.md).
 **Status:** IMPLEMENTED — `py_compile` OK, `--dry-run` OK. **NOT executed.**
 
 **Evidence:** `MEASURED` / `OBSERVED` / `DERIVED` / `HYPOTHESIS` throughout.

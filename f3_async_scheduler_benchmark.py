@@ -61,7 +61,7 @@ Output
 References
 ----------
   docs/F3_CALIBRATION_CHANGES_02.md           â€” full design rationale
-  docs/F3_F4_TECHNICAL_OPINION_01.md  â€” consultant advisory letters
+  docs/private/F3_F4_TECHNICAL_OPINION_01.md  â€” consultant advisory letters
   marley/ops/async_stream.py               â€” BudgetedAsyncStreamer implementation
 """
 
