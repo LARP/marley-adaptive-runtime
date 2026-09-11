@@ -1,0 +1,249 @@
+{
+  "timestamp": "2026-09-11T04:33:49.803986",
+  "phase": "F9-0 preflight",
+  "model_id": "Wan-AI/Wan2.1-T2V-1.3B-Diffusers",
+  "checks": {},
+  "sections": {
+    "gpu": {
+      "checks": {
+        "nvml_available": {
+          "pass": true,
+          "blocking": true,
+          "detail": "NVML init OK"
+        },
+        "vram_total_ge_6gb": {
+          "pass": true,
+          "blocking": true,
+          "detail": "total=6144.0 MB"
+        },
+        "vram_free_headroom": {
+          "pass": true,
+          "blocking": true,
+          "detail": "free=5137.3 MB (>=4500 MB recomendado para el safe-abort)"
+        },
+        "gpu_temp_reasonable": {
+          "pass": true,
+          "blocking": true,
+          "detail": "temp=51 C"
+        }
+      },
+      "available": true,
+      "device_name": "NVIDIA GeForce RTX 3050 6GB Laptop GPU",
+      "driver_version": "581.86",
+      "memory_total_mb": 6144.0,
+      "memory_used_mb": 1006.7,
+      "memory_free_mb": 5137.3,
+      "gpu_temp_c": 51,
+      "gpu_clock_mhz": 210,
+      "nvidia_smi": "NVIDIA GeForce RTX 3050 6GB Laptop GPU, 581.86, 6144 MiB, 865 MiB"
+    },
+    "python_env": {
+      "executable": "D:\\Gemini_Admin_Tool\\marley_720p\\.venv\\Scripts\\python.exe",
+      "python_version": "3.10.11",
+      "in_venv": true,
+      "checks": {
+        "torch_import": {
+          "pass": true,
+          "blocking": true,
+          "detail": "2.6.0+cu124"
+        },
+        "torch_cuda_available": {
+          "pass": true,
+          "blocking": true,
+          "detail": "cuda=True (12.4)"
+        },
+        "pynvml_import": {
+          "pass": true,
+          "blocking": true,
+          "detail": "?"
+        },
+        "diffusers_import": {
+          "pass": true,
+          "blocking": true,
+          "detail": "0.40.0"
+        },
+        "transformers_import": {
+          "pass": true,
+          "blocking": true,
+          "detail": "5.16.1"
+        },
+        "huggingface_hub_import": {
+          "pass": true,
+          "blocking": true,
+          "detail": "1.30.0"
+        }
+      },
+      "torch_version": "2.6.0+cu124",
+      "torch_cuda_available": true,
+      "torch_cuda_version": "12.4",
+      "cuda_device_name": "NVIDIA GeForce RTX 3050 6GB Laptop GPU",
+      "cuda_capability": "8.6",
+      "cuda_total_mb": 6143.5,
+      "pynvml_version": "unknown",
+      "diffusers_version": "0.40.0",
+      "transformers_version": "5.16.1",
+      "huggingface_hub_version": "1.30.0"
+    },
+    "model_cache": {
+      "cache_root": "C:\\Users\\larps\\.cache\\huggingface\\hub",
+      "model_id": "Wan-AI/Wan2.1-T2V-1.3B-Diffusers",
+      "checks": {
+        "model_cache_dir": {
+          "pass": true,
+          "blocking": true,
+          "detail": "C:\\Users\\larps\\.cache\\huggingface\\hub\\models--Wan-AI--Wan2.1-T2V-1.3B-Diffusers"
+        },
+        "model_snapshot_complete": {
+          "pass": true,
+          "blocking": true,
+          "detail": "snapshots=1, required=['model_index.json']"
+        }
+      },
+      "model_dir": "C:\\Users\\larps\\.cache\\huggingface\\hub\\models--Wan-AI--Wan2.1-T2V-1.3B-Diffusers",
+      "model_dir_exists": true,
+      "snapshots": [
+        "0fad780a534b6463e45facd96134c9f345acfa5b"
+      ],
+      "active_snapshot": "0fad780a534b6463e45facd96134c9f345acfa5b",
+      "missing_required_files": [],
+      "component_transformer": true,
+      "component_vae": true,
+      "component_scheduler": true,
+      "component_text_encoder": true
+    },
+    "cuda_exclusivity": {
+      "checks": {
+        "compute_enumeration_available": {
+          "pass": true,
+          "blocking": true,
+          "detail": "NVML compute enumeration OK"
+        },
+        "no_other_compute_context": {
+          "pass": true,
+          "blocking": true,
+          "detail": "real CUDA compute-context PIDs (nvcuda.dll): []"
+        },
+        "graphics_does_not_invalidate": {
+          "pass": true,
+          "blocking": false,
+          "detail": "graphics/DWM PIDs (informational only): [6908, 12976, 14356, 13828, 13672, 16000, 18100, 15804, 19736, 14144, 21040, 21868, 16104, 21864, 6496] ..."
+        },
+        "unknown_context_processes": {
+          "pass": true,
+          "blocking": false,
+          "detail": "protected processes with undeterminable context (not invalidating): [2392, 5512]"
+        }
+      },
+      "compute_n": 36,
+      "compute_attrib_mb": 0.0,
+      "graphics_n": 36,
+      "graphics_attrib_mb": 0.0,
+      "target_pid": 49100,
+      "target_pid_found": false,
+      "target_pid_gpu_mem": null,
+      "other_compute_pids": [],
+      "other_graphics_pids": [
+        6908,
+        12976,
+        14356,
+        13828,
+        13672,
+        16000,
+        18100,
+        15804,
+        19736,
+        14144,
+        21040,
+        21868,
+        16104,
+        21864,
+        6496,
+        6876,
+        18108,
+        13992,
+        25464,
+        25104,
+        25888,
+        27860,
+        12600,
+        10752,
+        15856,
+        36800,
+        23448,
+        42632,
+        37308,
+        31616,
+        29180,
+        20912,
+        35372,
+        31228
+      ],
+      "unknown_context_pids": [
+        2392,
+        5512
+      ],
+      "compute_enumeration_ok": true,
+      "exclusive_other_contexts": true,
+      "detection_method": "NVML compute list refined by real CUDA context detection (nvcuda.dll loaded in process); graphics/DWM does not invalidate",
+      "host_process_memory": {
+        "working_set_mb": 566.29,
+        "commit_private_mb": 1432.14
+      },
+      "note": "usedGpuMemory=None/UNAVAILABLE under WDDM means the counter is UNAVAILABLE, NOT that the process uses 0 MB"
+    },
+    "system": {
+      "checks": {
+        "ram_available_ge_8gb": {
+          "pass": true,
+          "blocking": true,
+          "detail": "available=12.2 GB (modelo usa ~15 GB host en pico)"
+        },
+        "disk_free_ge_5gb": {
+          "pass": true,
+          "blocking": true,
+          "detail": "free=137.5 GB"
+        },
+        "on_ac_power": {
+          "pass": true,
+          "blocking": true,
+          "detail": "AC power OK"
+        }
+      },
+      "ram_total_gb": 23.7,
+      "ram_available_gb": 12.2,
+      "cpu_count_logical": 20,
+      "cpu_count_physical": 14,
+      "disk_total_gb": 931.5,
+      "disk_free_gb": 137.5,
+      "battery_percent": 77,
+      "on_ac_power": true
+    },
+    "outputs": {
+      "checks": {
+        "dir_logs_exists": {
+          "pass": true,
+          "blocking": true,
+          "detail": "D:\\Gemini_Admin_Tool\\marley_720p\\logs"
+        },
+        "dir_docs_exists": {
+          "pass": true,
+          "blocking": true,
+          "detail": "D:\\Gemini_Admin_Tool\\marley_720p\\docs"
+        },
+        "runner_present": {
+          "pass": true,
+          "blocking": true,
+          "detail": "f9_0_attribution_runner.py"
+        },
+        "protocol_present": {
+          "pass": true,
+          "blocking": true,
+          "detail": "docs/F9_0_PREREGISTERED_MEMORY_PEAK_ATTRIBUTION_PROTOCOL_01.md"
+        }
+      }
+    }
+  },
+  "blocking_failures": [],
+  "ready_for_execution": true,
+  "campaign_command": ".venv\\Scripts\\python.exe f9_0_attribution_runner.py --runs 5 --attribution-iteration 1"
+}
