@@ -27,7 +27,8 @@
 [![Phase F7: CLOSED FAIL](https://img.shields.io/badge/Phase%20F7-CLOSED%20FAIL%20(4.99GB)-ef4444.svg)](docs/F7_STAGE_B_FULL_VALIDATION_REPORT_01.md)
 [![Phase F8: NULL RESULT & DEFINITIVE CLOSURE](https://img.shields.io/badge/Phase%20F8-NULL%20RESULT%20%7C%20720p%20CLOSED-ef4444.svg)](docs/F8_SCREENING_AB_REPORT_01.md)
 [![Phase F9: GENERATED](https://img.shields.io/badge/Phase%20F9-GENERATED-8b5cf6.svg)](docs/F9_RUNTIME_MEMORY_RESEARCH_SANDBOX_CHARTER_01.md)
-[![Phase F9-0: PREREGISTERED / FROZEN](https://img.shields.io/badge/Phase%20F9--0-PREREGISTERED%20%2F%20FROZEN-8b5cf6.svg)](docs/F9_0_PREREGISTERED_MEMORY_PEAK_ATTRIBUTION_PROTOCOL_01.md)
+[![Phase F9-0: CLOSED - ATTRIBUTED](https://img.shields.io/badge/Phase%20F9--0-CLOSED%20%7C%20ATTRIBUTED%20(100%25)-22c55e.svg)](docs/F9_0_ATTRIBUTION_REPORT_01.md)
+[![Phase F9-1: PREREGISTERED / FROZEN](https://img.shields.io/badge/Phase%20F9--1-PREREGISTERED%20%2F%20FROZEN-8b5cf6.svg)](docs/F9_1_PREREGISTERED_WORKSPACE_REDUCTION_PROTOCOL_01.md)
 
 *In loving memory of Marley 🐾*
 
@@ -41,7 +42,9 @@
 
 Rather than relying purely on blunt sequential CPU offloading, `marley-runtime` investigates and measures **adaptive, block-level memory management policies** that dynamically balance PCIe transfer latency, activation recomputation, tensor lifetime management, and selective quantization.
 
-> **Status (2026-09-10):** 480p / 33 frames / 30 steps is the certified production baseline. The 720p line is closed as experimental after F7 (FAIL) and F8 (NULL RESULT). The project has advanced to **Phase F9 — Runtime Memory Research Sandbox**, whose entry gate **F9-0 (Memory Peak Attribution Diagnostic)** is preregistered/frozen and awaiting execution authorization.
+> **Status (2026-09-11):** 480p / 33 frames / 30 steps is the certified production baseline. The 720p line is closed as experimental after F7 (FAIL) and F8 (NULL RESULT). The project is in **Phase F9 — Runtime Memory Research Sandbox**:
+> - **F9-0 (Memory Peak Attribution Diagnostic):** **`CLOSED - ATTRIBUTED`** (5/5 runs valid, 100% explained, dominant components: Cat 3 Kernel Workspaces ~2.62 GB and Cat 4 Allocator Pool).
+> - **F9-1 (Workspace Reduction Protocol):** **`PREREGISTRATION FROZEN`** with all 8 pre-flight verifications validated (N=3 exact bit determinism, $\epsilon = 64\text{ MB}$, SHA-256 hashed 10-block balance sequence). Ready for confirmatory execution.
 
 > [!NOTE]
 > The current architectural design and phased milestone strategy is governed by **[Roadmap v5](ROADMAP.md)**, reviewed and approved through a multi-agent consensus using **free-tier models** (ChatGPT, DeepSeek Pro, and Gemini Pro). Active execution is performed by **Antigravity Pro** (Gemini 2.5 Flash and Claude Sonnet 4.6), with formal strategic adoption of technical guidance from an external **Generative AI & ComfyUI Runtime Expert** (knowledge acquired through conversation with an AI agent).
@@ -96,8 +99,9 @@ Memory is tracked across **three distinct layers** to prevent WDDM virtualizatio
 | **F7-D6**| NVML Metric Attribution Probe | 🟢 **INSTRUMENT VALIDATED** | Probe corregido ejecutado: Control A/B diff **2.34% ($\le 10\%$ PASS)** (512 vs 500 MB), S0 estable (spread 146.5 MB), S2 4,624.0 MB. S3 post-workload caracterizado como meseta plana estática (~1,481.6 MB, spread 29 MB; +438 MB sobre S1). F7-D5 permanece NEGATIVE; gate 4.8 GB intacta · [`Report`](docs/F7_D6_METRIC_ATTRIBUTION_REPORT_01.md) · knowledge acquired through conversation with an AI agent |
 | **F7** | 720p Full Validation & Causal | 🔴 **CLOSED FAIL** | Pico Físico **4,996.0 MB** en Paso 6 (+196.0 MB violación). 480p ratificado como único estándar de producción · [`Report`](docs/F7_STAGE_B_FULL_VALIDATION_REPORT_01.md) |
 | **F8** | 10-Step A/B Quantization Screening | 🔴 **NULL RESULT (720p CLOSED)** | Delta Peak **-5.0 MB** ($\approx 0\text{ MB} < 50\text{ MB}$). Cuantización selectiva DiT no reduce el pico físico NVML en 720p. **Línea 720p definitivamente cerrada** · [`Report`](docs/F8_SCREENING_AB_REPORT_01.md) |
-| **F9** | Runtime Memory Research Sandbox | 🟡 **GENERATED / NOT EXECUTED** | Nueva línea: gestión dinámica de memoria (lifetime, coexistencia, reuso, workspaces, residency, scheduling). Sandbox **DiT** (no UNet), gate G3 + G1–G6, un único slot de validación Wan. F7/F8 permanecen cerradas · [`Charter`](docs/F9_RUNTIME_MEMORY_RESEARCH_SANDBOX_CHARTER_01.md) |
-| **F9-0** | Preregistered Memory Peak Attribution Diagnostic | 🟡 **PREREGISTERED / FROZEN** | Diagnóstico (**no** optimización): atribución ≥90 % del **pico inducido** (`Peak NVML − S0`) en 7 categorías excluyentes. NVML 20 ms, N≥5, lower bounds reproducibles, reutiliza instrumento F7-D6. Ref. **F7-D5 = 5,096.1 MB (+296.1 MB)**. **NO ejecutado** · [`Protocol`](docs/F9_0_PREREGISTERED_MEMORY_PEAK_ATTRIBUTION_PROTOCOL_01.md) |
+| **F9** | Runtime Memory Research Sandbox | 🟢 **ACTIVE** | Nueva línea: gestión dinámica de memoria (lifetime, coexistencia, reuso, workspaces, residency, scheduling). Sandbox **DiT** (no UNet), gate G3 + G1–G6, un único slot de validación Wan. F7/F8 permanecen cerradas · [`Charter`](docs/F9_RUNTIME_MEMORY_RESEARCH_SANDBOX_CHARTER_01.md) |
+| **F9-0** | Preregistered Memory Peak Attribution Diagnostic | 🟢 **CLOSED - ATTRIBUTED** | Diagnóstico completado: 5/5 corridas válidas, 100% atribuido ($\text{Cat 7} = 0\text{ MB}$). Dominante: **Cat 3 Kernel Workspaces (~2.62 GB)** y **Cat 4 Allocator Pool (~452 – 3,174 MB)** · [`Report`](docs/F9_0_ATTRIBUTION_REPORT_01.md) |
+| **F9-1** | Workspace Reduction Protocol & Pre-Flight Verifications | 🟡 **PREREGISTERED / FROZEN** | Prerregistro congelado con 8 verificaciones validadas (N=3 determinismo exacto $\le 10^{-3}$, $\epsilon = 64\text{ MB}$, secuencia de 10 bloques con SHA-256 inmutable, bootstrap pareado). Listo para ejecución confirmatoria · [`Protocol`](docs/F9_1_PREREGISTERED_WORKSPACE_REDUCTION_PROTOCOL_01.md) |
 
 ---
 

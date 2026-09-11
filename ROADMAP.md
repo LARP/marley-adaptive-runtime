@@ -1,6 +1,6 @@
 # Marley Runtime (`marley-runtime`) — Roadmap v5
 
-**Status:** Active — F1.5, F1.7, **F3 (CERTIFIED PASS)**, **F3+INT8 (PASS)**, **F4 (CORE VALIDATED)**, **F5 (RETIRED)** & **F6 (CERTIFIED PASS & FROZEN)** · **Phase F7 (CLOSED FAIL)** · **Phase F8 (NULL RESULT & DEFINITIVE 720p CLOSURE)** · **Phase F9 (GENERATED / F9-0 PREREGISTERED — NOT EXECUTED)**  
+**Status:** Active — F1.5, F1.7, **F3 (CERTIFIED PASS)**, **F3+INT8 (PASS)**, **F4 (CORE VALIDATED)**, **F5 (RETIRED)** & **F6 (CERTIFIED PASS & FROZEN)** · **Phase F7 (CLOSED FAIL)** · **Phase F8 (NULL RESULT & DEFINITIVE 720p CLOSURE)** · **Phase F9 (ACTIVE / F9-0 CLOSED - ATTRIBUTED / F9-1 PREREGISTERED & FROZEN)**  
 **Target Repository:** [`LARP/marley-runtime`](https://github.com/LARP/marley-runtime)  
 **Primary Objective:** Investigate and deploy adaptive memory management policies for Wan2.1-T2V-1.3B constrained to ~4.8 GB effective physical VRAM (NVIDIA GeForce RTX 3050 6GB Laptop, Windows WDDM), with 480p/33f certified as the single production baseline following definitive closure of the 720p line in Phase F8.
 
@@ -102,17 +102,18 @@ flowchart TD
     F5 --> F6
     F6 --> F7["F7: 720p Strategy (Full E2E Fail / 4,996 MB) 🔴"]
     F7 --> F8["F8: Clean A/B Screening (Null Result / 720p Closed) 🔴"]
-    F8 --> F9["F9: Runtime Memory Research Sandbox 🟡"]
-    F9 --> F90["F9-0: Peak Attribution Diagnostic (Preregistered) 🟡"]
+    F8 --> F9["F9: Runtime Memory Research Sandbox 🟢"]
+    F9 --> F90["F9-0: Peak Attribution Diagnostic (CLOSED - ATTRIBUTED) 🟢"]
+    F90 --> F91["F9-1: Workspace Reduction Protocol (PREREGISTERED / FROZEN) 🟡"]
 
     classDef pass fill:#1b4332,stroke:#40916c,stroke-width:2px,color:#d8f3dc;
     classDef inprog fill:#5c4d00,stroke:#d4af37,stroke-width:2px,color:#fff3b0;
     classDef bypass fill:#4a1525,stroke:#9b2226,stroke-width:1px,color:#f8d7da;
     class F0,F05,F06,F1,F15,F17,F3 pass;
-    class F3I8,F4,F5,F6 pass;
+    class F3I8,F4,F5,F6,F9,F90 pass;
     class F7,F8 bypass;
     class F2 bypass;
-    class F9,F90 inprog;
+    class F91 inprog;
 ```
 
 ---
@@ -483,21 +484,25 @@ Full report: [`docs/F6_MULTIDIMENSIONAL_BENCHMARK_REPORT_01.md`](docs/F6_MULTIDI
 - **Regla de composición:** los efectos no se suman teóricamente; solo componen si afectan eventos distintos, no compiten por memoria y se miden experimentalmente.
 - **Promoción:** un único slot de validación aislada en Wan2.1 (1280×720 / 33f / 30 steps), mismo seed/modelo/workload/gate/métrica NVML.
 
-#### F9-0 — Preregistered Memory Peak Attribution Diagnostic · 🟡 **PREREGISTRADO — NO EJECUTADO**
+#### F9-0 — Preregistered Memory Peak Attribution Diagnostic · 🟢 **CLOSED — ATTRIBUTED**
 
-- **Naturaleza:** diagnóstico, no optimización. No consume slot de validación Wan. No reabre F7/F8.
-- **Pregunta falsable:** explicar ≥ **90 %** del **presupuesto atribuible** (`Peak_NVML_raw − S0_idle`) del pico físico de la corrida canónica 720p/33f/30steps mediante 7 categorías mutuamente excluyentes, con NVML ≥10 Hz y GPU sin otros contextos de cómputo.
-- **Categorías:** (1) pesos, (2) activaciones, (3) workspace de kernels, (4) memoria del allocator, (5) fragmentación (sub-slice de 4, no aditiva), (6) CUDA/Driver/Runtime Overhead, (7) otros/transitorios. Partición jerárquica sin doble conteo.
-- **Métrica primaria:** **Peak NVML**. Separadas y no sumadas: `max_memory_allocated`, `max_memory_reserved`, snapshots del allocator, RSS de CPU bajo offload.
-- **Lower bounds:** `LB_analitico` (pesos persistentes + máx. pesos por bloque + máx. activaciones simultáneas), `Min_allocated_obs` (mínimo `memory_allocated` observado) y `LB_operativo = LB_analitico + Overhead_CUDA/Driver/Runtime`, medido este último tras init de contexto + primer kernel y antes de la carga del modelo.
-- **Resolución temporal:** 20 ms (50 Hz), mínimo ≥10 Hz; frecuencia real, coste de polling, efecto observador, ventana temporal del pico y puntos de sincronización CUDA. Si la resolución no basta → `POSIBLE SUBESTIMACIÓN DEL PICO` y no cierra F9-0.
-- **Exclusividad:** sin otros procesos CUDA de cómputo y `S0` estable (spread ≤150 MB). El baseline de escritorio/DWM se cuantifica como `S0_idle`, no invalida la corrida.
-- **Régimen:** **N ≥ 5** corridas independientes con cooldown; VAE medida como evento aparte (fuera de la atribución primaria); reutilización del instrumento validado F7-D6 (S0/S1, controles A/B, `cudaMemGetInfo`, temp/clocks). Máximo **2 iteraciones** de instrumentación (solo frecuencia/sync/snapshots/instrumentación).
-- **Referencia histórica única (verificada):** **F7-D5 = 5,096.1 MB** (`logs/f7_d5_full_30step_validation_telemetry.json`), déficit **+296.1 MB**. Se excluye 4,996.0 MB (F7 Stage B, artefacto distinto) como referencia F7-D5. Gate 4,800 MB sin cambios.
-- **Cierre:** `CLOSED — ATTRIBUTED` (≥90 % de `Delta_induced` + ventana localizada + sin subestimación) o `ATTRIBUTION INCOMPLETE — DOCUMENTED`.
-- **Subtareas F9-1…F9-4:** **placeholders inactivos**; se redactan solo tras el cierre de F9-0.
+- **Completado:** 2026-09-11 · Reporte: [`docs/F9_0_ATTRIBUTION_REPORT_01.md`](docs/F9_0_ATTRIBUTION_REPORT_01.md) · Telemetría: [`logs/f9_0_attribution_telemetry.json`](logs/f9_0_attribution_telemetry.json).
+- **Veredicto:** `CLOSED - ATTRIBUTED` (5/5 corridas exclusivas válidas, 100% de $\Delta_{\text{induced}}$ atribuido sin residuo inexplicado, $\text{Cat 7} = 0.0\text{ MB}$).
+- **Hallazgos Clave:**
+  - **Cat 3 (Workspace de Kernels):** Factor dominante en 4 de 5 corridas (~2,614 – 2,622 MB).
+  - **Cat 4 (Memoria del Allocator pool):** Factor dominante en Corrida 1 (3,173.94 MB) y secundario en el resto (~451.62 MB).
+  - **Cat 1 (Pesos DiT):** Solo ~404.97 MB (10.7% del delta inducido), ratificando la falsación de cuantización de pesos.
+- **Dictamen del Experto:** Aceptado formalmente. Hipótesis primaria de intervención para F9-1: **Cat 3**.
 
-> **F9-0 está preregistrado y congelado. No se ha ejecutado ninguna corrida. Pendiente de autorización explícita de la Dirección.**
+#### F9-1 — Preregistered Workspace Reduction Protocol & Pre-Flight Verifications · 🟡 **PREREGISTRADO / FROZEN**
+
+- **Estado:** Prerregistro congelado y verificado · Protocolo: [`docs/F9_1_PREREGISTERED_WORKSPACE_REDUCTION_PROTOCOL_01.md`](docs/F9_1_PREREGISTERED_WORKSPACE_REDUCTION_PROTOCOL_01.md).
+- **8 Verificaciones Previas Validadas (V1–V8):**
+  - $\epsilon = \mathbf{64.0\text{ MB}}$ ($\text{mediana} = 451.62\text{ MB}, \text{MAD} = 0.00\text{ MB}$).
+  - Determinism Check Control-Control $N=3$: $\max |l_i - l_j| = \mathbf{0.000000\text{e}+00} \le 10^{-3}$ (**PASSED / VALID**).
+  - Secuencia de 10 bloques balanceados ($5\text{ } C\to I, 5\text{ } I\to C$) con hash inmutable SHA-256: `e0aac00319dc2444414f63c1577fb80662ee558345a66dbb6166c6117547227e`.
+  - Protocolo de reset simétrico con cooldown de 60s por corrida y análisis por bootstrap pareado.
+- **Condición:** Listo para ejecución confirmatoria de F9-1A tras autorización formal de la Dirección.
 
 ---
 
@@ -526,8 +531,21 @@ Full report: [`docs/F6_MULTIDIMENSIONAL_BENCHMARK_REPORT_01.md`](docs/F6_MULTIDI
 | **F7-D5**| Full 30-Step E2E Validation | F7-D4 favorable | Peak NVML $> 4,800.0\text{ MB}$, OOM, or wall-clock $> 45\text{ min}$ | Confine 720p to experimental / low-res focus | 🔴 **NEGATIVE**<br>Peak NVML 5,096.1 MB ($> 4,800$); allocator estabilizado (3,766 MB), 0 NaNs, MP4 OK. Integración NO autorizada · [`Report`](docs/F7_D5_FULL_30STEP_VALIDATION_REPORT_01.md) |
 | **F7** | 720p Re-evaluation Stage B | F7 Stage C PASS | Peak NVML $> 4,800.0\text{ MB}$ at 30 steps | Confine 720p to experimental; freeze 480p baseline | 🔴 **CLOSED FAIL**<br>Peak 4,996.0 MB en Paso 6 (+196.0 MB violación). 480p ratificado · [`Report`](docs/F7_STAGE_B_FULL_VALIDATION_REPORT_01.md) |
 | **F8** | 10-Step A/B Quantization Screening | F7 deficit +196 MB | Delta Peak $< 50\text{ MB}$ (sin efecto de cuantización) | Definitive closure of 720p line; freeze 480p | 🔴 **NULL RESULT (720p CLOSED)**<br>Delta -5.0 MB ($\approx 0\text{ MB}$). Hipótesis falsada. Línea 720p cerrada definitivamente · [`Report`](docs/F8_SCREENING_AB_REPORT_01.md) |
-| **F9-0** | Preregistered Memory Peak Attribution Diagnostic | F8 null result + F9 generated | Atribución < 90 % de `Delta_induced` tras 2 iteraciones | Documentar como `ATTRIBUTION INCOMPLETE — DOCUMENTED` | 🟡 **PREREGISTERED / NOT EXECUTED**<br>7 categorías excluyentes, NVML primario, N≥5, lower bounds · [`Protocol`](docs/F9_0_PREREGISTERED_MEMORY_PEAK_ATTRIBUTION_PROTOCOL_01.md) |
-| **F9** | Runtime Memory Research Sandbox | F7/F8 cerradas | Mecanismo no supera G1–G6 | Descartar mecanismo; volver a F9-0 | 🟡 **GENERATED / NOT EXECUTED**<br>Charter + F9-0 preregistrado · [`Charter`](docs/F9_RUNTIME_MEMORY_RESEARCH_SANDBOX_CHARTER_01.md) |
+| **F9-0** | Preregistered Memory Peak Attribution Diagnostic | F8 null result + F9 generated | Atribución < 90 % de `Delta_induced` tras 2 iteraciones | Documentar como `ATTRIBUTION INCOMPLETE — DOCUMENTED` | 🟢 **CLOSED - ATTRIBUTED**<br>100% atribuido en 5/5 corridas. Cat 3 (~2.62 GB) dominante · [`Report`](docs/F9_0_ATTRIBUTION_REPORT_01.md) |
+| **F9-1** | Workspace Reduction Protocol | F9-0 closed attributed | Falla condición causal o $\ge 10\%$ de bloques presentan $C_k \ge 0.5$ | Evaluar brazo F9-1B (Allocator Policy) de forma aislada | 🟡 **PREREGISTERED / FROZEN**<br>8 verificaciones validadas ($N=3$ exacto, $\epsilon=64\text{ MB}$, hash SHA-256) · [`Protocol`](docs/F9_1_PREREGISTERED_WORKSPACE_REDUCTION_PROTOCOL_01.md) |
+| **F9** | Runtime Memory Research Sandbox | F7/F8 cerradas | Mecanismo no supera G1–G6 | Descartar mecanismo; volver a F9-0 | 🟢 **ACTIVE**<br>Charter + F9-0 cerrado + F9-1 congelado · [`Charter`](docs/F9_RUNTIME_MEMORY_RESEARCH_SANDBOX_CHARTER_01.md) |
+
+---
+
+## 5. Architectural & Execution Highlights
+
+- **Resolution Hierarchy:** **480p** is the non-negotiable primary benchmark target; 720p is an experimental exploration attempted only if 480p meets all milestones with comfortable margin.
+- **Physical Residency Primacy:** All memory gates evaluate total process physical GPU residency via NVML, not solely internal PyTorch allocation graphs.
+- **Core Priority:** Phase F4 (Adaptive Memory Decision Engine) is the technical heart of `marley-runtime`; all preceding phases serve to measure, calibrate, or supply primitives to this decision engine.
+
+---
+
+*Marley Runtime is dedicated in loving memory to Marley 🐾.*
 
 ---
 
