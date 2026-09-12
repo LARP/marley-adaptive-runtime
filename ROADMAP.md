@@ -1,6 +1,6 @@
 # Marley Runtime (`marley-runtime`) — Roadmap v5
 
-**Status:** Active — F1.5, F1.7, **F3 (CERTIFIED PASS)**, **F3+INT8 (PASS)**, **F4 (CORE VALIDATED)**, **F5 (RETIRED)** & **F6 (CERTIFIED PASS & FROZEN)** · **Phase F7 (CLOSED FAIL)** · **Phase F8 (NULL RESULT & DEFINITIVE 720p CLOSURE)** · **Phase F9 (ACTIVE / F9-0 CLOSED - ATTRIBUTED / F9-1 PREREGISTERED & FROZEN)**  
+**Status:** Active — F1.5, F1.7, **F3 (CERTIFIED PASS)**, **F3+INT8 (PASS)**, **F4 (CORE VALIDATED)**, **F5 (RETIRED)** & **F6 (CERTIFIED PASS & FROZEN)** · **Phase F7 (CLOSED FAIL)** · **Phase F8 (NULL RESULT & DEFINITIVE 720p CLOSURE)** · **Phase F9 (ACTIVE / F9-0 CLOSED - ATTRIBUTED / F9-1A FALSIFIED - NULL RESULT)**  
 **Target Repository:** [`LARP/marley-runtime`](https://github.com/LARP/marley-runtime)  
 **Primary Objective:** Investigate and deploy adaptive memory management policies for Wan2.1-T2V-1.3B constrained to ~4.8 GB effective physical VRAM (NVIDIA GeForce RTX 3050 6GB Laptop, Windows WDDM), with 480p/33f certified as the single production baseline following definitive closure of the 720p line in Phase F8.
 
@@ -104,16 +104,15 @@ flowchart TD
     F7 --> F8["F8: Clean A/B Screening (Null Result / 720p Closed) 🔴"]
     F8 --> F9["F9: Runtime Memory Research Sandbox 🟢"]
     F9 --> F90["F9-0: Peak Attribution Diagnostic (CLOSED - ATTRIBUTED) 🟢"]
-    F90 --> F91["F9-1: Workspace Reduction Protocol (PREREGISTERED / FROZEN) 🟡"]
+    F90 --> F91A["F9-1A: Workspace Reduction Campaign (FALSIFIED / NULL RESULT) 🔴"]
 
     classDef pass fill:#1b4332,stroke:#40916c,stroke-width:2px,color:#d8f3dc;
     classDef inprog fill:#5c4d00,stroke:#d4af37,stroke-width:2px,color:#fff3b0;
     classDef bypass fill:#4a1525,stroke:#9b2226,stroke-width:1px,color:#f8d7da;
     class F0,F05,F06,F1,F15,F17,F3 pass;
     class F3I8,F4,F5,F6,F9,F90 pass;
-    class F7,F8 bypass;
+    class F7,F8,F91A bypass;
     class F2 bypass;
-    class F91 inprog;
 ```
 
 ---
@@ -494,15 +493,16 @@ Full report: [`docs/F6_MULTIDIMENSIONAL_BENCHMARK_REPORT_01.md`](docs/F6_MULTIDI
   - **Cat 1 (Pesos DiT):** Solo ~404.97 MB (10.7% del delta inducido), ratificando la falsación de cuantización de pesos.
 - **Dictamen del Experto:** Aceptado formalmente. Hipótesis primaria de intervención para F9-1: **Cat 3**.
 
-#### F9-1 — Preregistered Workspace Reduction Protocol & Pre-Flight Verifications · 🟡 **PREREGISTRADO / FROZEN**
+#### F9-1A — Confirmatory Workspace Reduction Campaign · 🔴 **FALSIFIED (NULL RESULT)**
 
-- **Estado:** Prerregistro congelado y verificado · Protocolo: [`docs/F9_1_PREREGISTERED_WORKSPACE_REDUCTION_PROTOCOL_01.md`](docs/F9_1_PREREGISTERED_WORKSPACE_REDUCTION_PROTOCOL_01.md).
-- **8 Verificaciones Previas Validadas (V1–V8):**
-  - $\epsilon = \mathbf{64.0\text{ MB}}$ ($\text{mediana} = 451.62\text{ MB}, \text{MAD} = 0.00\text{ MB}$).
-  - Determinism Check Control-Control $N=3$: $\max |l_i - l_j| = \mathbf{0.000000\text{e}+00} \le 10^{-3}$ (**PASSED / VALID**).
-  - Secuencia de 10 bloques balanceados ($5\text{ } C\to I, 5\text{ } I\to C$) con hash inmutable SHA-256: `e0aac00319dc2444414f63c1577fb80662ee558345a66dbb6166c6117547227e`.
-  - Protocolo de reset simétrico con cooldown de 60s por corrida y análisis por bootstrap pareado.
-- **Condición:** Listo para ejecución confirmatoria de F9-1A tras autorización formal de la Dirección.
+- **Ejecución y Análisis:** 2026-09-12 · Reporte: [`docs/F9_1A_WORKSPACE_REDUCTION_REPORT_01.md`](docs/F9_1A_WORKSPACE_REDUCTION_REPORT_01.md) · Telemetría: [`logs/f9_1a_telemetry.json`](logs/f9_1a_telemetry.json) · Protocolo: [`docs/F9_1_PREREGISTERED_WORKSPACE_REDUCTION_PROTOCOL_01.md`](docs/F9_1_PREREGISTERED_WORKSPACE_REDUCTION_PROTOCOL_01.md).
+- **Diseño Experimental:** 10 bloques pareados (20 corridas en procesos limpios), orden balanceado inmutable (hash `e0aac00319dc...7227e`), análisis por bootstrap pareado sobre la mediana (10,000 remuestreos).
+- **Resultados Pareados ($\Delta = \text{Intervención} - \text{Control}$):**
+  - $\Delta\text{Peak NVML}$: Mediana **$+294.00\text{ MB}$** (95% CI $[+294.00, +294.00]\text{ MB}$).
+  - $\Delta\text{Cat 3 Workspace}$: Mediana **$+203.90\text{ MB}$** (95% CI $[+203.88, +203.91]\text{ MB}$).
+  - $\Delta\text{Cat 4 Allocator}$: Mediana **$+9.62\text{ MB}$** (95% CI $[+9.62, +9.66]\text{ MB}$).
+- **Veredicto:** Criterio A (Causal) **FAIL**, Criterio B (Operacional, 0/10) **FAIL**, Criterio C (Mecanístico) **FAIL**, Criterio D (Anti-desplazamiento) **PASS**, No-regresión de Cadencia **PASS**.
+- **Conclusión Científica:** Hipótesis causal falsada. Desactivar cuDNN SDPA y restringir cuBLAS no reduce los workspaces transitorios en PyTorch 2.6.0 / CUDA 12.4; fuerza el uso de rutas alternas con mayor footprint fuera de PyTorch. F9-1A queda **CERRADA como FALSIFICACIÓN EMPÍRICA**.
 
 ---
 
@@ -532,8 +532,8 @@ Full report: [`docs/F6_MULTIDIMENSIONAL_BENCHMARK_REPORT_01.md`](docs/F6_MULTIDI
 | **F7** | 720p Re-evaluation Stage B | F7 Stage C PASS | Peak NVML $> 4,800.0\text{ MB}$ at 30 steps | Confine 720p to experimental; freeze 480p baseline | 🔴 **CLOSED FAIL**<br>Peak 4,996.0 MB en Paso 6 (+196.0 MB violación). 480p ratificado · [`Report`](docs/F7_STAGE_B_FULL_VALIDATION_REPORT_01.md) |
 | **F8** | 10-Step A/B Quantization Screening | F7 deficit +196 MB | Delta Peak $< 50\text{ MB}$ (sin efecto de cuantización) | Definitive closure of 720p line; freeze 480p | 🔴 **NULL RESULT (720p CLOSED)**<br>Delta -5.0 MB ($\approx 0\text{ MB}$). Hipótesis falsada. Línea 720p cerrada definitivamente · [`Report`](docs/F8_SCREENING_AB_REPORT_01.md) |
 | **F9-0** | Preregistered Memory Peak Attribution Diagnostic | F8 null result + F9 generated | Atribución < 90 % de `Delta_induced` tras 2 iteraciones | Documentar como `ATTRIBUTION INCOMPLETE — DOCUMENTED` | 🟢 **CLOSED - ATTRIBUTED**<br>100% atribuido en 5/5 corridas. Cat 3 (~2.62 GB) dominante · [`Report`](docs/F9_0_ATTRIBUTION_REPORT_01.md) |
-| **F9-1** | Workspace Reduction Protocol | F9-0 closed attributed | Falla condición causal o $\ge 10\%$ de bloques presentan $C_k \ge 0.5$ | Evaluar brazo F9-1B (Allocator Policy) de forma aislada | 🟡 **PREREGISTERED / FROZEN**<br>8 verificaciones validadas ($N=3$ exacto, $\epsilon=64\text{ MB}$, hash SHA-256) · [`Protocol`](docs/F9_1_PREREGISTERED_WORKSPACE_REDUCTION_PROTOCOL_01.md) |
-| **F9** | Runtime Memory Research Sandbox | F7/F8 cerradas | Mecanismo no supera G1–G6 | Descartar mecanismo; volver a F9-0 | 🟢 **ACTIVE**<br>Charter + F9-0 cerrado + F9-1 congelado · [`Charter`](docs/F9_RUNTIME_MEMORY_RESEARCH_SANDBOX_CHARTER_01.md) |
+| **F9-1A**| Confirmatory Workspace Reduction | F9-0 closed attributed | Falla condición causal o $\ge 10\%$ de bloques presentan $C_k \ge 0.5$ | Evaluar brazo F9-1B (Allocator Policy) de forma aislada | 🔴 **FALSIFIED (NULL RESULT)**<br>$\Delta\text{Peak}=+294\text{ MB}$, $\Delta\text{Cat3}=+203.9\text{ MB}$. Capping workspace refutado · [`Report`](docs/F9_1A_WORKSPACE_REDUCTION_REPORT_01.md) |
+| **F9** | Runtime Memory Research Sandbox | F7/F8 cerradas | Mecanismo no supera G1–G6 | Descartar mecanismo; volver a F9-0 | 🟢 **ACTIVE**<br>Charter + F9-0 cerrado + F9-1A cerrado · [`Charter`](docs/F9_RUNTIME_MEMORY_RESEARCH_SANDBOX_CHARTER_01.md) |
 
 ---
 

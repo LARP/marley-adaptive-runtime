@@ -28,7 +28,7 @@
 [![Phase F8: NULL RESULT & DEFINITIVE CLOSURE](https://img.shields.io/badge/Phase%20F8-NULL%20RESULT%20%7C%20720p%20CLOSED-ef4444.svg)](docs/F8_SCREENING_AB_REPORT_01.md)
 [![Phase F9: GENERATED](https://img.shields.io/badge/Phase%20F9-GENERATED-8b5cf6.svg)](docs/F9_RUNTIME_MEMORY_RESEARCH_SANDBOX_CHARTER_01.md)
 [![Phase F9-0: CLOSED - ATTRIBUTED](https://img.shields.io/badge/Phase%20F9--0-CLOSED%20%7C%20ATTRIBUTED%20(100%25)-22c55e.svg)](docs/F9_0_ATTRIBUTION_REPORT_01.md)
-[![Phase F9-1: PREREGISTERED / FROZEN](https://img.shields.io/badge/Phase%20F9--1-PREREGISTERED%20%2F%20FROZEN-8b5cf6.svg)](docs/F9_1_PREREGISTERED_WORKSPACE_REDUCTION_PROTOCOL_01.md)
+[![Phase F9-1A: FALSIFIED (NULL RESULT)](https://img.shields.io/badge/Phase%20F9--1A-FALSIFIED%20(+294MB)-ef4444.svg)](docs/F9_1A_WORKSPACE_REDUCTION_REPORT_01.md)
 
 *In loving memory of Marley 🐾*
 
@@ -42,9 +42,9 @@
 
 Rather than relying purely on blunt sequential CPU offloading, `marley-runtime` investigates and measures **adaptive, block-level memory management policies** that dynamically balance PCIe transfer latency, activation recomputation, tensor lifetime management, and selective quantization.
 
-> **Status (2026-09-11):** 480p / 33 frames / 30 steps is the certified production baseline. The 720p line is closed as experimental after F7 (FAIL) and F8 (NULL RESULT). The project is in **Phase F9 — Runtime Memory Research Sandbox**:
+> **Status (2026-09-12):** 480p / 33 frames / 30 steps is the certified production baseline. The 720p line is closed as experimental after F7 (FAIL) and F8 (NULL RESULT). The project is in **Phase F9 — Runtime Memory Research Sandbox**:
 > - **F9-0 (Memory Peak Attribution Diagnostic):** **`CLOSED - ATTRIBUTED`** (5/5 runs valid, 100% explained, dominant components: Cat 3 Kernel Workspaces ~2.62 GB and Cat 4 Allocator Pool).
-> - **F9-1 (Workspace Reduction Protocol):** **`PREREGISTRATION FROZEN`** with all 8 pre-flight verifications validated (N=3 exact bit determinism, $\epsilon = 64\text{ MB}$, SHA-256 hashed 10-block balance sequence). Ready for confirmatory execution.
+> - **F9-1A (Confirmatory Workspace Reduction Campaign):** **`FALSIFIED / CLOSED (NULL RESULT)`** (10 paired blocks / 20 runs complete; $\Delta\text{Peak} = +294.0\text{ MB}$, $\Delta\text{Cat3} = +203.9\text{ MB}$. cuDNN SDPA disable + cuBLAS capping increased peak footprint; hypothesis refutation confirmed).
 
 > [!NOTE]
 > The current architectural design and phased milestone strategy is governed by **[Roadmap v5](ROADMAP.md)**, reviewed and approved through a multi-agent consensus using **free-tier models** (ChatGPT, DeepSeek Pro, and Gemini Pro). Active execution is performed by **Antigravity Pro** (Gemini 2.5 Flash and Claude Sonnet 4.6), with formal strategic adoption of technical guidance from an external **Generative AI & ComfyUI Runtime Expert** (knowledge acquired through conversation with an AI agent).
@@ -101,7 +101,7 @@ Memory is tracked across **three distinct layers** to prevent WDDM virtualizatio
 | **F8** | 10-Step A/B Quantization Screening | 🔴 **NULL RESULT (720p CLOSED)** | Delta Peak **-5.0 MB** ($\approx 0\text{ MB} < 50\text{ MB}$). Cuantización selectiva DiT no reduce el pico físico NVML en 720p. **Línea 720p definitivamente cerrada** · [`Report`](docs/F8_SCREENING_AB_REPORT_01.md) |
 | **F9** | Runtime Memory Research Sandbox | 🟢 **ACTIVE** | Nueva línea: gestión dinámica de memoria (lifetime, coexistencia, reuso, workspaces, residency, scheduling). Sandbox **DiT** (no UNet), gate G3 + G1–G6, un único slot de validación Wan. F7/F8 permanecen cerradas · [`Charter`](docs/F9_RUNTIME_MEMORY_RESEARCH_SANDBOX_CHARTER_01.md) |
 | **F9-0** | Preregistered Memory Peak Attribution Diagnostic | 🟢 **CLOSED - ATTRIBUTED** | Diagnóstico completado: 5/5 corridas válidas, 100% atribuido ($\text{Cat 7} = 0\text{ MB}$). Dominante: **Cat 3 Kernel Workspaces (~2.62 GB)** y **Cat 4 Allocator Pool (~452 – 3,174 MB)** · [`Report`](docs/F9_0_ATTRIBUTION_REPORT_01.md) |
-| **F9-1** | Workspace Reduction Protocol & Pre-Flight Verifications | 🟡 **PREREGISTERED / FROZEN** | Prerregistro congelado con 8 verificaciones validadas (N=3 determinismo exacto $\le 10^{-3}$, $\epsilon = 64\text{ MB}$, secuencia de 10 bloques con SHA-256 inmutable, bootstrap pareado). Listo para ejecución confirmatoria · [`Protocol`](docs/F9_1_PREREGISTERED_WORKSPACE_REDUCTION_PROTOCOL_01.md) |
+| **F9-1A** | Confirmatory Workspace Reduction Campaign | 🔴 **FALSIFIED (NULL RESULT)** | 10 bloques pareados (20 corridas): $\Delta\text{Peak} = +294.00\text{ MB}$, $\Delta\text{Cat3} = +203.90\text{ MB}$. Capping de cuBLAS/cuDNN SDPA aumenta el footprint transitorio no-PyTorch. Hipótesis falsada · [`Report`](docs/F9_1A_WORKSPACE_REDUCTION_REPORT_01.md) |
 
 ---
 
@@ -518,16 +518,21 @@ validation slot. It attributes the physical peak of the canonical 720p/33f/30-st
 8. **F9-1…F9-4** are inactive placeholders; only F9-0 is enabled. The next mechanism is selected
    solely from the F9-0 result.
 
-**Instrumentation:** NVML at 20 ms (50 Hz, min ≥10 Hz), CUDA synchronization points, peak time
-window, observer-effect test; if resolution is insufficient → `POSIBLE SUBESTIMACIÓN DEL PICO` and
-F9-0 cannot close. **N ≥ 5** independent runs with cooldown; maximum 2 instrumentation iterations.
-Closure: `CLOSED — ATTRIBUTED` (≥90 % of the induced peak) or
-`ATTRIBUTION INCOMPLETE — DOCUMENTED`.
+**N ≥ 5** independent runs with cooldown; 5/5 valid runs achieved.
+- **Diagnostic Result:** **`CLOSED — ATTRIBUTED`** (100% of induced delta explained; dominant component is Category 3 Kernel Workspaces ~2.62 GB and Category 4 Allocator Pool).
+- **Documents:** [`F9 Charter`](docs/F9_RUNTIME_MEMORY_RESEARCH_SANDBOX_CHARTER_01.md) · [`F9-0 Report`](docs/F9_0_ATTRIBUTION_REPORT_01.md) · [`F9-0 Telemetry`](logs/f9_0_attribution_telemetry.json).
 
-> [!IMPORTANT]
-> **F9-0 is PREREGISTERED / FROZEN and has NOT been executed.** No run is launched without explicit
-> Director authorization. Documents: [`F9 Charter`](docs/F9_RUNTIME_MEMORY_RESEARCH_SANDBOX_CHARTER_01.md) ·
-> [`F9-0 Protocol`](docs/F9_0_PREREGISTERED_MEMORY_PEAK_ATTRIBUTION_PROTOCOL_01.md).
+### F9-1A — Confirmatory Workspace Reduction Campaign (🔴 FALSIFIED / NULL RESULT)
+
+- **Intervention Surface:** Bounded deterministic cuBLAS workspace (`CUBLAS_WORKSPACE_CONFIG=:4096:8`), cuDNN deterministic mode, disabling cuDNN SDPA (`enable_cudnn_sdp(False)`). PyTorch CUDACachingAllocator policy untouched.
+- **Design:** 10 paired blocks (20 clean OS processes) in a pre-registered, immutable balance sequence (`e0aac00319dc...7227e`) analyzed with 10,000 paired bootstrap resamples.
+- **Results:**
+  - $\Delta \text{Peak NVML}$: Median **$+294.00\text{ MB}$** (95% CI $[+294.00, +294.00]$).
+  - $\Delta \text{Cat3 Workspace}$: Median **$+203.90\text{ MB}$** (95% CI $[+203.88, +203.91]$).
+  - $\Delta \text{Cat4 Allocator}$: Median **$+9.62\text{ MB}$** (95% CI $[+9.62, +9.66]$).
+  - Criteria A, B, C: **FAIL** · Criterion D & Cadence non-regression: **PASS**.
+- **Conclusion:** Refutation of the workspace capping hypothesis in PyTorch 2.6.0 / CUDA 12.4. Restricting cuBLAS and disabling cuDNN SDPA forced execution through fallback kernels with higher unmanaged workspace footprints.
+- **Documents:** [`F9-1 Protocol`](docs/F9_1_PREREGISTERED_WORKSPACE_REDUCTION_PROTOCOL_01.md) · [`F9-1A Report`](docs/F9_1A_WORKSPACE_REDUCTION_REPORT_01.md) · [`F9-1A Telemetry`](logs/f9_1a_telemetry.json).
 
 ---
 
