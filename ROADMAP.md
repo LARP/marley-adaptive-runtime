@@ -1,6 +1,6 @@
 # Marley Runtime (`marley-runtime`) — Roadmap v5
 
-**Status:** Active — F1.5, F1.7, **F3 (CERTIFIED PASS)**, **F3+INT8 (PASS)**, **F4 (CORE VALIDATED)**, **F5 (RETIRED)** & **F6 (CERTIFIED PASS & FROZEN)** · **Phase F7 (CLOSED FAIL)** · **Phase F8 (NULL RESULT & DEFINITIVE 720p CLOSURE)** · **Phase F9 (ACTIVE / F9-0 CLOSED - ATTRIBUTED / F9-1A FALSIFIED - NULL RESULT)**  
+**Status:** Active — F1.5, F1.7, **F3 (CERTIFIED PASS)**, **F3+INT8 (PASS)**, **F4 (CORE VALIDATED)**, **F5 (RETIRED)** & **F6 (CERTIFIED PASS & FROZEN)** · **Phase F7 (CLOSED FAIL)** · **Phase F8 (NULL RESULT & DEFINITIVE 720p CLOSURE)** · **Phase F9 (ACTIVE / F9-0 CLOSED - ATTRIBUTED / F9-1A FALSIFIED - NULL RESULT / F9-1B NULL - NOT APPLICABLE ON WDDM)**  
 **Target Repository:** [`LARP/marley-runtime`](https://github.com/LARP/marley-runtime)  
 **Primary Objective:** Investigate and deploy adaptive memory management policies for Wan2.1-T2V-1.3B constrained to ~4.8 GB effective physical VRAM (NVIDIA GeForce RTX 3050 6GB Laptop, Windows WDDM), with 480p/33f certified as the single production baseline following definitive closure of the 720p line in Phase F8.
 
@@ -504,6 +504,18 @@ Full report: [`docs/F6_MULTIDIMENSIONAL_BENCHMARK_REPORT_01.md`](docs/F6_MULTIDI
 - **Veredicto:** Criterio A (Causal) **FAIL**, Criterio B (Operacional, 0/10) **FAIL**, Criterio C (Mecanístico) **FAIL**, Criterio D (Anti-desplazamiento) **PASS**, No-regresión de Cadencia **PASS**.
 - **Conclusión Científica:** Hipótesis causal falsada. Desactivar cuDNN SDPA y restringir cuBLAS no reduce los workspaces transitorios en PyTorch 2.6.0 / CUDA 12.4; fuerza el uso de rutas alternas con mayor footprint fuera de PyTorch. F9-1A queda **CERRADA como FALSIFICACIÓN EMPÍRICA**.
 
+#### F9-1B — Confirmatory Allocator Policy Isolation · 🔴 **NULL RESULT (NOT APPLICABLE ON WDDM)**
+
+- **Ejecución y Análisis:** 2026-09-12/13 · Reporte: [`docs/F9_1B_ALLOCATOR_REDUCTION_REPORT_01.md`](docs/F9_1B_ALLOCATOR_REDUCTION_REPORT_01.md) · Telemetría: [`logs/f9_1b_telemetry.json`](logs/f9_1b_telemetry.json) · Checkpoint: [`logs/f9_1b_checkpoint.json`](logs/f9_1b_checkpoint.json) · Protocolo: [`docs/F9_1B_PREREGISTERED_ALLOCATOR_PROTOCOL_01.md`](docs/F9_1B_PREREGISTERED_ALLOCATOR_PROTOCOL_01.md).
+- **Diseño Experimental:** 10 bloques pareados (20 corridas en procesos limpios), orden balanceado inmutable (hash `323fda6381c0...580411`), bootstrap pareado sobre la mediana (10,000 remuestreos).
+- **Resultados Pareados ($\Delta = \text{Intervención} - \text{Control}$):**
+  - $\Delta\text{Peak NVML}$: Mediana **$+0.00\text{ MB}$** (95% CI $[-88.62, +0.00]\text{ MB}$).
+  - $\Delta\text{Cat 4 Allocator}$: Mediana **$+0.00\text{ MB}$** (95% CI $[-0.00, +51.98]\text{ MB}$).
+  - $\Delta\text{Cat 3 Workspace}$: Mediana **$-0.01\text{ MB}$** (95% CI $[-110.70, +0.21]\text{ MB}$).
+- **Veredicto:** Criterio A (Causal) **FAIL**, Criterio B (Operacional, 4/10) **FAIL**, Criterio C (Mecanístico) **FAIL**, Criterio D (Anti-desplazamiento) **PASS**, No-regresión de Cadencia **PASS**.
+- **Advertencia de validez:** brazos de intervención registraron `expandable_segments not supported on this platform` (PyTorch 2.6.0+cu124, Windows WDDM); la intervención fue no-op funcional, consistente con Δ≈0 en B6–B9. S0 subió de ~1,000 MB (B1–B4) a ~1,327 MB (B5–B9); B10-C anómalo con 5,217.9 MB.
+- **Conclusión Científica:** `expandable_segments:True` no reduce el pico NVML ni Cat4 en RTX 3050 6GB / WDDM. F9-1B queda **CERRADA como RESULTADO NULO / NO APLICABLE EN ESTA PLATAFORMA**. Siguiente: evaluar F9-1C (cuDNN Algorithm Pinning / Pooling) de forma aislada.
+
 ---
 
 ## 4. Kill Gates Summary Table
@@ -533,7 +545,8 @@ Full report: [`docs/F6_MULTIDIMENSIONAL_BENCHMARK_REPORT_01.md`](docs/F6_MULTIDI
 | **F8** | 10-Step A/B Quantization Screening | F7 deficit +196 MB | Delta Peak $< 50\text{ MB}$ (sin efecto de cuantización) | Definitive closure of 720p line; freeze 480p | 🔴 **NULL RESULT (720p CLOSED)**<br>Delta -5.0 MB ($\approx 0\text{ MB}$). Hipótesis falsada. Línea 720p cerrada definitivamente · [`Report`](docs/F8_SCREENING_AB_REPORT_01.md) |
 | **F9-0** | Preregistered Memory Peak Attribution Diagnostic | F8 null result + F9 generated | Atribución < 90 % de `Delta_induced` tras 2 iteraciones | Documentar como `ATTRIBUTION INCOMPLETE — DOCUMENTED` | 🟢 **CLOSED - ATTRIBUTED**<br>100% atribuido en 5/5 corridas. Cat 3 (~2.62 GB) dominante · [`Report`](docs/F9_0_ATTRIBUTION_REPORT_01.md) |
 | **F9-1A**| Confirmatory Workspace Reduction | F9-0 closed attributed | Falla condición causal o $\ge 10\%$ de bloques presentan $C_k \ge 0.5$ | Evaluar brazo F9-1B (Allocator Policy) de forma aislada | 🔴 **FALSIFIED (NULL RESULT)**<br>$\Delta\text{Peak}=+294\text{ MB}$, $\Delta\text{Cat3}=+203.9\text{ MB}$. Capping workspace refutado · [`Report`](docs/F9_1A_WORKSPACE_REDUCTION_REPORT_01.md) |
-| **F9** | Runtime Memory Research Sandbox | F7/F8 cerradas | Mecanismo no supera G1–G6 | Descartar mecanismo; volver a F9-0 | 🟢 **ACTIVE**<br>Charter + F9-0 cerrado + F9-1A cerrado · [`Charter`](docs/F9_RUNTIME_MEMORY_RESEARCH_SANDBOX_CHARTER_01.md) |
+| **F9-1B**| Allocator Policy Isolation | F9-1A falsified | Falla condición causal A ($\Delta\text{Peak} \ge 0$) o C ($\Delta\text{Cat4} \ge 0$) | Evaluar F9-1C (cuDNN Algorithm Pinning / Pooling) | 🔴 **NULL (NOT APPLICABLE ON WDDM)**<br>ΔPeak +0.00, ΔCat4 +0.00; `expandable_segments` no-op en WDDM · [`Report`](docs/F9_1B_ALLOCATOR_REDUCTION_REPORT_01.md) |
+| **F9** | Runtime Memory Research Sandbox | F7/F8 cerradas | Mecanismo no supera G1–G6 | Descartar mecanismo; volver a F9-0 | 🟢 **ACTIVE**<br>Charter + F9-0 cerrado + F9-1A cerrado + F9-1B cerrado (nulo) · [`Charter`](docs/F9_RUNTIME_MEMORY_RESEARCH_SANDBOX_CHARTER_01.md) |
 
 ---
 
